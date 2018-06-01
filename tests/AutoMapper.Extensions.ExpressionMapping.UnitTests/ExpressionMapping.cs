@@ -24,6 +24,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         protected override MapperConfiguration Configuration { get; } = new MapperConfiguration(cfg =>
         {
+            cfg.AddExpressionMapping();
             cfg.CreateMap<SourceExpressionHolder, DestExpressionHolder>().ReverseMap();
             cfg.CreateMap<ExpressionMapping.Parent, ExpressionMapping.ParentDTO>().ReverseMap();
             cfg.CreateMap<ExpressionMapping.Child, ExpressionMapping.ChildDTO>()
@@ -109,6 +110,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         protected override MapperConfiguration Configuration { get; } = new MapperConfiguration(cfg =>
         {
+            cfg.AddExpressionMapping();
             cfg.CreateMissingTypeMaps = false;
             cfg.CreateMap<GrandParent, GrandParentDTO>().ReverseMap();
             cfg.CreateMap<Parent, ParentDTO>().ReverseMap();

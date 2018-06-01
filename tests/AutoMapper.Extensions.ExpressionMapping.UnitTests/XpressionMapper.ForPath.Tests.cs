@@ -138,6 +138,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             var config = new MapperConfiguration(cfg =>
             {
+                cfg.AddExpressionMapping();
                 cfg.AddProfiles(typeof(ForPathCustomerProfile));
             });
 

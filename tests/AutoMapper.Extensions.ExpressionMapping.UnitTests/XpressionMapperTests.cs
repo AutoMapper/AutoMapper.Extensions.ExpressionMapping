@@ -214,6 +214,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             // Arrange
             var config = new MapperConfiguration(cfg =>
             {
+                cfg.AddExpressionMapping();
                 cfg.CreateMap<Car, CarModel>();
                 cfg.CreateMissingTypeMaps = false;
             });
@@ -239,6 +240,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             // Arrange    
             var config = new MapperConfiguration(cfg =>
             {
+                cfg.AddExpressionMapping();
                 cfg.CreateMap<ThingModel, Thing>();
             });
 
@@ -565,6 +567,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             var config = new MapperConfiguration(cfg =>
             {
+                cfg.AddExpressionMapping();
                 cfg.AddProfiles(typeof(OrganizationProfile));
             });
 

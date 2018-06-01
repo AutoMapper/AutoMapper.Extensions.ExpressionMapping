@@ -41,6 +41,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             {
                 var config = new MapperConfiguration(cfg =>
                 {
+                    cfg.AddExpressionMapping();
                     // issue #1886
                     cfg.CreateMap<Entity, DTO>();
                     cfg.CreateMap<DTO, Entity>();
