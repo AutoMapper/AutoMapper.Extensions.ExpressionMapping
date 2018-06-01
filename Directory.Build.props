@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Jimmy Bogard</Authors>
+    <LangVersion>latest</LangVersion>
+    <VersionPrefix>5.0.1</VersionPrefix>
+    <WarningsAsErrors>true</WarningsAsErrors>
+    <NoWarn>$(NoWarn);1701;1702;1591</NoWarn>
+  </PropertyGroup>
+</Project>
