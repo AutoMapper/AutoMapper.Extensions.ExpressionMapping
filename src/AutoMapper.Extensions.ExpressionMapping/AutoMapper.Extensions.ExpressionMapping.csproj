@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\AutoMapper\src\AutoMapper\AutoMapper.csproj" />
+    <PackageReference Include="AutoMapper" Version="7.0.0" />
   </ItemGroup>
 
 </Project>
