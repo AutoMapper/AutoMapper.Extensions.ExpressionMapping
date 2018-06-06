@@ -44,7 +44,5 @@ try {
     Pop-Location
 }
 
-Pop-Location
-
 exec { & dotnet pack .\src\AutoMapper.Extensions.ExpressionMapping\AutoMapper.Extensions.ExpressionMapping.csproj -c Release -o ..\..\artifacts --include-symbols --no-build --no-restore $versionSuffix }
 
