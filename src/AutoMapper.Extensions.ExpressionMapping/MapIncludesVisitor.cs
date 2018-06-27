@@ -96,7 +96,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return v.Result;
             }
             fullName = BuildFullName(propertyMapInfoList);
-            var me = ExpressionFactory.MemberAccesses(fullName, InfoDictionary[parameterExpression].NewParameter);
+            var me = ExpressionHelpers.MemberAccesses(fullName, InfoDictionary[parameterExpression].NewParameter);
             if (me.Expression.NodeType == ExpressionType.MemberAccess && (me.Type == typeof(string) || me.Type.GetTypeInfo().IsValueType || (me.Type.GetTypeInfo().IsGenericType
                                                                                                                                              && me.Type.GetGenericTypeDefinition() == typeof(Nullable<>)
                                                                                                                                              && Nullable.GetUnderlyingType(me.Type).GetTypeInfo().IsValueType)))

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Shouldly;
 using Xunit;
+using AutoMapper;
 
 namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 {
@@ -409,6 +410,32 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             List<IGrouping<int, User>> users = expMapped.Compile().Invoke(Users).ToList();
 
             Assert.True(users[0].Count() == 2);
+        }
+
+        [Fact]
+        public void Map_orderBy_thenBy_GroupBy_Select_expression()
+        {
+            //Arrange
+            Expression<Func<IQueryable<UserModel>, IQueryable<object>>> grouped = q => q.OrderBy(s => s.Id).ThenBy(s => s.FullName).GroupBy(s => s.AgeInYears).Select(grp => new { Id = grp.Key, Count = grp.Count() });
+
+            //Act
+            Expression<Func<IQueryable<User>, IQueryable<object>>> expMapped = mapper.MapExpression<Expression<Func<IQueryable<User>, IQueryable<object>>>>(grouped);
+            List<dynamic> users = expMapped.Compile().Invoke(Users).ToList();
+
+            Assert.True(users[0].Count == 2);
+        }
+
+        [Fact]
+        public void Map_orderBy_thenBy_To_Dictionary_Select_expression()
+        {
+            //Arrange
+            Expression<Func<IQueryable<UserModel>, IEnumerable<object>>> grouped = q => q.OrderBy(s => s.Id).ThenBy(s => s.FullName).ToDictionary(kvp => kvp.Id).Select(grp => new { Id = grp.Key, Name = grp.Value.FullName });
+
+            //Act
+            Expression<Func<IQueryable<User>, IEnumerable<object>>> expMapped = mapper.MapExpression<Expression<Func<IQueryable<User>, IEnumerable<object>>>>(grouped);
+            List<dynamic> users = expMapped.Compile().Invoke(Users).ToList();
+
+            Assert.True(users[0].Id == 11);
         }
 
         [Fact]

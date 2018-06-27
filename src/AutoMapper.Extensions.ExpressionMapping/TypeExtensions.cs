@@ -29,11 +29,6 @@ namespace AutoMapper
         public static MethodInfo GetRemoveMethod(this EventInfo eventInfo) => eventInfo.RemoveMethod;
 #endif
 
-        public static Type CreateType(this TypeBuilder type)
-        {
-            return type.CreateTypeInfo().AsType();
-        }
-
         public static IEnumerable<MemberInfo> GetDeclaredMembers(this Type type) => type.GetTypeInfo().DeclaredMembers;
 
         public static IEnumerable<Type> GetTypeInheritance(this Type type)

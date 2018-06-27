@@ -37,7 +37,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     return result;
                 });
 
-                return ExpressionFactory.MemberAccesses(member, _newParameter);
+                return ExpressionHelpers.MemberAccesses(member, _newParameter);
             }
         }
 

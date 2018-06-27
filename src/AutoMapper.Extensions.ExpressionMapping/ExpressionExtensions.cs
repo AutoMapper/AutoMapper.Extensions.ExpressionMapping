@@ -7,6 +7,7 @@ using AutoMapper.Internal;
 
 namespace AutoMapper
 {
+    using AutoMapper.Extensions.ExpressionMapping;
     using static Expression;
 
     internal static class ExpressionExtensions
@@ -55,5 +56,24 @@ namespace AutoMapper
 
         public static Expression IfNullElse(this Expression expression, Expression then, Expression @else = null)
             => ExpressionFactory.IfNullElse(expression, then, @else);
+    }
+
+    internal static class ExpressionHelpers
+    {
+        public static MemberExpression MemberAccesses(string members, Expression obj) =>
+            (MemberExpression)GetMemberPath(obj.Type, members).MemberAccesses(obj);
+
+        private static IEnumerable<MemberInfo> GetMemberPath(Type type, string fullMemberName)
+        {
+            MemberInfo property = null;
+            foreach (var memberName in fullMemberName.Split('.'))
+            {
+                var currentType = GetCurrentType(property, type);
+                yield return property = currentType.GetFieldOrProperty(memberName);
+            }
+        }
+
+        private static Type GetCurrentType(MemberInfo member, Type type)
+            => member?.GetMemberType() ?? type;
     }
 }
