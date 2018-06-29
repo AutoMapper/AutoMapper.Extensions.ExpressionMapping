@@ -90,10 +90,19 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return ex;
             }
             fullName = BuildFullName(propertyMapInfoList);
-            var me = ExpressionFactory.MemberAccesses(fullName, InfoDictionary[parameterExpression].NewParameter);
+            var me = ExpressionHelpers.MemberAccesses(fullName, InfoDictionary[parameterExpression].NewParameter);
 
             this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, me.Type);
             return me;
+        }
+
+        protected override Expression VisitLambda<T>(Expression<T> node)
+        {
+            var ex = this.Visit(node.Body);
+
+            var mapped = Expression.Lambda(ex, node.GetDestinationParameterExpressions(this.InfoDictionary, this.TypeMappings));
+            this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, mapped.Type);
+            return mapped;
         }
 
         protected override Expression VisitUnary(UnaryExpression node)
@@ -109,6 +118,13 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         default:
                             return base.VisitUnary(node);
                     }
+                case ExpressionType.Lambda:
+                    var lambdaExpression = (LambdaExpression)node.Operand;
+                    var ex = this.Visit(lambdaExpression.Body);
+
+                    var mapped = Expression.Quote(Expression.Lambda(ex, lambdaExpression.GetDestinationParameterExpressions(this.InfoDictionary, this.TypeMappings)));
+                    this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, mapped.Type);
+                    return mapped;
                 default:
                     return base.VisitUnary(node);
             }
@@ -137,7 +153,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             var listOfArgumentsForNewMethod = node.Arguments.Aggregate(new List<Expression>(), (lst, next) =>
             {
-                var mappedNext = ArgumentMapper.Create(this, next).MappedArgumentExpression;
+                //var mappedNext = ArgumentMapper.Create(this, next).MappedArgumentExpression;
+                //Using VisitUnary and VisitLambda instead of ArgumentMappers
+                var mappedNext = this.Visit(next);
                 TypeMappings.AddTypeMapping(ConfigurationProvider, next.Type, mappedNext.Type);
 
                 lst.Add(mappedNext);
@@ -151,9 +169,14 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             ConvertTypesIfNecessary(node.Method.GetParameters(), listOfArgumentsForNewMethod, node.Method);
 
+            /*Using VisitUnary and VisitLambda instead of ArgumentMappers
+             * return node.Method.IsStatic
+                    ? GetStaticExpression()
+                    : GetInstanceExpression(ArgumentMapper.Create(this, node.Object).MappedArgumentExpression);*/
+
             return node.Method.IsStatic
                     ? GetStaticExpression()
-                    : GetInstanceExpression(ArgumentMapper.Create(this, node.Object).MappedArgumentExpression);
+                    : GetInstanceExpression(this.Visit(node.Object));
 
             MethodCallExpression GetInstanceExpression(Expression instance)
                 => node.Method.IsGenericMethod
@@ -225,15 +248,18 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
         }
 
+        private bool GenericTypeDefinitionsAreEquivalent(Type typeSource, Type typeDestination) 
+            => typeSource.IsGenericType() && typeDestination.IsGenericType() && typeSource.GetGenericTypeDefinition() == typeDestination.GetGenericTypeDefinition();
+
         protected void FindDestinationFullName(Type typeSource, Type typeDestination, string sourceFullName, List<PropertyMapInfo> propertyMapInfoList)
         {
             const string period = ".";
+            
             if (typeSource == typeDestination)
             {
                 var sourceFullNameArray = sourceFullName.Split(new[] { period[0] }, StringSplitOptions.RemoveEmptyEntries);
                 sourceFullNameArray.Aggregate(propertyMapInfoList, (list, next) =>
                 {
-
                     if (list.Count == 0)
                     {
                         AddPropertyMapInfo(typeSource, next, list);
@@ -248,6 +274,36 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     return list;
                 });
                 return;
+            }
+
+            if (GenericTypeDefinitionsAreEquivalent(typeSource, typeDestination))
+            {
+                if (sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    //sourceFullName is a member of the generic type definition so just add the members PropertyMapInfo
+                    AddPropertyMapInfo(typeDestination, sourceFullName, propertyMapInfoList);
+                    var sourceType = typeSource.GetFieldOrProperty(sourceFullName).GetMemberType();
+                    var destType = typeDestination.GetFieldOrProperty(sourceFullName).GetMemberType();
+
+                    TypeMappings.AddTypeMapping(ConfigurationProvider, sourceType, destType);
+
+                    return;
+                }
+                else
+                {
+                    //propertyName is a member of the generic type definition so just add the members PropertyMapInfo
+                    var propertyName = sourceFullName.Substring(0, sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase));
+                    AddPropertyMapInfo(typeDestination, propertyName, propertyMapInfoList);
+
+                    var sourceType = typeSource.GetFieldOrProperty(propertyName).GetMemberType();
+                    var destType = typeDestination.GetFieldOrProperty(propertyName).GetMemberType();
+                    
+                    TypeMappings.AddTypeMapping(ConfigurationProvider, sourceType, destType);
+
+                    var childFullName = sourceFullName.Substring(sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) + 1);
+                    FindDestinationFullName(sourceType, destType, childFullName, propertyMapInfoList);
+                    return;
+                }
             }
 
             var typeMap = ConfigurationProvider.CheckIfMapExists(sourceType: typeDestination, destinationType: typeSource);//The destination becomes the source because to map a source expression to a destination expression,

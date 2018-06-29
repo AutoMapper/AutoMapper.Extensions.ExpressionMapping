@@ -40,7 +40,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                             ? sourcePath
                             : string.Concat(ParentFullName, ".", sourcePath);
 
-            var me = ExpressionFactory.MemberAccesses(fullName, NewParameter);
+            var me = ExpressionHelpers.MemberAccesses(fullName, NewParameter);
 
             return me;
         }
