@@ -588,6 +588,19 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Assert
             Assert.NotNull(expMapped);
         }
+
+        [Fact]
+        public void Can_correctly_type_maps_for_child_properties()
+        {
+            //Arrange
+            Expression<Func<OrderModel, bool>> src = x => x.Items.Any(i => i.Name == "Test");
+
+            //Act
+            Expression<Func<OrderEntity, bool>> dest = mapper.Map<Expression<Func<OrderEntity, bool>>>(src);
+
+            //Assert
+            Assert.NotNull(dest);
+        }
         #endregion Tests
 
         private static void SetupAutoMapper()
@@ -936,6 +949,31 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public string Data { get; set; }
     }
 
+    class OrderModel
+    {
+        public IEnumerable<ItemModel> Items { get; set; }
+    }
+
+    class ItemModel
+    {
+        public string Name { get; set; }
+    }
+
+    class OrderEntity
+    {
+        public OrderData OrderData { get; set; }
+    }
+
+    class OrderData
+    {
+        public IEnumerable<ItemEntity> Items { get; set; }
+    }
+
+    class ItemEntity
+    {
+        public string Name { get; set; }
+    }
+
     public class OrganizationProfile : Profile
     {
         public OrganizationProfile()
@@ -1023,6 +1061,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 .ForMember(d => d.ID_, opt => opt.MapFrom(s => s.ID))
                 .ReverseMap()
                 .ForMember(d => d.ID, opt => opt.MapFrom(s => s.ID_));
+
+            CreateMap<OrderEntity, OrderModel>()
+                    .ForMember(x => x.Items, opt => opt.MapFrom(x => x.OrderData.Items));
+            CreateMap<ItemEntity, ItemModel>();
 
             CreateMissingTypeMaps = true;
         }

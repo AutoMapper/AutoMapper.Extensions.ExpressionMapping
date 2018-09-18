@@ -290,7 +290,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             {
                 foreach (PropertyMap pm in maps)
                 {
-                    if (pm.SourceMember == null)
+                    if (!pm.SourceMembers.Any())
                         continue;
 
                     AddChildMappings
