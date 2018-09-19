@@ -326,7 +326,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     throw new InvalidOperationException(Resource.customResolversNotSupported);
                 }
 
-                if (propertyMap.CustomExpression == null && propertyMap.SourceMember == null)
+                if (propertyMap.CustomExpression == null && !propertyMap.SourceMembers.Any())
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, sourceFullName));
 
                 CompareSourceAndDestLiterals
@@ -351,7 +351,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 var propertyMap = typeMap.GetPropertyMapByDestinationProperty(propertyName);
 
                 var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.DestinationProperty.Name);
-                if (propertyMap.CustomExpression == null && propertyMap.SourceMember == null)//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
+                if (propertyMap.CustomExpression == null && !propertyMap.SourceMembers.Any())//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, propertyName));
 
                 propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomExpression, propertyMap.SourceMembers.ToList()));
