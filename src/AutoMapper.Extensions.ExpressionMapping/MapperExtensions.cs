@@ -69,12 +69,14 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return (TDestDelegate)Lambda
                 (
                     typeDestFunc,
-                    ExpressionFactory.ToType(remappedBody, typeDestFunc.GetGenericArguments().Last()),
+                    typeDestFunc.IsFuncType() ? ExpressionFactory.ToType(remappedBody, typeDestFunc.GetGenericArguments().Last()) : remappedBody,
                     expression.GetDestinationParameterExpressions(visitor.InfoDictionary, typeMappings)
                 );
             }
         }
 
+        private static bool IsFuncType(this Type type)
+            => type.FullName.StartsWith("System.Func");
 
         /// <summary>
         /// Maps an expression given a dictionary of types where the source type is the key and the destination type is the value.
