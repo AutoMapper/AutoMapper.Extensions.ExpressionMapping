@@ -146,15 +146,11 @@ namespace AutoMapper.Extensions.ExpressionMapping
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
             var parameterExpression = node.GetParameterExpression();
-            if (parameterExpression == null)
-                return base.VisitMethodCall(node);
-
-            InfoDictionary.Add(parameterExpression, TypeMappings);
+            if (parameterExpression != null)
+                InfoDictionary.Add(parameterExpression, TypeMappings);
 
             var listOfArgumentsForNewMethod = node.Arguments.Aggregate(new List<Expression>(), (lst, next) =>
             {
-                //var mappedNext = ArgumentMapper.Create(this, next).MappedArgumentExpression;
-                //Using VisitUnary and VisitLambda instead of ArgumentMappers
                 var mappedNext = this.Visit(next);
                 TypeMappings.AddTypeMapping(ConfigurationProvider, next.Type, mappedNext.Type);
 
@@ -168,11 +164,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 : null;
 
             ConvertTypesIfNecessary(node.Method.GetParameters(), listOfArgumentsForNewMethod, node.Method);
-
-            /*Using VisitUnary and VisitLambda instead of ArgumentMappers
-             * return node.Method.IsStatic
-                    ? GetStaticExpression()
-                    : GetInstanceExpression(ArgumentMapper.Create(this, node.Object).MappedArgumentExpression);*/
 
             return node.Method.IsStatic
                     ? GetStaticExpression()

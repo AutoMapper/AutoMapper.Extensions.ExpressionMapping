@@ -601,6 +601,40 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Assert
             Assert.NotNull(dest);
         }
+
+        [Fact]
+        public void Can_map_expressions_with_no_parameters()
+        {
+            //Arrange
+            Expression<Func<OptionS>> exp = () => Activator.CreateInstance<OptionS>();
+
+            //Act
+            Expression<Func<OptionT>> expmapped = mapper.Map<Expression<Func<OptionS>>, Expression<Func<OptionT>>>(exp);
+
+            //Assert
+            Assert.True(expmapped.Type == typeof(Func<OptionT>));
+        }
+
+
+        [Fact]
+        public void Can_map_expressions_with_action_independent_of_expression_param()
+        {
+            //Arrange
+            Expression<Action<OptionS>> exp = (s) => CallSomeAction<OptionS>(Activator.CreateInstance<OptionS>());
+
+            //Act
+            Expression<Action<OptionT>> expmapped = mapper.MapExpression<Expression<Action<OptionS>>, Expression<Action<OptionT>>>(exp);
+
+            //Assert
+            expmapped.Compile()(Activator.CreateInstance<OptionT>());
+            Assert.True(this.val.GetType() == typeof(OptionT));
+        }
+
+        object val;
+        void CallSomeAction<T>(T val)
+        {
+            this.val = val;
+        }
         #endregion Tests
 
         private static void SetupAutoMapper()
@@ -696,6 +730,16 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         private static IQueryable<User> Users { get; set; }
+    }
+
+    public class OptionS
+    {
+        public static OptionS GetNew() => new OptionS();
+    }
+
+    public class OptionT
+    {
+        public static OptionT GetNew() => new OptionT();
     }
 
     public class Account
@@ -1065,6 +1109,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             CreateMap<OrderEntity, OrderModel>()
                     .ForMember(x => x.Items, opt => opt.MapFrom(x => x.OrderData.Items));
             CreateMap<ItemEntity, ItemModel>();
+
+            CreateMap<OptionT, OptionS>();
 
             CreateMissingTypeMaps = true;
         }
