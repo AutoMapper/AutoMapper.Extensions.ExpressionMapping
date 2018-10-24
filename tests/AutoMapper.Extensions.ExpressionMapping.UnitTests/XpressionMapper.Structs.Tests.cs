@@ -62,6 +62,161 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             output1.First().Year.ShouldBe(2000);
             output2.Year.ShouldBe(2000);
         }
+
+        [Fact]
+        public void Replace_operator_when_operands_change()
+        {
+            var config = new MapperConfiguration(cfg => {
+                cfg.AddExpressionMapping();
+                cfg.CreateMap<Source, Dest>().ReverseMap();
+            });
+
+            var mapper = config.CreateMapper();
+
+            Expression<Func<Source, bool>> expression = x => x == default(Source);
+
+            var mapped = mapper.MapExpression<Expression<Func<Dest, bool>>>(expression);
+        }
+    }
+
+    public struct Source
+    {
+        public Source(int i) { val = i; }
+        public int val;
+
+        public static implicit operator int(Source i)
+        {
+            return i.val;
+        }
+
+        public static implicit operator Source(int i)
+        {
+            return new Source(i);
+        }
+
+        public static bool operator <(Source a, Source b)
+        {
+            return a.val < b.val;
+        }
+
+        public static bool operator >(Source a, Source b)
+        {
+            return a.val > b.val;
+        }
+
+        public static bool operator ==(Source a, Source b)
+        {
+            return a.val == b.val;
+        }
+
+        public static bool operator ==(Source a, int b)
+        {
+            return a.val == b;
+        }
+
+        public static bool operator ==(int a, Source b)
+        {
+            return a == b.val;
+        }
+
+        public static bool operator !=(Source a, Source b)
+        {
+            return a.val != b.val;
+        }
+
+        public static bool operator !=(Source a, int b)
+        {
+            return a.val != b;
+        }
+
+        public static bool operator !=(int a, Source b)
+        {
+            return a != b.val;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.val.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Source)
+                return this == (Source)obj;
+            if (obj is int)
+                return this == (Source)((int)obj);
+            return false;
+        }
+    }
+
+    public struct Dest
+    {
+        public Dest(int i) { val = i; }
+        public int val;
+
+        public static implicit operator int(Dest i)
+        {
+            return i.val;
+        }
+
+        public static implicit operator Dest(int i)
+        {
+            return new Dest(i);
+        }
+
+        public static bool operator <(Dest a, Dest b)
+        {
+            return a.val < b.val;
+        }
+
+        public static bool operator >(Dest a, Dest b)
+        {
+            return a.val > b.val;
+        }
+
+        public static bool operator ==(Dest a, Dest b)
+        {
+            return a.val == b.val;
+        }
+
+        public static bool operator ==(Dest a, int b)
+        {
+            return a.val == b;
+        }
+
+        public static bool operator ==(int a, Dest b)
+        {
+            return a == b.val;
+        }
+
+        public static bool operator !=(Dest a, Dest b)
+        {
+            return a.val != b.val;
+        }
+
+        public static bool operator !=(Dest a, int b)
+        {
+            return a.val != b;
+        }
+
+        public static bool operator !=(int a, Dest b)
+        {
+            return a != b.val;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.val.GetHashCode();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Dest)
+                return this == (Dest)obj;
+            if (obj is int)
+                return this == (Dest)((int)obj);
+            return false;
+        }
     }
 
     public struct Garage
