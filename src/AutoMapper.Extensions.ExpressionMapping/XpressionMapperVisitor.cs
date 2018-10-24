@@ -105,6 +105,31 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return mapped;
         }
 
+        protected override Expression VisitBinary(BinaryExpression node)
+        {
+            return DoVisitBinary(this.Visit(node.Left), this.Visit(node.Right), this.Visit(node.Conversion));
+
+            Expression DoVisitBinary(Expression newLeft, Expression newRight, Expression conversion)
+            {
+                if (newLeft != node.Left || newRight != node.Right || conversion != node.Conversion)
+                {
+                    if (node.NodeType == ExpressionType.Coalesce && node.Conversion != null)
+                        return Expression.Coalesce(newLeft, newRight, conversion as LambdaExpression);
+                    else
+                        return Expression.MakeBinary
+                        (
+                            node.NodeType,
+                            newLeft,
+                            newRight,
+                            node.IsLiftedToNull,
+                            Expression.MakeBinary(node.NodeType, newLeft, newRight).Method
+                        );
+                }
+
+                return node;
+            }
+        }
+
         protected override Expression VisitUnary(UnaryExpression node)
         {
             switch (node.NodeType)
