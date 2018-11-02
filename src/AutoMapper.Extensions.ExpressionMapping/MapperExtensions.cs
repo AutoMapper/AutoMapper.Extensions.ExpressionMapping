@@ -256,7 +256,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             if (typeMappings == null)
                 throw new ArgumentException(Resource.typeMappingsDictionaryIsNull);
 
-            typeMappings.DoAddTypeMappings
+            typeMappings.DoAddTypeMappingsFromDelegates
             (
                 configurationProvider,
                 sourceType.GetGenericArguments().ToList(),
@@ -266,10 +266,22 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return typeMappings;
         }
 
-        private static void DoAddTypeMappings(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, List<Type> sourceArguments, List<Type> destArguments)
+        private static void DoAddTypeMappingsFromDelegates(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, List<Type> sourceArguments, List<Type> destArguments)
         {
             if (sourceArguments.Count != destArguments.Count)
                 throw new ArgumentException(Resource.invalidArgumentCount);
+
+            for (int i = 0; i < sourceArguments.Count; i++)
+            {
+                if (!typeMappings.ContainsKey(sourceArguments[i]) && sourceArguments[i] != destArguments[i])
+                    typeMappings.AddTypeMapping(configurationProvider, sourceArguments[i], destArguments[i]);
+            }
+        }
+
+        private static void DoAddTypeMappings(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, List<Type> sourceArguments, List<Type> destArguments)
+        {
+            if (sourceArguments.Count != destArguments.Count)
+                return;
 
             for (int i = 0; i < sourceArguments.Count; i++)
             {
