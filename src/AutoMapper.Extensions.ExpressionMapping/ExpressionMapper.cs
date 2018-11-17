@@ -21,7 +21,7 @@ namespace AutoMapper.Mappers
                                                  && typeof(LambdaExpression).IsAssignableFrom(context.DestinationType)
                                                  && context.DestinationType != typeof(LambdaExpression);
 
-        public Expression MapExpression(IConfigurationProvider configurationProvider, ProfileMap profileMap, PropertyMap propertyMap, Expression sourceExpression, Expression destExpression, Expression contextExpression) => 
+        public Expression MapExpression(IConfigurationProvider configurationProvider, ProfileMap profileMap, IMemberMap memberMap, Expression sourceExpression, Expression destExpression, Expression contextExpression) => 
             Call(null, 
                 MapMethodInfo.MakeGenericMethod(sourceExpression.Type, destExpression.Type), 
                 sourceExpression, 
@@ -151,11 +151,11 @@ namespace AutoMapper.Mappers
             private static bool BothAreNonNullable(Expression node, Expression newLeft) 
                 => !node.Type.IsNullableType() && !newLeft.Type.IsNullableType();
 
-            protected override Expression VisitLambda<T>(Expression<T> expression)
+            protected override Expression VisitLambda<T>(Expression<T> node)
             {
-                return expression.Parameters.Any(b => b.Type == _oldParam.Type) 
-                    ? VisitLambdaExpression(expression) 
-                    : VisitAllParametersExpression(expression);
+                return node.Parameters.Any(b => b.Type == _oldParam.Type) 
+                    ? VisitLambdaExpression(node) 
+                    : VisitAllParametersExpression(node);
             }
 
             private Expression VisitLambdaExpression<T>(Expression<T> expression)
@@ -207,8 +207,8 @@ namespace AutoMapper.Mappers
                 if (replacedExpression == node.Expression)
                     replacedExpression = _parentMappingVisitor.Visit(node.Expression);
 
-                if (propertyMap.CustomExpression != null)
-                    return propertyMap.CustomExpression.ReplaceParameters(replacedExpression);
+                if (propertyMap.CustomMapExpression != null)
+                    return propertyMap.CustomMapExpression.ReplaceParameters(replacedExpression);
 
                 Func<Expression, MemberInfo, Expression> getExpression = MakeMemberAccess;
 
@@ -235,7 +235,7 @@ namespace AutoMapper.Mappers
                 if (propertyMap == null)
                     return node;
                 var sourceType = GetSourceType(propertyMap);
-                var destType = propertyMap.DestinationPropertyType;
+                var destType = propertyMap.DestinationType;
                 if (sourceType == destType)
                     return MakeMemberAccess(baseExpression, node.Member);
                 var typeMap = _configurationProvider.ResolveTypeMap(sourceType, destType);
@@ -250,7 +250,7 @@ namespace AutoMapper.Mappers
                 throw new AutoMapperMappingException(
                     "Could not determine source property type. Make sure the property is mapped.", 
                     null, 
-                    new TypePair(null, propertyMap.DestinationPropertyType), 
+                    new TypePair(null, propertyMap.DestinationType), 
                     propertyMap.TypeMap, 
                     propertyMap);
 

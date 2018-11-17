@@ -299,7 +299,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             if (typeMap == null)
                 return;
 
-            FindMaps(typeMap.GetPropertyMaps().ToList());
+            FindMaps(typeMap.PropertyMaps.ToList());
             void FindMaps(List<PropertyMap> maps)
             {
                 foreach (PropertyMap pm in maps)
@@ -309,7 +309,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
                     AddChildMappings
                     (
-                        source.GetFieldOrProperty(pm.DestinationProperty.Name).GetMemberType(),
+                        source.GetFieldOrProperty(pm.DestinationMember.Name).GetMemberType(),
                         pm.SourceMember.GetMemberType()
                     );
                     void AddChildMappings(Type sourcePropertyType, Type destPropertyType)
