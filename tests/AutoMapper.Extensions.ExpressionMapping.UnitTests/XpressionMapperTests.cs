@@ -635,6 +635,19 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             this.val = val;
         }
+
+        [Fact]
+        public void Can_map_expression_when_mapped_properties_have_a_different_generic_argument_counts()
+        {
+            //Arrange
+            Expression<Func<ListParent, bool>> src = x => x.List.Count == 0;
+
+            //Act
+            Expression<Func<ListParentExtension, bool>> dest = mapper.Map<Expression<Func<ListParentExtension, bool>>>(src);
+
+            //Assert
+            Assert.NotNull(dest);
+        }
         #endregion Tests
 
         private static void SetupAutoMapper()
@@ -1018,6 +1031,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public string Name { get; set; }
     }
 
+    class ListParentExtension 
+    {
+        public ListExtension List { get; set; }
+    }
+
+    class ListParent : List<string>
+    {
+        public List<string> List { get; set; }
+    }
+
+    class ListExtension : List<string>
+    {
+    }
+
     public class OrganizationProfile : Profile
     {
         public OrganizationProfile()
@@ -1111,6 +1138,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             CreateMap<ItemEntity, ItemModel>();
 
             CreateMap<OptionT, OptionS>();
+
+            CreateMap<ListParentExtension, ListParent>()
+                .ReverseMap();
+            CreateMap<ListExtension, List<string>>()
+                .ForMember(d => d.Count, opt => opt.MapFrom(s => s.Count))
+                .ReverseMap()
+                .ForMember(d => d.Count, opt => opt.MapFrom(s => s.Count));
 
             CreateMissingTypeMaps = true;
         }
