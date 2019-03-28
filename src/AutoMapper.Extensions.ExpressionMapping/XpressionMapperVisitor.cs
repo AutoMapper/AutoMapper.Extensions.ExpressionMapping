@@ -130,6 +130,19 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
         }
 
+        protected override Expression VisitConditional(ConditionalExpression c)
+        {
+            return DoVisitConditional(this.Visit(c.Test), this.Visit(c.IfTrue), this.Visit(c.IfFalse));
+
+            Expression DoVisitConditional(Expression test, Expression ifTrue, Expression ifFalse)
+            {
+                if (test != c.Test || ifTrue != c.IfTrue || ifFalse != c.IfFalse)
+                    return Expression.Condition(test, ifTrue, ifFalse);
+
+                return c;
+            }
+        }
+
         protected override Expression VisitUnary(UnaryExpression node)
         {
             switch (node.NodeType)
