@@ -177,6 +177,51 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Map__object_including_child_and_grandchild_with_conditional_filter()
+        {
+            //Arrange
+            ParameterExpression userParam = Expression.Parameter(typeof(UserModel), "s");
+            MemberExpression accountModelProperty = Expression.MakeMemberAccess(userParam, PrimitiveHelper.GetFieldOrProperty(typeof(UserModel), "AccountModel"));
+            MemberExpression branchModelProperty = Expression.MakeMemberAccess(accountModelProperty, PrimitiveHelper.GetFieldOrProperty(typeof(AccountModel), "Branch"));
+            MemberExpression nameProperty = Expression.MakeMemberAccess(branchModelProperty, PrimitiveHelper.GetFieldOrProperty(typeof(BranchModel), "Name"));
+
+            //{s => (IIF((IIF((s.AccountModel == null), null, s.AccountModel.Branch) == null), null, s.AccountModel.Branch.Name) == "Leeds")}
+            Expression<Func<UserModel, bool>> selection = Expression.Lambda<Func<UserModel, bool>>
+            (
+                Expression.Equal
+                (
+                    Expression.Condition
+                    (
+                        Expression.Equal
+                        (
+                            Expression.Condition
+                            (
+                                Expression.Equal
+                                (
+                                    accountModelProperty,
+                                    Expression.Constant(null, typeof(AccountModel))
+                                ),
+                                Expression.Constant(null, typeof(BranchModel)),
+                                branchModelProperty
+                            ),
+                            Expression.Constant(null, typeof(BranchModel))
+                        ),
+                        Expression.Constant(null, typeof(string)),
+                        nameProperty
+                    ),
+                    Expression.Constant("Park Row", typeof(string))
+                ),
+                userParam
+            );
+
+            Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
+            List<User> users = Users.Where(selectionMapped).ToList();
+
+            //Assert
+            Assert.True(users.Count == 1);
+        }
+
+        [Fact]
         public void Map_object_when_null_values_are_typed()
         {
             //Arrange
@@ -783,6 +828,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public string Description { get; set; }
         public string Type { get; set; }
         public DateTime DateCreated { get; set; }
+        public BranchModel Branch { get; set; }
         public ICollection<ThingModel> ThingModels { get; set; }
         public ICollection<UserModel> UserModels { get; set; }
     }
@@ -822,6 +868,12 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     }
 
     public class Branch
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class BranchModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
