@@ -72,20 +72,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
         public ISourceInjectedQueryable<TDestination> For<TDestination>(object parameters, params Expression<Func<TDestination, object>>[] membersToExpand)
         {
             _parameters = GetParameters(parameters);
-            _membersToExpand = ProjectionExpression.GetMemberPaths(membersToExpand);
+            _membersToExpand = ReflectionExtensions.GetMemberPaths(membersToExpand);
             return CreateQueryable<TDestination>();
         }
 
         public ISourceInjectedQueryable<TDestination> For<TDestination>(params Expression<Func<TDestination, object>>[] membersToExpand)
         {
-            _membersToExpand = ProjectionExpression.GetMemberPaths(membersToExpand);
+            _membersToExpand = ReflectionExtensions.GetMemberPaths(membersToExpand);
             return CreateQueryable<TDestination>();
         }
 
         public ISourceInjectedQueryable<TDestination> For<TDestination>(IObjectDictionary parameters, params string[] membersToExpand)
         {
             _parameters = parameters;
-            _membersToExpand = ProjectionExpression.GetMemberPaths(typeof(TDestination), membersToExpand);
+            _membersToExpand = ReflectionExtensions.GetMemberPaths(typeof(TDestination), membersToExpand);
             return CreateQueryable<TDestination>();
         }
 

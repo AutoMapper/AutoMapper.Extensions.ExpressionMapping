@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper.Internal;
 
 namespace AutoMapper
 {
+    using MemberPaths = IEnumerable<IEnumerable<MemberInfo>>;
+
     internal static class ReflectionExtensions
     {
         public static object GetDefaultValue(this ParameterInfo parameter)
@@ -28,6 +31,12 @@ namespace AutoMapper
 
         public static IEnumerable<MemberInfo> GetMemberPath(Type type, string fullMemberName)
             => ReflectionHelper.GetMemberPath(type, fullMemberName);
+
+        public static MemberPaths GetMemberPaths(Type type, string[] membersToExpand) =>
+            membersToExpand.Select(m => ReflectionHelper.GetMemberPath(type, m));
+
+        public static MemberPaths GetMemberPaths<TResult>(Expression<Func<TResult, object>>[] membersToExpand) =>
+            membersToExpand.Select(expr => MemberVisitor.GetMemberPath(expr));
 
         public static MemberInfo GetFieldOrProperty(this LambdaExpression expression)
             => ReflectionHelper.GetFieldOrProperty(expression);

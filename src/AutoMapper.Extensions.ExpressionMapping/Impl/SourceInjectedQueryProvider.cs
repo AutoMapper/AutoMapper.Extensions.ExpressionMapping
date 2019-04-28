@@ -94,7 +94,12 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                     var sourceResult = _dataSource.Provider.CreateQuery(sourceExpression);
                     Inspector.SourceResult(sourceExpression, sourceResult);
 
-                    destResult = new ProjectionExpression((IQueryable<TSource>)sourceResult, _mapper.ConfigurationProvider.ExpressionBuilder).To<TDestination>(_parameters, _membersToExpand);
+                    var membersToExpand = _membersToExpand.SelectMany(m => m).Distinct().ToArray();
+
+                    var parameters = _parameters ?? new Dictionary<string, object>();
+                    var mapExpressions = _mapper.ConfigurationProvider.ExpressionBuilder.GetMapExpression(sourceResult.ElementType, typeof(TDestination), parameters, membersToExpand);
+
+                    destResult = (IQueryable<TDestination>)mapExpressions.Aggregate(sourceResult, Select);
                 }
                 // case #2: query is arbitrary ("manual") projection
                 // exaple: users.UseAsDataSource().For<UserDto>().Select(user => user.Age).ToList()
@@ -227,6 +232,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                     new[] { source, Quote(lambda) }
                 );
         }
+
+        private static IQueryable Select(IQueryable source, LambdaExpression lambda) => source.Provider.CreateQuery(
+                Call(
+                    null,
+                    QueryableSelectMethod.MakeGenericMethod(source.ElementType, lambda.ReturnType),
+                    new[] { source.Expression, Expression.Quote(lambda) }
+                    )
+                );
 
         private object InvokeSourceQuery(Type sourceResultType, Expression sourceExpression)
         {
