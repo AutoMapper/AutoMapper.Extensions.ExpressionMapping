@@ -269,7 +269,15 @@ namespace AutoMapper.Mappers
                         ? null
                         : (!node.Member.DeclaringType.IsAssignableFrom(_typeMap.DestinationType)
                             ? null
-                            : _typeMap.GetExistingPropertyMapFor(node.Member)));
+                            : GetExistingPropertyMapFor(node.Member, _typeMap)));
+
+            private PropertyMap GetExistingPropertyMapFor(MemberInfo destinationProperty, TypeMap typeMap)
+            {
+                if (!destinationProperty.DeclaringType.IsAssignableFrom(typeMap.DestinationType))
+                    return null;
+
+                return typeMap.PropertyMaps.FirstOrDefault(pm => pm.DestinationName == destinationProperty.Name);
+            }
 
             private void SetSorceSubTypes(PropertyMap propertyMap)
             {
