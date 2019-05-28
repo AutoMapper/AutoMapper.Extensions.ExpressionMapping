@@ -8,6 +8,12 @@ Mapper.Initialize(cfg => {
     cfg.AddExpressionMapping();
 	// Rest of your configuration
 });
+
+// or if using the MS Ext DI:
+
+services.AddAutoMapper(cfg => {
+    cfg.AddExpressionMapping();
+}, /* assemblies with profiles */);
 ```
 
 ## DTO Queries
