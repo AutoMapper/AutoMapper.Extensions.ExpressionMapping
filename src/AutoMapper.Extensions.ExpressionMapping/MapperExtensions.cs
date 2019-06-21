@@ -245,6 +245,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 {
                     typeMappings.AddUnderlyingTypes(configurationProvider, sourceType, destType);
                     typeMappings.FindChildPropertyTypeMaps(configurationProvider, sourceType, destType);
+                    typeMappings.AddIncludedTypeMaps(configurationProvider, sourceType, destType);
                 }
             }
 
@@ -300,6 +301,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return;
 
             FindMaps(typeMap.PropertyMaps.ToList());
+
             void FindMaps(List<PropertyMap> maps)
             {
                 foreach (PropertyMap pm in maps)
@@ -312,6 +314,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         source.GetFieldOrProperty(pm.DestinationMember.Name).GetMemberType(),
                         pm.SourceMember.GetMemberType()
                     );
+
                     void AddChildMappings(Type sourcePropertyType, Type destPropertyType)
                     {
                         if (sourcePropertyType.IsLiteralType() || destPropertyType.IsLiteralType())
@@ -320,6 +323,24 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         typeMappings.AddTypeMapping(ConfigurationProvider, sourcePropertyType, destPropertyType);
                     }
                 }
+            }
+        }
+
+        private static void AddIncludedTypeMaps(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type source, Type dest)
+        {
+            var typeMap = configurationProvider.ResolveTypeMap(source, dest);
+
+            if (typeMap == null)
+                return;
+
+            foreach(var includedBase in typeMap.IncludedBaseTypes)
+            {
+                typeMappings.AddTypeMapping(configurationProvider, includedBase.SourceType, includedBase.DestinationType);
+            }
+
+            foreach(var includedDerived in typeMap.IncludedDerivedTypes)
+            {
+                typeMappings.AddTypeMapping(configurationProvider, includedDerived.SourceType, includedDerived.DestinationType);
             }
         }
     }
