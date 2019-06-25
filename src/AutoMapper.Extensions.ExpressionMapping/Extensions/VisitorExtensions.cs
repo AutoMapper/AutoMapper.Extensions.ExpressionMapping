@@ -63,35 +63,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
                     return string.Empty;
             }
         }
-
-        private static MemberExpression GetMemberExpression(LambdaExpression expr)
-        {
-            MemberExpression me;
-            switch (expr.Body.NodeType)
-            {
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                    var ue = expr.Body as UnaryExpression;
-                    me = ue?.Operand as MemberExpression;
-                    break;
-                default:
-                    me = expr.Body as MemberExpression;
-                    if (me == null)
-                    {
-                        if (expr.Body is BinaryExpression binaryExpression)
-                        {
-                            if (binaryExpression.Left is MemberExpression left)
-                                return left;
-                            if (binaryExpression.Right is MemberExpression right)
-                                return right;
-                        }
-                    }
-                    break;
-            }
-
-            return me;
-        }
-
+        
         /// <summary>
         /// Returns the ParameterExpression for the LINQ parameter.
         /// </summary>
@@ -101,36 +73,41 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
         {
             if (expression == null)
                 return null;
-
-            //the node represents parameter of the expression
-            switch (expression.NodeType)
+            
+            switch(expression)
             {
-                case ExpressionType.Parameter:
-                    return (ParameterExpression)expression;
-                case ExpressionType.Quote:
-                    return GetParameterExpression(GetMemberExpression((LambdaExpression)((UnaryExpression)expression).Operand));
-                case ExpressionType.Lambda:
-                    return GetParameterExpression(GetMemberExpression((LambdaExpression)expression));
-                case ExpressionType.ConvertChecked:
-                case ExpressionType.Convert:
-                    var ue = expression as UnaryExpression;
-                    return GetParameterExpression(ue?.Operand);
-                case ExpressionType.MemberAccess:
-                    return GetParameterExpression(((MemberExpression)expression).Expression);
-                case ExpressionType.Call:
-                    var methodExpression = expression as MethodCallExpression;
-                    var memberExpression = methodExpression?.Object as MemberExpression;//Method is an instance method
-
-                    var isExtension = methodExpression != null && methodExpression.Method.IsDefined(typeof(ExtensionAttribute), true);
-                    if (isExtension && memberExpression == null && methodExpression.Arguments.Count > 0)
-                        memberExpression = methodExpression.Arguments[0] as MemberExpression;//Method is an extension method based on the type of methodExpression.Arguments[0] and methodExpression.Arguments[0] is a member expression.
-
-                    return isExtension && memberExpression == null && methodExpression.Arguments.Count > 0
-                        ? GetParameterExpression(methodExpression.Arguments[0])
-                        : (memberExpression == null ? null : GetParameterExpression(memberExpression.Expression));
+                case ParameterExpression pe:
+                    return pe;
+                case UnaryExpression ue:
+                    return ue.Operand.GetParameterExpression();
+                case BinaryExpression be:
+                    return be.Left.GetParameterExpression()
+                        ?? be.Right.GetParameterExpression();
+                case ConditionalExpression ce:
+                    return ce.Test.GetParameterExpression()
+                        ?? ce.IfTrue.GetParameterExpression()
+                        ?? ce.IfFalse.GetParameterExpression();
+                case MemberExpression me:
+                    return me.Expression.GetParameterExpression();
+                case MethodCallExpression mce:
+                    return mce.Method.IsDefined(typeof(ExtensionAttribute), true)
+                        ? mce.Arguments.FirstOrDefault()?.GetParameterExpression()
+                        : mce.Object?.GetParameterExpression();
+                case LambdaExpression le:
+                    return le.Body.GetParameterExpression();
+                default:
+                    return null;
             }
+        }
 
-            return null;
+        /// <summary>
+        /// Determines if the given expression contains a parameter expression.
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        public static bool HasParameterExpression(this Expression expression)
+        {
+            return expression.GetParameterExpression() != null;
         }
 
         /// <summary>

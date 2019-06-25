@@ -40,8 +40,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            var parameterExpression = node.GetParameterExpression();
-            if (parameterExpression == null)
+            // This check guards against mapping expressions that shouldn't be, e.g. string.empty
+            if (!node.HasParameterExpression())
                 return base.VisitMember(node);
 
             var sourcePath = node.GetPropertyFullName();
@@ -50,9 +50,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             var sType = baseExpr.Type;
             var dType = visitedBaseExpr.Type;
-
-            InfoDictionary.Add(parameterExpression, TypeMappings);
-
+            
             var propertyMapInfoList = new List<PropertyMapInfo>();
             FindDestinationFullName(sType, dType, sourcePath, propertyMapInfoList);
             string fullName;
@@ -78,7 +76,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 var visitor = new PrependParentNameVisitor(
                     last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, 
                     fullName, 
-                    InfoDictionary[parameterExpression].NewParameter);
+                    visitedBaseExpr);
 
                 var ex = propertyMapInfoList[propertyMapInfoList.Count - 1] != last
                     ? visitor.Visit(last.CustomExpression.Body.MemberAccesses(afterCustExpression))
@@ -155,6 +153,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         default:
                             return ProcessConvert(node);
                     }
+                case ExpressionType.TypeIs:
+                case ExpressionType.TypeAs:
+                    return ProcessConvert(node);
                 case ExpressionType.Lambda:
                     var lambdaExpression = (LambdaExpression)node.Operand;
                     var ex = this.Visit(lambdaExpression.Body);
@@ -179,11 +180,11 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitTypeBinary(TypeBinaryExpression node)
         {
-            if(this.TypeMappings.TryGetValue(node.TypeOperand, out Type mappedType))
+            if (this.TypeMappings.TryGetValue(node.TypeOperand, out Type mappedType))
             {
                 var visitedExpr = this.Visit(node.Expression);
 
-                switch(node.NodeType)
+                switch (node.NodeType)
                 {
                     case ExpressionType.TypeIs:
                         return Expression.TypeIs(visitedExpr, mappedType);
