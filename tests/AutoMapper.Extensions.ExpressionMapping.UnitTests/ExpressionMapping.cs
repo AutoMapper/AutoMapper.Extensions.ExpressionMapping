@@ -111,7 +111,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         protected override MapperConfiguration Configuration { get; } = new MapperConfiguration(cfg =>
         {
             cfg.AddExpressionMapping();
-            cfg.CreateMissingTypeMaps = false;
             cfg.CreateMap<GrandParent, GrandParentDTO>().ReverseMap();
             cfg.CreateMap<Parent, ParentDTO>().ReverseMap();
             cfg.CreateMap<Child, ChildDTO>()
