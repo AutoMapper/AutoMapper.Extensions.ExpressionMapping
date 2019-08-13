@@ -4,10 +4,10 @@ AutoMapper extentions for mapping expressions (OData)
 To use, configure using the configuration helper method:
 
 ```c#
-Mapper.Initialize(cfg => {
+var mapper = new Mapper(new MapperConfiguration(cfg => {
     cfg.AddExpressionMapping();
 	// Rest of your configuration
-});
+}));
 
 // or if using the MS Ext DI:
 

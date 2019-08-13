@@ -607,26 +607,25 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             destItem.DestValue.ShouldBe(sourceItem.SrcValue);
         }
 
-        [Fact]
+        [Fact(Skip="Conventions not available like this.")]
         public void Shoud_work_with_conventions()
         {
-            var mapper = new MapperConfiguration(cfg => cfg.AddConditionalObjectMapper()
-                .Where((s, d) => s.Name == d.Name + "Model" || s.Name + "Model" == d.Name)).CreateMapper();
+            //var mapper = new MapperConfiguration(cfg => cfg.AddConditionalObjectMapper()
+            //    .Where((s, d) => s.Name == d.Name + "Model" || s.Name + "Model" == d.Name)).CreateMapper();
 
 
-            IQueryable<Destination> result = _source.AsQueryable()
-                .UseAsDataSource(Mapper).For<Destination>()
-                .Where(s => s.DestValue > 6);
+            //IQueryable<Destination> result = _source.AsQueryable()
+            //    .UseAsDataSource(Mapper).For<Destination>()
+            //    .Where(s => s.DestValue > 6);
 
-            result.Count().ShouldBe(1);
-            result.Any(s => s.DestValue > 6).ShouldBeTrue();
+            //result.Count().ShouldBe(1);
+            //result.Any(s => s.DestValue > 6).ShouldBeTrue();
         }
 
         private static IMapper SetupAutoMapper()
         {
             var config = new MapperConfiguration(cfg =>
             {
-                cfg.CreateMissingTypeMaps = false;
                 cfg.CreateMap<User, UserModel>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.UserId))
                 .ForMember(d => d.FullName, opt => opt.MapFrom(s => s.Name))

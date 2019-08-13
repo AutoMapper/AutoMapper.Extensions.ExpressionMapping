@@ -36,8 +36,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             return MapExpression<TDestDelegate>
             (
-                mapper ?? Mapper.Instance,
-                mapper == null ? Mapper.Configuration : mapper.ConfigurationProvider,
+                mapper,
+                mapper.ConfigurationProvider,
                 expression,
                 expression.GetType().GetGenericArguments()[0],
                 typeof(TDestDelegate).GetGenericArguments()[0],

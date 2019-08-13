@@ -19,6 +19,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 c.CreateMap<GarageModel, Garage>()
                     .ReverseMap()
                         .ForMember(d => d.Color, opt => opt.MapFrom(s => s.Truck.Color));
+                c.CreateMap<TruckModel, Truck>()
+                    .ReverseMap();
             });
 
             config.AssertConfigurationIsValid();
@@ -45,6 +47,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 c.CreateMap<GarageModel, Garage>()
                     .ReverseMap()
                         .ForMember(d => d.Color, opt => opt.MapFrom(s => s.Truck.Color));
+                c.CreateMap<TruckModel, Truck>()
+                    .ReverseMap();
             });
 
             config.AssertConfigurationIsValid();

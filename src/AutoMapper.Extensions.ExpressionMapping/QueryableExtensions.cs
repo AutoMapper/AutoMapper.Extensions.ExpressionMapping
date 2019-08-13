@@ -5,9 +5,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
 {
     public static class QueryableExtensions
     {
-        public static IQueryDataSourceInjection<TSource> UseAsDataSource<TSource>(this IQueryable<TSource> dataSource)
-            => dataSource.UseAsDataSource(Mapper.Configuration?.CreateMapper());
-
         public static IQueryDataSourceInjection<TSource> UseAsDataSource<TSource>(this IQueryable<TSource> dataSource, IConfigurationProvider config)
             => dataSource.UseAsDataSource(config.CreateMapper());
 

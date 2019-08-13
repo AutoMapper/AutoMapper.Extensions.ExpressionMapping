@@ -262,7 +262,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<Car, CarModel>();
-                cfg.CreateMissingTypeMaps = false;
             });
 
             var customMapper = config.CreateMapper();
@@ -276,7 +275,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                     {
                         exception.InnerException.ShouldNotBeNull();
                         exception.InnerException.ShouldBeOfType<InvalidOperationException>();
-                        exception.InnerException.Message.ShouldContain("Mapper.CreateMap<CarModel, Car>", Case.Insensitive);
+                        exception.InnerException.Message.ShouldContain("CreateMap<CarModel, Car>", Case.Insensitive);
                     });
         }
 
@@ -700,7 +699,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
-                cfg.AddProfiles(typeof(OrganizationProfile));
+                cfg.AddMaps(typeof(OrganizationProfile));
             });
 
             mapper = config.CreateMapper();
@@ -1198,7 +1197,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 .ReverseMap()
                 .ForMember(d => d.Count, opt => opt.MapFrom(s => s.Count));
 
-            CreateMissingTypeMaps = true;
+            CreateMap<Branch, BranchModel>();
         }
     }
 
