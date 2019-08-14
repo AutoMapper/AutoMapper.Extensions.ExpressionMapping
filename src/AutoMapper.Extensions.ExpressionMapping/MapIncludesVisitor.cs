@@ -1,18 +1,17 @@
-﻿using System;
+﻿using AutoMapper.Extensions.ExpressionMapping.Extensions;
+using AutoMapper.Extensions.ExpressionMapping.Structures;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using AutoMapper.Internal;
-using AutoMapper.Extensions.ExpressionMapping.Extensions;
-using AutoMapper.Extensions.ExpressionMapping.Structures;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {
     public class MapIncludesVisitor : XpressionMapperVisitor
     {
-        public MapIncludesVisitor(IMapper mapper, IConfigurationProvider configurationProvider, Dictionary<Type, Type> typeMappings)
-            : base(mapper, configurationProvider, typeMappings)
+        public MapIncludesVisitor(IMapper mapper, IConfigurationProvider configurationProvider, Dictionary<Type, Type> typeMappings, bool ignoreValidations)
+            : base(mapper, configurationProvider, typeMappings, ignoreValidations)
         {
         }
 

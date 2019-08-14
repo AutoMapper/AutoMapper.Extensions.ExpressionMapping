@@ -1,11 +1,11 @@
-﻿using System;
+﻿using AutoMapper.Internal;
+using AutoMapper.Mappers.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using static System.Linq.Expressions.Expression;
 using System.Reflection;
-using AutoMapper.Mappers.Internal;
-using AutoMapper.Internal;
+using static System.Linq.Expressions.Expression;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {
@@ -17,8 +17,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <typeparam name="TDestDelegate"></typeparam>
         /// <param name="mapper"></param>
         /// <param name="expression"></param>
+        /// <param name="ignoreValidations"></param>
         /// <returns></returns>
-        public static TDestDelegate MapExpression<TDestDelegate>(this IMapper mapper, LambdaExpression expression)
+        public static TDestDelegate MapExpression<TDestDelegate>(this IMapper mapper, LambdaExpression expression, bool ignoreValidations = false)
             where TDestDelegate : LambdaExpression
         {
             if (expression == null)
@@ -26,12 +27,13 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             return mapper.MapExpression<TDestDelegate>
             (
-                expression, 
-                (config, mappings) => new XpressionMapperVisitor(mapper, config, mappings)
+                expression,
+                ignoreValidations,
+                (config, mappings, _ignoreValidations) => new XpressionMapperVisitor(mapper, config, mappings, _ignoreValidations)
             );
         }
 
-        private static TDestDelegate MapExpression<TDestDelegate>(this IMapper mapper, LambdaExpression expression, Func<IConfigurationProvider, Dictionary<Type, Type>, XpressionMapperVisitor> getVisitor)
+        private static TDestDelegate MapExpression<TDestDelegate>(this IMapper mapper, LambdaExpression expression, bool ignoreValidations, Func<IConfigurationProvider, Dictionary<Type, Type>, bool, XpressionMapperVisitor> getVisitor)
             where TDestDelegate : LambdaExpression
         {
             return MapExpression<TDestDelegate>
@@ -41,6 +43,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 expression,
                 expression.GetType().GetGenericArguments()[0],
                 typeof(TDestDelegate).GetGenericArguments()[0],
+                ignoreValidations,
                 getVisitor
             );
         }
@@ -50,13 +53,14 @@ namespace AutoMapper.Extensions.ExpressionMapping
             LambdaExpression expression,
             Type typeSourceFunc,
             Type typeDestFunc,
-            Func<IConfigurationProvider, Dictionary<Type, Type>, XpressionMapperVisitor> getVisitor)
+            bool ignoreValidations,
+            Func<IConfigurationProvider, Dictionary<Type, Type>, bool, XpressionMapperVisitor> getVisitor)
             where TDestDelegate : LambdaExpression
         {
             return CreateVisitor(new Dictionary<Type, Type>().AddTypeMappingsFromDelegates(configurationProvider, typeSourceFunc, typeDestFunc));
 
             TDestDelegate CreateVisitor(Dictionary<Type, Type> typeMappings)
-                => MapBody(typeMappings, getVisitor(configurationProvider, typeMappings));
+                => MapBody(typeMappings, getVisitor(configurationProvider, typeMappings, ignoreValidations));
 
             TDestDelegate MapBody(Dictionary<Type, Type> typeMappings, XpressionMapperVisitor visitor)
                 => GetLambda(typeMappings, visitor, visitor.Visit(expression.Body));
@@ -85,11 +89,12 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <typeparam name="TDestDelegate"></typeparam>
         /// <param name="mapper"></param>
         /// <param name="expression"></param>
+        /// <param name="ignoreValidations"></param>
         /// <returns></returns>
-        public static TDestDelegate MapExpression<TSourceDelegate, TDestDelegate>(this IMapper mapper, TSourceDelegate expression)
+        public static TDestDelegate MapExpression<TSourceDelegate, TDestDelegate>(this IMapper mapper, TSourceDelegate expression, bool ignoreValidations = false)
             where TSourceDelegate : LambdaExpression
             where TDestDelegate : LambdaExpression
-            => mapper.MapExpression<TDestDelegate>(expression);
+            => mapper.MapExpression<TDestDelegate>(expression, ignoreValidations);
 
         /// <summary>
         /// Maps an expression to be used as an "Include" given a dictionary of types where the source type is the key and the destination type is the value.
@@ -97,8 +102,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <typeparam name="TDestDelegate"></typeparam>
         /// <param name="mapper"></param>
         /// <param name="expression"></param>
+        /// <param name="ignoreValidations"></param>
         /// <returns></returns>
-        public static TDestDelegate MapExpressionAsInclude<TDestDelegate>(this IMapper mapper, LambdaExpression expression)
+        public static TDestDelegate MapExpressionAsInclude<TDestDelegate>(this IMapper mapper, LambdaExpression expression, bool ignoreValidations = false)
             where TDestDelegate : LambdaExpression
         {
             if (expression == null)
@@ -107,7 +113,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return mapper.MapExpression<TDestDelegate>
             (
                 expression,
-                (config, mappings) => new MapIncludesVisitor(mapper, config, mappings)
+                ignoreValidations,
+                (config, mappings, _ignoreValidations) => new MapIncludesVisitor(mapper, config, mappings, _ignoreValidations)
             );
         }
 
@@ -118,11 +125,12 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <typeparam name="TDestDelegate"></typeparam>
         /// <param name="mapper"></param>
         /// <param name="expression"></param>
+        /// <param name="ignoreValidations"></param>
         /// <returns></returns>
-        public static TDestDelegate MapExpressionAsInclude<TSourceDelegate, TDestDelegate>(this IMapper mapper, TSourceDelegate expression)
+        public static TDestDelegate MapExpressionAsInclude<TSourceDelegate, TDestDelegate>(this IMapper mapper, TSourceDelegate expression, bool ignoreValidations = false)
             where TSourceDelegate : LambdaExpression
             where TDestDelegate : LambdaExpression
-            => mapper.MapExpressionAsInclude<TDestDelegate>(expression);
+            => mapper.MapExpressionAsInclude<TDestDelegate>(expression, ignoreValidations);
 
         /// <summary>
         /// Maps a collection of expressions given a dictionary of types where the source type is the key and the destination type is the value.
@@ -131,11 +139,12 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <typeparam name="TDestDelegate"></typeparam>
         /// <param name="mapper"></param>
         /// <param name="collection"></param>
+        /// <param name="ignoreValidations"></param>
         /// <returns></returns>
-        public static ICollection<TDestDelegate> MapExpressionList<TSourceDelegate, TDestDelegate>(this IMapper mapper, ICollection<TSourceDelegate> collection)
+        public static ICollection<TDestDelegate> MapExpressionList<TSourceDelegate, TDestDelegate>(this IMapper mapper, ICollection<TSourceDelegate> collection, bool ignoreValidations = false)
             where TSourceDelegate : LambdaExpression
             where TDestDelegate : LambdaExpression
-            => collection?.Select(mapper.MapExpression<TSourceDelegate, TDestDelegate>).ToList();
+            => collection?.Select(item => mapper.MapExpression<TSourceDelegate, TDestDelegate>(item, ignoreValidations)).ToList();
 
         /// <summary>
         /// Maps a collection of expressions given a dictionary of types where the source type is the key and the destination type is the value.
@@ -143,10 +152,11 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <typeparam name="TDestDelegate"></typeparam>
         /// <param name="mapper"></param>
         /// <param name="collection"></param>
+        /// <param name="ignoreValidations"></param>
         /// <returns></returns>
-        public static ICollection<TDestDelegate> MapExpressionList<TDestDelegate>(this IMapper mapper, IEnumerable<LambdaExpression> collection)
+        public static ICollection<TDestDelegate> MapExpressionList<TDestDelegate>(this IMapper mapper, IEnumerable<LambdaExpression> collection, bool ignoreValidations = false)
             where TDestDelegate : LambdaExpression
-            => collection?.Select(mapper.MapExpression<TDestDelegate>).ToList();
+            => collection?.Select(item => mapper.MapExpression<TDestDelegate>(item, ignoreValidations)).ToList();
 
         /// <summary>
         /// Maps a collection of expressions to be used as a "Includes" given a dictionary of types where the source type is the key and the destination type is the value.
@@ -155,11 +165,12 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <typeparam name="TDestDelegate"></typeparam>
         /// <param name="mapper"></param>
         /// <param name="collection"></param>
+        /// <param name="ignoreValidations"></param>
         /// <returns></returns>
-        public static ICollection<TDestDelegate> MapIncludesList<TSourceDelegate, TDestDelegate>(this IMapper mapper, ICollection<TSourceDelegate> collection)
+        public static ICollection<TDestDelegate> MapIncludesList<TSourceDelegate, TDestDelegate>(this IMapper mapper, ICollection<TSourceDelegate> collection, bool ignoreValidations = false)
             where TSourceDelegate : LambdaExpression
             where TDestDelegate : LambdaExpression
-            => collection?.Select(mapper.MapExpressionAsInclude<TSourceDelegate, TDestDelegate>).ToList();
+            => collection?.Select(item => mapper.MapExpressionAsInclude<TSourceDelegate, TDestDelegate>(item, ignoreValidations)).ToList();
 
         /// <summary>
         /// Maps a collection of expressions to be used as a "Includes" given a dictionary of types where the source type is the key and the destination type is the value.
@@ -167,10 +178,11 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <typeparam name="TDestDelegate"></typeparam>
         /// <param name="mapper"></param>
         /// <param name="collection"></param>
+        /// <param name="ignoreValidations"></param>
         /// <returns></returns>
-        public static ICollection<TDestDelegate> MapIncludesList<TDestDelegate>(this IMapper mapper, IEnumerable<LambdaExpression> collection)
+        public static ICollection<TDestDelegate> MapIncludesList<TDestDelegate>(this IMapper mapper, IEnumerable<LambdaExpression> collection, bool ignoreValidations = false)
             where TDestDelegate : LambdaExpression
-            => collection?.Select(mapper.MapExpressionAsInclude<TDestDelegate>).ToList();
+            => collection?.Select(item => mapper.MapExpressionAsInclude<TDestDelegate>(item, ignoreValidations)).ToList();
 
         /// <summary>
         /// Takes a list of parameters from the source lamda expression and returns a list of parameters for the destination lambda expression.

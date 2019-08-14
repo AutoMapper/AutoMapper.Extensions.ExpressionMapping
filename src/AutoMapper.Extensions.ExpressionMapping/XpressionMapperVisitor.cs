@@ -1,26 +1,27 @@
-﻿using System;
+﻿using AutoMapper.Extensions.ExpressionMapping.Extensions;
+using AutoMapper.Extensions.ExpressionMapping.Structures;
+using AutoMapper.QueryableExtensions.Impl;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using AutoMapper.Extensions.ExpressionMapping.ArgumentMappers;
-using AutoMapper.Extensions.ExpressionMapping.Extensions;
-using AutoMapper.Extensions.ExpressionMapping.Structures;
-using AutoMapper.Internal;
-using AutoMapper.QueryableExtensions.Impl;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {
     public class XpressionMapperVisitor : ExpressionVisitor
     {
-        public XpressionMapperVisitor(IMapper mapper, IConfigurationProvider configurationProvider, Dictionary<Type, Type> typeMappings)
+        private readonly bool _ignoreValidations;
+
+        public XpressionMapperVisitor(IMapper mapper, IConfigurationProvider configurationProvider, Dictionary<Type, Type> typeMappings, bool ignoreValidations)
         {
             Mapper = mapper;
             TypeMappings = typeMappings;
             InfoDictionary = new MapperInfoDictionary(new ParameterExpressionEqualityComparer());
             ConfigurationProvider = configurationProvider;
+            _ignoreValidations = ignoreValidations;
         }
 
         public MapperInfoDictionary InfoDictionary { get; }
@@ -154,7 +155,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         case ExpressionType.Constant:
                             return ProcessConstant((ConstantExpression)node.Operand);
                         default:
-                            return base.VisitUnary(node);
+                            return _ignoreValidations ? node.Update(Visit(node.Operand)) : base.VisitUnary(node);
                     }
                 case ExpressionType.Lambda:
                     var lambdaExpression = (LambdaExpression)node.Operand;
@@ -164,7 +165,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, mapped.Type);
                     return mapped;
                 default:
-                    return base.VisitUnary(node);
+                    return _ignoreValidations ? node.Update(Visit(node.Operand)) : base.VisitUnary(node);
             }
 
             Expression ProcessConstant(ConstantExpression operand)
@@ -277,13 +278,13 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
         }
 
-        private bool GenericTypeDefinitionsAreEquivalent(Type typeSource, Type typeDestination) 
+        private bool GenericTypeDefinitionsAreEquivalent(Type typeSource, Type typeDestination)
             => typeSource.IsGenericType() && typeDestination.IsGenericType() && typeSource.GetGenericTypeDefinition() == typeDestination.GetGenericTypeDefinition();
 
         protected void FindDestinationFullName(Type typeSource, Type typeDestination, string sourceFullName, List<PropertyMapInfo> propertyMapInfoList)
         {
             const string period = ".";
-            
+
             if (typeSource == typeDestination)
             {
                 var sourceFullNameArray = sourceFullName.Split(new[] { period[0] }, StringSplitOptions.RemoveEmptyEntries);
@@ -326,7 +327,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
                     var sourceType = typeSource.GetFieldOrProperty(propertyName).GetMemberType();
                     var destType = typeDestination.GetFieldOrProperty(propertyName).GetMemberType();
-                    
+
                     TypeMappings.AddTypeMapping(ConfigurationProvider, sourceType, destType);
 
                     var childFullName = sourceFullName.Substring(sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) + 1);

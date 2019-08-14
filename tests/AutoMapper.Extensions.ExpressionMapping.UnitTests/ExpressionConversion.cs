@@ -1,8 +1,8 @@
 ﻿
+using Shouldly;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using Shouldly;
 using Xunit;
 
 namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
@@ -26,6 +26,28 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             public int Value { get; set; }
             public int Bar { get; set; }
             public int ChildValue { get; set; }
+        }
+
+        public enum SourceEnum
+        {
+            Foo,
+            Bar
+        }
+
+        public enum DestEnum
+        {
+            Foo,
+            Bar
+        }
+
+        public class SourceWithEnum : Source
+        {
+            public SourceEnum Enum { get; set; }
+        }
+
+        public class DestWithEnum : Dest
+        {
+            public DestEnum Enum { get; set; }
         }
 
         [Fact]
@@ -129,6 +151,45 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 new Source {Foo = 10},
                 new Source {Foo = 10},
                 new Source {Foo = 15}
+            };
+
+            var items2 = items.AsQueryable().Select(mapped).ToList();
+        }
+
+        [Fact]
+        public void Throw_AutoMapperMappingException_because_it_would_change_the_meaning_of_the_operation()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddExpressionMapping();
+                cfg.CreateMap<SourceEnum, DestEnum>();
+                cfg.CreateMap<DestWithEnum, SourceWithEnum>();
+            });
+
+            Expression<Func<SourceWithEnum, bool>> expr = s => s.Enum == SourceEnum.Foo;
+
+            Assert.Throws<InvalidOperationException>(() => config.CreateMapper().MapExpression<Expression<Func<SourceWithEnum, bool>>, Expression<Func<DestWithEnum, bool>>>(expr));
+        }
+
+        [Fact]
+        public void Can_map_even_it_would_change_the_meaning_of_the_operation()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddExpressionMapping();
+                cfg.CreateMap<SourceEnum, DestEnum>();
+                cfg.CreateMap<DestWithEnum, SourceWithEnum>();
+            });
+
+            Expression<Func<SourceWithEnum, bool>> expr = s => s.Enum == SourceEnum.Bar;
+
+            var mapped = config.CreateMapper().MapExpression<Expression<Func<SourceWithEnum, bool>>, Expression<Func<DestWithEnum, bool>>>(expr, ignoreValidations: true);
+
+            var items = new[]
+            {
+                new DestWithEnum {Enum = DestEnum.Foo},
+                new DestWithEnum {Enum = DestEnum.Bar},
+                new DestWithEnum {Enum = DestEnum.Bar}
             };
 
             var items2 = items.AsQueryable().Select(mapped).ToList();
