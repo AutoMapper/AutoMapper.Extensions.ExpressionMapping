@@ -145,32 +145,15 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitUnary(UnaryExpression node)
         {
-            switch (node.NodeType)
+            return DoVisitUnary(Visit(node.Operand));
+
+            Expression DoVisitUnary(Expression updated)
             {
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                    switch (node.Operand.NodeType)
-                    {
-                        case ExpressionType.Constant:
-                            return ProcessConstant((ConstantExpression)node.Operand);
-                        default:
-                            return base.VisitUnary(node);
-                    }
-                case ExpressionType.Lambda:
-                    var lambdaExpression = (LambdaExpression)node.Operand;
-                    var ex = this.Visit(lambdaExpression.Body);
+                if (updated != node.Operand)
+                    return node.Update(updated);
 
-                    var mapped = Expression.Quote(Expression.Lambda(ex, lambdaExpression.GetDestinationParameterExpressions(this.InfoDictionary, this.TypeMappings)));
-                    this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, mapped.Type);
-                    return mapped;
-                default:
-                    return base.VisitUnary(node);
+                return node;
             }
-
-            Expression ProcessConstant(ConstantExpression operand)
-                                => this.TypeMappings.TryGetValue(operand.Type, out Type newType)
-                                    ? Expression.Constant(Mapper.Map(operand.Value, node.Type, newType), newType)
-                                    : base.VisitUnary(node);
         }
 
         protected override Expression VisitConstant(ConstantExpression node)

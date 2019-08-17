@@ -16,31 +16,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
         }
 
-        protected override Expression VisitUnary(UnaryExpression node)
-        {
-            switch (node.NodeType)
-            {
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-
-                    var me = node.Operand as MemberExpression;
-                    var parameterExpression = node.GetParameterExpression();
-                    var sType = parameterExpression?.Type;
-                    if (me != null && (sType != null && me.Expression.NodeType == ExpressionType.MemberAccess && me.Type.IsLiteralType()))
-                    {
-                        //just pass me and let the FindMemberExpressionsVisitor handle removing of the value type
-                        //me.Expression will not match the PathMap name.
-                        return Visit(me);
-                    }
-                    else
-                    {
-                        return base.VisitUnary(node);
-                    }
-                default:
-                    return base.VisitUnary(node);
-            }
-        }
-
         protected override Expression VisitMember(MemberExpression node)
         {
             string sourcePath;
