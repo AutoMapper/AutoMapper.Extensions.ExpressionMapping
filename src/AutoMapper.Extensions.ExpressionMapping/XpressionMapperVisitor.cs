@@ -40,26 +40,20 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            string sourcePath;
-
             var parameterExpression = node.GetParameterExpression();
             if (parameterExpression == null)
                 return base.VisitMember(node);
 
             InfoDictionary.Add(parameterExpression, TypeMappings);
 
-            var sType = parameterExpression.Type;
-            if (InfoDictionary.ContainsKey(parameterExpression) && node.IsMemberExpression())
-            {
-                sourcePath = node.GetPropertyFullName();
-            }
-            else
-            {
-                return base.VisitMember(node);
-            }
+            string sourcePath = node.GetPropertyFullName();
+            Expression baseParentExpr = node.GetBaseOfMemberExpression();
+            Expression visitedParentExpr = this.Visit(baseParentExpr);
+            Type sType = baseParentExpr.Type;
+            Type dType = visitedParentExpr.Type;
 
             var propertyMapInfoList = new List<PropertyMapInfo>();
-            FindDestinationFullName(sType, InfoDictionary[parameterExpression].DestType, sourcePath, propertyMapInfoList);
+            FindDestinationFullName(sType, dType, sourcePath, propertyMapInfoList);
             string fullName;
 
             if (propertyMapInfoList.Any(x => x.CustomExpression != null))
@@ -80,7 +74,12 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 });
 
                 fullName = BuildFullName(beforeCustExpression);
-                var visitor = new PrependParentNameVisitor(last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, fullName, InfoDictionary[parameterExpression].NewParameter);
+                var visitor = new PrependParentNameVisitor
+                (
+                    last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, 
+                    fullName,
+                    visitedParentExpr
+                );
 
                 var ex = propertyMapInfoList[propertyMapInfoList.Count - 1] != last
                     ? visitor.Visit(last.CustomExpression.Body.MemberAccesses(afterCustExpression))
@@ -90,7 +89,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return ex;
             }
             fullName = BuildFullName(propertyMapInfoList);
-            var me = ExpressionHelpers.MemberAccesses(fullName, InfoDictionary[parameterExpression].NewParameter);
+            var me = ExpressionHelpers.MemberAccesses(fullName, visitedParentExpr);
 
             this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, me.Type);
             return me;

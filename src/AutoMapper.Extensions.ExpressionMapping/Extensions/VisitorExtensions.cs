@@ -53,17 +53,15 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             //the node represents parameter of the expression
             switch (expression.NodeType)
             {
-                case ExpressionType.Parameter:
-                    return string.Empty;
                 case ExpressionType.MemberAccess:
                     var memberExpression = (MemberExpression)expression;
                     var parentFullName = memberExpression.Expression.GetPropertyFullName();
                     return string.IsNullOrEmpty(parentFullName)
                         ? memberExpression.Member.Name
                         : string.Concat(memberExpression.Expression.GetPropertyFullName(), period, memberExpression.Member.Name);
+                default:
+                    return string.Empty;
             }
-
-            throw new InvalidOperationException(Resource.invalidExpErr);
         }
 
         private static MemberExpression GetMemberExpression(LambdaExpression expr)
@@ -133,6 +131,22 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Returns the first ancestor node that is not a MemberExpression.
+        /// </summary>
+        /// <param name="expression"></param>
+        /// <returns></returns>
+        public static Expression GetBaseOfMemberExpression(this MemberExpression expression)
+        {
+            switch (expression.Expression.NodeType)
+            {
+                case ExpressionType.MemberAccess:
+                    return GetBaseOfMemberExpression((MemberExpression)expression.Expression);
+                default:
+                    return expression.Expression;
+            }
         }
 
         /// <summary>

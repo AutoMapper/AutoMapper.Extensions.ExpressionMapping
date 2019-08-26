@@ -7,7 +7,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 {
     internal class PrependParentNameVisitor : ExpressionVisitor
     {
-        public PrependParentNameVisitor(Type currentParameterType, string parentFullName, ParameterExpression newParameter)
+        public PrependParentNameVisitor(Type currentParameterType, string parentFullName, Expression newParameter)
         {
             CurrentParameterType = currentParameterType;
             ParentFullName = parentFullName;
@@ -16,7 +16,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         public Type CurrentParameterType { get; }
         public string ParentFullName { get; }
-        public ParameterExpression NewParameter { get; } 
+        public Expression NewParameter { get; } 
 
         protected override Expression VisitMember(MemberExpression node)
         {
