@@ -10,9 +10,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
 {
     internal class FindMemberExpressionsVisitor : ExpressionVisitor
     {
-        internal FindMemberExpressionsVisitor(ParameterExpression newParameter) => _newParameter = newParameter;
+        internal FindMemberExpressionsVisitor(Expression newParentExpression) => _newParentExpression = newParentExpression;
 
-        private readonly ParameterExpression _newParameter;
+        private readonly Expression _newParentExpression;
         private readonly List<MemberExpression> _memberExpressions = new List<MemberExpression>();
 
         public MemberExpression Result
@@ -31,13 +31,13 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         result = next;
                     else throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
                         Resource.includeExpressionTooComplex,
-                        string.Concat(_newParameter.Type.Name, period, result),
-                        string.Concat(_newParameter.Type.Name, period, next)));
+                        string.Concat(_newParentExpression.Type.Name, period, result),
+                        string.Concat(_newParentExpression.Type.Name, period, next)));
 
                     return result;
                 });
 
-                return ExpressionHelpers.MemberAccesses(member, _newParameter);
+                return ExpressionHelpers.MemberAccesses(member, _newParentExpression);
             }
         }
 
@@ -45,7 +45,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             var parameterExpression = node.GetParameterExpression();
             var sType = parameterExpression?.Type;
-            if (sType != null && _newParameter.Type == sType && node.IsMemberExpression())
+            if (sType != null && _newParentExpression.Type == sType && node.IsMemberExpression())
             {
                 if (node.Expression.NodeType == ExpressionType.MemberAccess && node.Type.IsLiteralType())
                     _memberExpressions.Add((MemberExpression)node.Expression);

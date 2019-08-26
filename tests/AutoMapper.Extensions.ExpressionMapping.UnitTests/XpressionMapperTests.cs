@@ -692,6 +692,35 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Assert
             Assert.NotNull(dest);
         }
+
+        [Fact]
+        public void Can_map_expression_when_mapped_when_members_parent_is_a_method()
+        {
+            //Arrange
+            List<EmployeeEntity> empEntity = new List<EmployeeEntity>
+            {
+                new EmployeeEntity { Id = 1, Name = "Jean-Louis", Age = 39, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-1) } }.ToList() },
+                new EmployeeEntity { Id = 2, Name = "Jean-Paul", Age = 32, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-2) } }.ToList() },
+                new EmployeeEntity { Id = 3, Name = "Jean-Christophe", Age = 19, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-1) } }.ToList() },
+                new EmployeeEntity { Id = 4, Name = "Jean-Marie", Age = 27, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-3) } }.ToList() },
+                new EmployeeEntity { Id = 5, Name = "Jean-Marc", Age = 22, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-5) } }.ToList() },
+                new EmployeeEntity { Id = 5, Name = "Jean-Pierre", Age = 22, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-5) } }.ToList() },
+                new EmployeeEntity { Id = 6, Name = "Christophe", Age = 55, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-1) } }.ToList() },
+                new EmployeeEntity { Id = 7, Name = "Marc", Age = 23, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-2) } }.ToList() },
+                new EmployeeEntity { Id = 8, Name = "Paul", Age = 38, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-10) }, new EventEntity { EventType = "Stop", EventDate = DateTime.Today.AddYears(-1) } }.ToList() },
+                new EmployeeEntity { Id = 9, Name = "Jean", Age = 32, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-10) }, new EventEntity { EventType = "Stop", EventDate = DateTime.Today.AddYears(-2) } }.ToList() },
+            };
+            Expression<Func<EmployeeModel, bool>> filter = emp =>
+                emp.Events.Any(e => e.EventType.Equals("Stop")) &&
+                emp.Events.First(e => e.EventType.Equals("Stop")).EventDate < DateTime.Today.AddYears(-1);
+
+            //Act
+            Expression<Func<EmployeeEntity, bool>>  mappedFilter = mapper.MapExpression<Expression<Func<EmployeeEntity, bool>>>(filter);
+            List<EmployeeEntity> res = empEntity.AsQueryable().Where(mappedFilter).ToList();
+
+            //Assert
+            Assert.True(res.Count == 1);
+        }
         #endregion Tests
 
         private static void SetupAutoMapper()
@@ -1096,6 +1125,35 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     {
     }
 
+    internal class EmployeeEntity
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public List<EventEntity> Events { get; set; }
+    }
+
+    internal class EventEntity
+    {
+        public string EventType { get; set; }
+        public DateTime EventDate { get; set; }
+    }
+
+
+    internal class EmployeeModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public int Age { get; set; }
+        public List<EventModel> Events { get; set; }
+    }
+
+    internal class EventModel
+    {
+        public string EventType { get; set; }
+        public DateTime EventDate { get; set; }
+    }
+
     public class OrganizationProfile : Profile
     {
         public OrganizationProfile()
@@ -1198,6 +1256,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 .ForMember(d => d.Count, opt => opt.MapFrom(s => s.Count));
 
             CreateMap<Branch, BranchModel>();
+
+            CreateMap<EmployeeModel, EmployeeEntity>().ReverseMap();
+            CreateMap<EventModel, EventEntity>().ReverseMap();
+            //CreateMap<EventEntity, EmployeeModel>();
         }
     }
 
