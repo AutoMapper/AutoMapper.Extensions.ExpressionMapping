@@ -7,16 +7,16 @@ namespace AutoMapper.Extensions.ExpressionMapping
 {
     internal class PrependParentNameVisitor : ExpressionVisitor
     {
-        public PrependParentNameVisitor(Type currentParameterType, string parentFullName, Expression baseExpression)
+        public PrependParentNameVisitor(Type currentParameterType, string parentFullName, Expression newParameter)
         {
             CurrentParameterType = currentParameterType;
             ParentFullName = parentFullName;
-            this.baseExpression = baseExpression;
+            NewParameter = newParameter;
         }
 
         public Type CurrentParameterType { get; }
         public string ParentFullName { get; }
-        public Expression baseExpression { get; } 
+        public Expression NewParameter { get; }
 
         protected override Expression VisitMember(MemberExpression node)
         {
@@ -40,7 +40,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                             ? sourcePath
                             : string.Concat(ParentFullName, ".", sourcePath);
 
-            var me = ExpressionHelpers.MemberAccesses(fullName, baseExpression);
+            var me = ExpressionHelpers.MemberAccesses(fullName, NewParameter);
 
             return me;
         }

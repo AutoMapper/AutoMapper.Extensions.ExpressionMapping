@@ -36,8 +36,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             return MapExpression<TDestDelegate>
             (
-                mapper ?? Mapper.Instance,
-                mapper == null ? Mapper.Configuration : mapper.ConfigurationProvider,
+                mapper,
+                mapper.ConfigurationProvider,
                 expression,
                 expression.GetType().GetGenericArguments()[0],
                 typeof(TDestDelegate).GetGenericArguments()[0],
@@ -301,7 +301,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return;
 
             FindMaps(typeMap.PropertyMaps.ToList());
-
             void FindMaps(List<PropertyMap> maps)
             {
                 foreach (PropertyMap pm in maps)
@@ -314,7 +313,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         source.GetFieldOrProperty(pm.DestinationMember.Name).GetMemberType(),
                         pm.SourceMember.GetMemberType()
                     );
-
                     void AddChildMappings(Type sourcePropertyType, Type destPropertyType)
                     {
                         if (sourcePropertyType.IsLiteralType() || destPropertyType.IsLiteralType())
@@ -333,12 +331,12 @@ namespace AutoMapper.Extensions.ExpressionMapping
             if (typeMap == null)
                 return;
 
-            foreach(var includedBase in typeMap.IncludedBaseTypes)
+            foreach (var includedBase in typeMap.IncludedBaseTypes)
             {
                 typeMappings.AddTypeMapping(configurationProvider, includedBase.SourceType, includedBase.DestinationType);
             }
 
-            foreach(var includedDerived in typeMap.IncludedDerivedTypes)
+            foreach (var includedDerived in typeMap.IncludedDerivedTypes)
             {
                 typeMappings.AddTypeMapping(configurationProvider, includedDerived.SourceType, includedDerived.DestinationType);
             }

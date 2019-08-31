@@ -153,7 +153,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var config = new MapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
-                cfg.AddProfiles(typeof(ForPathCustomerProfile));
+                cfg.AddMaps(typeof(ForPathCustomerProfile));
             });
 
             mapper = config.CreateMapper();
@@ -231,6 +231,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     {
         public ForPathCustomerProfile()
         {
+            /*Need a more meaningfull error message for when the Include and IncludeBase configurations have not been set up
+             CreateMap<DerivedDataModel, DerivedModel>()
+                .ForPath(d => d.Nested.NestedTitle, opt => opt.MapFrom(src => src.Title))
+                .ForPath(d => d.Nested.NestedTitle2, opt => opt.MapFrom(src => src.Title2));*/
             CreateMap<DataModel, RootModel>()
                 .Include<DerivedDataModel, DerivedModel>()
                 .ReverseMap();

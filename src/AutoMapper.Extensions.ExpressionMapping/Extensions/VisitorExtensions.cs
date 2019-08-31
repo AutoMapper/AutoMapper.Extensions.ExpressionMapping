@@ -63,7 +63,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
                     return string.Empty;
             }
         }
-        
+
         /// <summary>
         /// Returns the ParameterExpression for the LINQ parameter.
         /// </summary>
@@ -73,8 +73,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
         {
             if (expression == null)
                 return null;
-            
-            switch(expression)
+
+            switch (expression)
             {
                 case ParameterExpression pe:
                     return pe;

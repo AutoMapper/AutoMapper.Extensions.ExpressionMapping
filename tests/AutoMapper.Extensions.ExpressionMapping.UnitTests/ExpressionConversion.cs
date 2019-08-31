@@ -28,6 +28,52 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             public int ChildValue { get; set; }
         }
 
+        public enum SourceEnum
+        {
+            Foo,
+            Bar
+        }
+
+        public enum DestEnum
+        {
+            Foo,
+            Bar
+        }
+
+        public class SourceWithEnum : Source
+        {
+            public SourceEnum Enum { get; set; }
+        }
+
+        public class DestWithEnum : Dest
+        {
+            public DestEnum Enum { get; set; }
+        }
+
+        [Fact]
+        public void Can_map_unary_expression_converting_enum_to_int()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddExpressionMapping();
+                cfg.CreateMap<SourceEnum, DestEnum>();
+                cfg.CreateMap<DestWithEnum, SourceWithEnum>();
+            });
+
+            Expression<Func<SourceWithEnum, bool>> expr = s => s.Enum == SourceEnum.Bar;
+
+            var mapped = config.CreateMapper().MapExpression<Expression<Func<SourceWithEnum, bool>>, Expression<Func<DestWithEnum, bool>>>(expr);
+
+            var items = new[]
+           {
+                new DestWithEnum {Enum = DestEnum.Foo},
+                new DestWithEnum {Enum = DestEnum.Bar},
+                new DestWithEnum {Enum = DestEnum.Bar}
+            };
+
+            var items2 = items.AsQueryable().Select(mapped).ToList();
+        }
+
         [Fact]
         public void Can_map_single_properties()
         {

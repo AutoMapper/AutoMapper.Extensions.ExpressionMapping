@@ -40,17 +40,18 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            // This check guards against mapping expressions that shouldn't be, e.g. string.empty
-            if (!node.HasParameterExpression())
+            var parameterExpression = node.GetParameterExpression();
+            if (parameterExpression == null)
                 return base.VisitMember(node);
 
-            var sourcePath = node.GetPropertyFullName();
-            var baseExpr = node.GetBaseOfMemberExpression();
-            var visitedBaseExpr = this.Visit(baseExpr);
+            InfoDictionary.Add(parameterExpression, TypeMappings);
 
-            var sType = baseExpr.Type;
-            var dType = visitedBaseExpr.Type;
-            
+            string sourcePath = node.GetPropertyFullName();
+            Expression baseParentExpr = node.GetBaseOfMemberExpression();
+            Expression visitedParentExpr = this.Visit(baseParentExpr);
+            Type sType = baseParentExpr.Type;
+            Type dType = visitedParentExpr.Type;
+
             var propertyMapInfoList = new List<PropertyMapInfo>();
             FindDestinationFullName(sType, dType, sourcePath, propertyMapInfoList);
             string fullName;
@@ -73,10 +74,12 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 });
 
                 fullName = BuildFullName(beforeCustExpression);
-                var visitor = new PrependParentNameVisitor(
-                    last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, 
-                    fullName, 
-                    visitedBaseExpr);
+                var visitor = new PrependParentNameVisitor
+                (
+                    last.CustomExpression.Parameters[0].Type/*Parent type of current property*/,
+                    fullName,
+                    visitedParentExpr
+                );
 
                 var ex = propertyMapInfoList[propertyMapInfoList.Count - 1] != last
                     ? visitor.Visit(last.CustomExpression.Body.MemberAccesses(afterCustExpression))
@@ -85,9 +88,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, ex.Type);
                 return ex;
             }
-
             fullName = BuildFullName(propertyMapInfoList);
-            var me = ExpressionHelpers.MemberAccesses(fullName, visitedBaseExpr);
+            var me = ExpressionHelpers.MemberAccesses(fullName, visitedParentExpr);
 
             this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, me.Type);
             return me;
@@ -142,40 +144,24 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitUnary(UnaryExpression node)
         {
-            switch (node.NodeType)
+            return DoVisitUnary(Visit(node.Operand));
+
+            Expression DoVisitUnary(Expression updated)
             {
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                    switch (node.Operand.NodeType)
-                    {
-                        case ExpressionType.Constant:
-                            return ProcessConstant((ConstantExpression)node.Operand);
-                        default:
-                            return ProcessConvert(node);
-                    }
-                case ExpressionType.TypeIs:
-                case ExpressionType.TypeAs:
-                    return ProcessConvert(node);
-                case ExpressionType.Lambda:
-                    var lambdaExpression = (LambdaExpression)node.Operand;
-                    var ex = this.Visit(lambdaExpression.Body);
+                if (this.TypeMappings.TryGetValue(node.Type, out Type mappedType))
+                    return Expression.MakeUnary
+                    (
+                        node.NodeType,
+                        updated != node.Operand
+                            ? updated
+                            : node.Operand,
+                        mappedType
+                    );
 
-                    var mapped = Expression.Quote(Expression.Lambda(ex, lambdaExpression.GetDestinationParameterExpressions(this.InfoDictionary, this.TypeMappings)));
-                    this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, mapped.Type);
-                    return mapped;
-                default:
-                    return base.VisitUnary(node);
+                return updated != node.Operand
+                        ? node.Update(updated)
+                        : base.VisitUnary(node);
             }
-
-            Expression ProcessConstant(ConstantExpression operand)
-                                => this.TypeMappings.TryGetValue(operand.Type, out Type newType)
-                                    ? Expression.Constant(Mapper.Map(operand.Value, node.Type, newType), newType)
-                                    : base.VisitUnary(node);
-
-            Expression ProcessConvert(UnaryExpression convertExpression)
-                                => this.TypeMappings.TryGetValue(convertExpression.Type, out Type mappedType)
-                                    ? Expression.MakeUnary(convertExpression.NodeType, base.Visit(convertExpression.Operand), mappedType)
-                                    : base.VisitUnary(convertExpression);
         }
 
         protected override Expression VisitTypeBinary(TypeBinaryExpression node)

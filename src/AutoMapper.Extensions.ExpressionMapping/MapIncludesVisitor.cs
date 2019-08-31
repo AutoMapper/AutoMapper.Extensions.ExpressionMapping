@@ -16,52 +16,21 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
         }
 
-        protected override Expression VisitUnary(UnaryExpression node)
-        {
-            switch (node.NodeType)
-            {
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-
-                    var me = node.Operand as MemberExpression;
-                    var parameterExpression = node.GetParameterExpression();
-                    var sType = parameterExpression?.Type;
-                    if (me != null && (sType != null && me.Expression.NodeType == ExpressionType.MemberAccess && me.Type.IsLiteralType()))
-                    {
-                        //just pass me and let the FindMemberExpressionsVisitor handle removing of the value type
-                        //me.Expression will not match the PathMap name.
-                        return Visit(me);
-                    }
-                    else
-                    {
-                        return base.VisitUnary(node);
-                    }
-                default:
-                    return base.VisitUnary(node);
-            }
-        }
-
         protected override Expression VisitMember(MemberExpression node)
         {
-            string sourcePath;
-
             var parameterExpression = node.GetParameterExpression();
             if (parameterExpression == null)
                 return base.VisitMember(node);
 
             InfoDictionary.Add(parameterExpression, TypeMappings);
-            var sType = parameterExpression.Type;
-            if (sType != null && InfoDictionary.ContainsKey(parameterExpression) && node.IsMemberExpression())
-            {
-                sourcePath = node.GetPropertyFullName();
-            }
-            else
-            {
-                return base.VisitMember(node);
-            }
+            string sourcePath = node.GetPropertyFullName();
+            Expression baseParentExpr = node.GetBaseOfMemberExpression();
+            Expression visitedParentExpr = this.Visit(baseParentExpr);
+            Type sType = baseParentExpr.Type;
+            Type dType = visitedParentExpr.Type;
 
             var propertyMapInfoList = new List<PropertyMapInfo>();
-            FindDestinationFullName(sType, InfoDictionary[parameterExpression].DestType, sourcePath, propertyMapInfoList);
+            FindDestinationFullName(sType, dType, sourcePath, propertyMapInfoList);
             string fullName;
 
             if (propertyMapInfoList.Any(x => x.CustomExpression != null))//CustomExpression takes precedence over DestinationPropertyInfo
@@ -84,22 +53,25 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
                 fullName = BuildFullName(beforeCustExpression);
 
-                var visitor = new PrependParentNameVisitor(last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, fullName, InfoDictionary[parameterExpression].NewParameter);
+                var visitor = new PrependParentNameVisitor
+                (
+                    last.CustomExpression.Parameters[0].Type/*Parent type of current property*/,
+                    fullName,
+                    visitedParentExpr
+                );
 
                 var ex = propertyMapInfoList[propertyMapInfoList.Count - 1] != last
                     ? visitor.Visit(last.CustomExpression.Body.MemberAccesses(afterCustExpression))
                     : visitor.Visit(last.CustomExpression.Body);
 
-                var v = new FindMemberExpressionsVisitor(InfoDictionary[parameterExpression].NewParameter);
+                var v = new FindMemberExpressionsVisitor(visitedParentExpr);
                 v.Visit(ex);
 
                 return v.Result;
             }
             fullName = BuildFullName(propertyMapInfoList);
             var me = ExpressionHelpers.MemberAccesses(fullName, InfoDictionary[parameterExpression].NewParameter);
-            if (me.Expression.NodeType == ExpressionType.MemberAccess && (me.Type == typeof(string) || me.Type.GetTypeInfo().IsValueType || (me.Type.GetTypeInfo().IsGenericType
-                                                                                                                                             && me.Type.GetGenericTypeDefinition() == typeof(Nullable<>)
-                                                                                                                                             && Nullable.GetUnderlyingType(me.Type).GetTypeInfo().IsValueType)))
+            if (me.Expression.NodeType == ExpressionType.MemberAccess && me.Type.IsLiteralType())
             {
                 return me.Expression;
             }
