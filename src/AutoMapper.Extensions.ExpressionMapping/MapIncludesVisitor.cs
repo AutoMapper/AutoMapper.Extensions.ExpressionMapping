@@ -23,60 +23,45 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return base.VisitMember(node);
 
             InfoDictionary.Add(parameterExpression, TypeMappings);
-            string sourcePath = node.GetPropertyFullName();
-            Expression baseParentExpr = node.GetBaseOfMemberExpression();
-            Expression visitedParentExpr = this.Visit(baseParentExpr);
-            Type sType = baseParentExpr.Type;
-            Type dType = visitedParentExpr.Type;
+            return GetMappedMemberExpression(node.GetBaseOfMemberExpression(), new List<PropertyMapInfo>());
 
-            var propertyMapInfoList = new List<PropertyMapInfo>();
-            FindDestinationFullName(sType, dType, sourcePath, propertyMapInfoList);
-            string fullName;
-
-            if (propertyMapInfoList.Any(x => x.CustomExpression != null))//CustomExpression takes precedence over DestinationPropertyInfo
+            Expression GetMappedMemberExpression(Expression parentExpression, List<PropertyMapInfo> propertyMapInfoList)
             {
-                var last = propertyMapInfoList.Last(x => x.CustomExpression != null);
-                var beforeCustExpression = propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
+                Expression mappedParentExpression = this.Visit(parentExpression);
+                FindDestinationFullName(parentExpression.Type, mappedParentExpression.Type, node.GetPropertyFullName(), propertyMapInfoList);
+
+                if (propertyMapInfoList.Any(x => x.CustomExpression != null))//CustomExpression takes precedence over DestinationPropertyInfo
                 {
-                    if (propertyMapInfoList.IndexOf(next) < propertyMapInfoList.IndexOf(last))
-                        list.Add(next);
-                    return list;
-                });
+                    return GetMemberExpression
+                    (
+                        new FindMemberExpressionsVisitor(mappedParentExpression),
+                        GetMemberExpressionFromCustomExpression
+                        (
+                            propertyMapInfoList,
+                            propertyMapInfoList.Last(x => x.CustomExpression != null),
+                            mappedParentExpression
+                        )
+                    );
+                }
 
-                var afterCustExpression = propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
-                {
-                    if (propertyMapInfoList.IndexOf(next) > propertyMapInfoList.IndexOf(last))
-                        list.Add(next);
-                    return list;
-                });
-
-
-                fullName = BuildFullName(beforeCustExpression);
-
-                var visitor = new PrependParentNameVisitor
+                return GetExpressionForInclude
                 (
-                    last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, 
-                    fullName,
-                    visitedParentExpr
+                    GetMemberExpressionFromMemberMaps
+                    (
+                        BuildFullName(propertyMapInfoList),
+                        mappedParentExpression
+                    )
                 );
-
-                var ex = propertyMapInfoList[propertyMapInfoList.Count - 1] != last
-                    ? visitor.Visit(last.CustomExpression.Body.MemberAccesses(afterCustExpression))
-                    : visitor.Visit(last.CustomExpression.Body);
-
-                var v = new FindMemberExpressionsVisitor(visitedParentExpr);
-                v.Visit(ex);
-
-                return v.Result;
             }
-            fullName = BuildFullName(propertyMapInfoList);
-            var me = ExpressionHelpers.MemberAccesses(fullName, InfoDictionary[parameterExpression].NewParameter);
-            if (me.Expression.NodeType == ExpressionType.MemberAccess && me.Type.IsLiteralType())
+
+            Expression GetExpressionForInclude(MemberExpression memberExpression) 
+                => memberExpression.Type.IsLiteralType() ? memberExpression.Expression : memberExpression;
+
+            MemberExpression GetMemberExpression(FindMemberExpressionsVisitor visitor, Expression mappedExpression)
             {
-                return me.Expression;
+                visitor.Visit(mappedExpression);
+                return visitor.Result;
             }
-
-            return me;
         }
     }
 }

@@ -45,55 +45,80 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return base.VisitMember(node);
 
             InfoDictionary.Add(parameterExpression, TypeMappings);
+            return GetMappedMemberExpression(node.GetBaseOfMemberExpression(), new List<PropertyMapInfo>());
 
-            string sourcePath = node.GetPropertyFullName();
-            Expression baseParentExpr = node.GetBaseOfMemberExpression();
-            Expression visitedParentExpr = this.Visit(baseParentExpr);
-            Type sType = baseParentExpr.Type;
-            Type dType = visitedParentExpr.Type;
-
-            var propertyMapInfoList = new List<PropertyMapInfo>();
-            FindDestinationFullName(sType, dType, sourcePath, propertyMapInfoList);
-            string fullName;
-
-            if (propertyMapInfoList.Any(x => x.CustomExpression != null))
+            Expression GetMappedMemberExpression(Expression parentExpression, List<PropertyMapInfo> propertyMapInfoList)
             {
-                var last = propertyMapInfoList.Last(x => x.CustomExpression != null);
-                var beforeCustExpression = propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
+                Expression mappedParentExpression = this.Visit(parentExpression);
+                FindDestinationFullName(parentExpression.Type, mappedParentExpression.Type, node.GetPropertyFullName(), propertyMapInfoList);
+
+                if (propertyMapInfoList.Any(x => x.CustomExpression != null))
                 {
-                    if (propertyMapInfoList.IndexOf(next) < propertyMapInfoList.IndexOf(last))
-                        list.Add(next);
-                    return list;
-                });
+                    var fromCustomExpression = GetMemberExpressionFromCustomExpression
+                    (
+                        propertyMapInfoList,
+                        propertyMapInfoList.Last(x => x.CustomExpression != null),
+                        mappedParentExpression
+                    );
 
-                var afterCustExpression = propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
-                {
-                    if (propertyMapInfoList.IndexOf(next) > propertyMapInfoList.IndexOf(last))
-                        list.Add(next);
-                    return list;
-                });
+                    this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, fromCustomExpression.Type);
+                    return fromCustomExpression;
+                }
 
-                fullName = BuildFullName(beforeCustExpression);
-                var visitor = new PrependParentNameVisitor
-                (
-                    last.CustomExpression.Parameters[0].Type/*Parent type of current property*/, 
-                    fullName,
-                    visitedParentExpr
-                );
+                var memberExpression = GetMemberExpressionFromMemberMaps(BuildFullName(propertyMapInfoList), mappedParentExpression);
+                this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, memberExpression.Type);
 
-                var ex = propertyMapInfoList[propertyMapInfoList.Count - 1] != last
-                    ? visitor.Visit(last.CustomExpression.Body.MemberAccesses(afterCustExpression))
-                    : visitor.Visit(last.CustomExpression.Body);
-
-                this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, ex.Type);
-                return ex;
+                return memberExpression;
             }
-            fullName = BuildFullName(propertyMapInfoList);
-            var me = ExpressionHelpers.MemberAccesses(fullName, visitedParentExpr);
-
-            this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, me.Type);
-            return me;
         }
+
+        protected MemberExpression GetMemberExpressionFromMemberMaps(string fullName, Expression visitedParentExpr) 
+            => ExpressionHelpers.MemberAccesses(fullName, visitedParentExpr);
+
+        private Expression GetMemberExpressionFromCustomExpression(PropertyMapInfo lastWithCustExpression,
+                PropertyMapInfo lastInList,
+                List<PropertyMapInfo> beforeCustExpression,
+                List<PropertyMapInfo> afterCustExpression,
+                Expression visitedParentExpr)
+        {
+            return PrependParentMemberExpression
+            (
+                new PrependParentNameVisitor
+                (
+                    lastWithCustExpression.CustomExpression.Parameters[0].Type/*Parent type of current property*/,
+                    BuildFullName(beforeCustExpression),
+                    visitedParentExpr
+                )
+            );
+
+            Expression PrependParentMemberExpression(PrependParentNameVisitor visitor)
+                => visitor.Visit
+                (
+                    lastInList != lastWithCustExpression
+                        ? lastWithCustExpression.CustomExpression.Body.MemberAccesses(afterCustExpression)
+                        : lastWithCustExpression.CustomExpression.Body
+                );
+        }
+
+        protected Expression GetMemberExpressionFromCustomExpression(List<PropertyMapInfo> propertyMapInfoList, PropertyMapInfo lastWithCustExpression, Expression mappedParentExpr) 
+            => GetMemberExpressionFromCustomExpression
+            (
+                lastWithCustExpression,
+                propertyMapInfoList.Last(),
+                propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
+                {
+                    if (propertyMapInfoList.IndexOf(next) < propertyMapInfoList.IndexOf(lastWithCustExpression))
+                        list.Add(next);
+                    return list;
+                }),
+                propertyMapInfoList.Aggregate(new List<PropertyMapInfo>(), (list, next) =>
+                {
+                    if (propertyMapInfoList.IndexOf(next) > propertyMapInfoList.IndexOf(lastWithCustExpression))
+                        list.Add(next);
+                    return list;
+                }),
+                mappedParentExpr
+            );
 
         protected override Expression VisitLambda<T>(Expression<T> node)
         {
@@ -148,10 +173,19 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             Expression DoVisitUnary(Expression updated)
             {
-                if (updated != node.Operand)
-                    return node.Update(updated);
+                if (this.TypeMappings.TryGetValue(node.Type, out Type mappedType))
+                    return Expression.MakeUnary
+                    (
+                        node.NodeType, 
+                        updated != node.Operand
+                            ? updated
+                            : node.Operand, 
+                        mappedType
+                    );
 
-                return node;
+                return updated != node.Operand
+                        ? node.Update(updated)
+                        : base.VisitUnary(node);
             }
         }
 

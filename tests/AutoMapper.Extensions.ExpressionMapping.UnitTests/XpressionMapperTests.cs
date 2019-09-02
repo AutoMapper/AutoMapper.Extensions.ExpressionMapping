@@ -715,7 +715,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 emp.Events.First(e => e.EventType.Equals("Stop")).EventDate < DateTime.Today.AddYears(-1);
 
             //Act
-            Expression<Func<EmployeeEntity, bool>>  mappedFilter = mapper.MapExpression<Expression<Func<EmployeeEntity, bool>>>(filter);
+            Expression<Func<EmployeeEntity, bool>> mappedFilter = mapper.MapExpression<Expression<Func<EmployeeEntity, bool>>>(filter);
             List<EmployeeEntity> res = empEntity.AsQueryable().Where(mappedFilter).ToList();
 
             //Assert
