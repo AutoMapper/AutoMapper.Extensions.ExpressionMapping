@@ -115,6 +115,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
                 case ExpressionType.Convert:
                     var ue = expression as UnaryExpression;
                     return GetParameterExpression(ue?.Operand);
+                case ExpressionType.TypeAs:
+                    return ((UnaryExpression)expression).Operand.GetParameterExpression();
                 case ExpressionType.MemberAccess:
                     return GetParameterExpression(((MemberExpression)expression).Expression);
                 case ExpressionType.Call:
@@ -138,16 +140,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public static Expression GetBaseOfMemberExpression(this MemberExpression expression)
-        {
-            switch (expression.Expression.NodeType)
-            {
-                case ExpressionType.MemberAccess:
-                    return GetBaseOfMemberExpression((MemberExpression)expression.Expression);
-                default:
-                    return expression.Expression;
-            }
-        }
+        public static Expression GetBaseOfMemberExpression(this MemberExpression expression) 
+            => expression.Expression.NodeType == ExpressionType.MemberAccess
+                ? GetBaseOfMemberExpression((MemberExpression)expression.Expression)
+                : expression.Expression;
 
         /// <summary>
         /// Adds member expressions to an existing expression.

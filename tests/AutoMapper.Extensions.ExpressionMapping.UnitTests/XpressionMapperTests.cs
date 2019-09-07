@@ -119,7 +119,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Assert
             Assert.True(users.Count == 1);
         }
-        
+
         [Fact]
         public void Map_works_with_members_from_interfaces()
         {
@@ -483,6 +483,25 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Map_orderBy_thenBy_To_Dictionary_Select_expression_without_generic_types()
+        {
+            //Arrange
+            Expression<Func<IQueryable<UserModel>, IEnumerable<object>>> grouped = q => q.OrderBy(s => s.Id).ThenBy(s => s.FullName).ToDictionary(kvp => kvp.Id).Select(grp => new { Id = grp.Key, Name = grp.Value.FullName });
+
+            //Act
+            Expression<Func<IQueryable<User>, IEnumerable<object>>> expMapped = (Expression<Func<IQueryable<User>, IEnumerable<object>>>)mapper.MapExpression
+            (
+                grouped, 
+                typeof(Expression<Func<IQueryable<UserModel>, IEnumerable<object>>>), 
+                typeof(Expression<Func<IQueryable<User>, IEnumerable<object>>>)
+            );
+
+            List<dynamic> users = expMapped.Compile().Invoke(Users).ToList();
+
+            Assert.True(users[0].Id == 11);
+        }
+
+        [Fact]
         public void Map_dynamic_return_type()
         {
             //Arrange
@@ -532,6 +551,23 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Assert
             Assert.NotNull(expMapped);
+        }
+
+        [Fact]
+        public void Can_map_expression_where_parent_of_member_expression_is_typeAsExpression()
+        {
+            //Arrange
+            Parent[] parents = new Parent[]
+            {
+                new Parent {  DateTimeObject = new DateTime?(new DateTime(2019, 9, 7))}
+            };
+            Expression<Func<ParentDTO, bool>> exp = p => (p.DateTimeObject as DateTime?).Value.Year.ToString() == "2019";
+
+            //Act
+            Expression<Func<Parent, bool>> expMapped = mapper.Map<Expression<Func<Parent, bool>>>(exp);
+
+            //Assert
+            Assert.Equal(1, parents.AsQueryable<Parent>().Count(expMapped));
         }
 
         [Fact]
@@ -1011,6 +1047,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public ICollection<ChildDTO> Children { get; set; }
         public ChildDTO Child { get; set; }
         public DateTime DateTime { get; set; }
+        public object DateTimeObject { get; set; }
     }
 
     public class ChildDTO
@@ -1042,6 +1079,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             }
         }
         public DateTime DateTime { get; set; }
+        public object DateTimeObject { get; set; }
     }
 
     public class Child
@@ -1259,7 +1297,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             CreateMap<EmployeeModel, EmployeeEntity>().ReverseMap();
             CreateMap<EventModel, EventEntity>().ReverseMap();
-            //CreateMap<EventEntity, EmployeeModel>();
         }
     }
 

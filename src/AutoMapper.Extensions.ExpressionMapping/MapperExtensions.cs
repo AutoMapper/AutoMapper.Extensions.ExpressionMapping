@@ -12,6 +12,35 @@ namespace AutoMapper.Extensions.ExpressionMapping
     public static class MapperExtensions
     {
         /// <summary>
+        /// Maps an expression from typeof(Expression&lt;TSource&gt;) to typeof(Expression&lt;TTarget&gt;)
+        /// </summary>
+        /// <param name="mapper"></param>
+        /// <param name="expression"></param>
+        /// <param name="sourceExpressionType"></param>
+        /// <param name="destExpressionType"></param>
+        /// <returns></returns>
+        public static LambdaExpression MapExpression(this IMapper mapper, LambdaExpression expression, Type sourceExpressionType, Type destExpressionType)
+        {
+            if (expression == null)
+                return default;
+
+            return (LambdaExpression)"_MapExpression".GetMapExpressionMethod().MakeGenericMethod
+            (
+                sourceExpressionType,
+                destExpressionType
+            ).Invoke(null, new object[] { mapper, expression });
+        }
+
+        private static TDestDelegate _MapExpression<TSourceDelegate, TDestDelegate>(this IMapper mapper, TSourceDelegate expression)
+            where TSourceDelegate : LambdaExpression
+            where TDestDelegate : LambdaExpression
+            => mapper.MapExpression<TSourceDelegate, TDestDelegate>(expression);
+
+
+        private static MethodInfo GetMapExpressionMethod(this string methodName)
+            => typeof(MapperExtensions).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
+
+        /// <summary>
         /// Maps an expression given a dictionary of types where the source type is the key and the destination type is the value.
         /// </summary>
         /// <typeparam name="TDestDelegate"></typeparam>
@@ -36,7 +65,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             return MapExpression<TDestDelegate>
             (
-                mapper,
                 mapper.ConfigurationProvider,
                 expression,
                 expression.GetType().GetGenericArguments()[0],
@@ -45,8 +73,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             );
         }
 
-        private static TDestDelegate MapExpression<TDestDelegate>(IMapper mapper,
-            IConfigurationProvider configurationProvider,
+        private static TDestDelegate MapExpression<TDestDelegate>(IConfigurationProvider configurationProvider,
             LambdaExpression expression,
             Type typeSourceFunc,
             Type typeDestFunc,
