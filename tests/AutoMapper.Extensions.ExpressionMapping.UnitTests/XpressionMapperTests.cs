@@ -757,6 +757,19 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Assert
             Assert.True(res.Count == 1);
         }
+
+        [Fact]
+        public void Can_map_expression_with_condittional_logic_while_deflattening()
+        {
+            /*
+             CreateMap<TestEntity, TestDTO>()
+                .ForMember(dst => dst.NestedClass, opt => opt.MapFrom(src => src.ConditionField == 1 ? src : default));*/
+            Expression<Func<TestDTO, bool>> expr = x => x.NestedClass.NestedField == 1;
+
+            var mappedExpression = mapper.MapExpression<Expression<Func<TestEntity, bool>>>(expr);
+
+            Assert.NotNull(mappedExpression);
+        }
         #endregion Tests
 
         private static void SetupAutoMapper()
@@ -1192,6 +1205,23 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public DateTime EventDate { get; set; }
     }
 
+    public class TestEntity
+    {
+        public Guid Id { get; set; }
+        public int ConditionField { get; set; }
+        public int ToBeNestedField { get; set; }
+    }
+
+    public class TestDTO
+    {
+        public Guid Id { get; set; }
+        public TestDTONestedClass NestedClass { get; set; }
+    }
+    public class TestDTONestedClass
+    {
+        public int? NestedField { get; set; }
+    }
+
     public class OrganizationProfile : Profile
     {
         public OrganizationProfile()
@@ -1297,6 +1327,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             CreateMap<EmployeeModel, EmployeeEntity>().ReverseMap();
             CreateMap<EventModel, EventEntity>().ReverseMap();
+
+            CreateMap<TestEntity, TestDTO>()
+                .ForMember(dst => dst.Id, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dst => dst.NestedClass, opt => opt.MapFrom(src => src.ConditionField == 1 ? src : default));
+
+            CreateMap<TestEntity, TestDTONestedClass>()
+                .ForMember(dst => dst.NestedField, opt => opt.MapFrom(src => (int?)src.ToBeNestedField));
         }
     }
 

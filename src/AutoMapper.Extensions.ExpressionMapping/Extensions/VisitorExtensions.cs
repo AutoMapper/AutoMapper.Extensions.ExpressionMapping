@@ -48,6 +48,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
         /// <returns></returns>
         public static string GetPropertyFullName(this Expression expression)
         {
+            if (expression == null)
+                return string.Empty;
+
             const string period = ".";
 
             //the node represents parameter of the expression
