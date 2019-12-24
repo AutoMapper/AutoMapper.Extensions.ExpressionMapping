@@ -16,6 +16,15 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
         }
 
+        protected override Expression VisitLambda<T>(Expression<T> node)
+        {
+            var ex = this.Visit(node.Body);
+
+            var mapped = Expression.Lambda(ex, node.GetDestinationParameterExpressions(this.InfoDictionary, this.TypeMappings));
+            this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, mapped.Type);
+            return mapped;
+        }
+
         protected override Expression VisitMember(MemberExpression node)
         {
             var parameterExpression = node.GetParameterExpression();
