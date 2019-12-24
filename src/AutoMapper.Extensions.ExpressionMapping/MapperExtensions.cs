@@ -278,6 +278,33 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return typeMappings;
         }
 
+        /// <summary>
+        /// Replaces a type in the source expression with the corresponding destination type.
+        /// </summary>
+        /// <param name="typeMappings"></param>
+        /// <param name="sourceType"></param>
+        /// <returns></returns>
+        public static Type ReplaceType(this Dictionary<Type, Type> typeMappings, Type sourceType)
+        {
+            if (!sourceType.IsGenericType)
+            {
+                return typeMappings.TryGetValue(sourceType, out Type destType) ? destType : sourceType;
+            }
+            else
+            {
+                if (typeMappings.TryGetValue(sourceType, out Type destType))
+                    return destType;
+                else
+                    return sourceType.GetGenericTypeDefinition().MakeGenericType
+                    (
+                        sourceType
+                        .GetGenericArguments()
+                        .Select(type => typeMappings.ReplaceType(type))
+                        .ToArray()
+                    );
+            }
+        }
+
         private static Dictionary<Type, Type> AddTypeMappingsFromDelegates(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type sourceType, Type destType)
         {
             if (typeMappings == null)
