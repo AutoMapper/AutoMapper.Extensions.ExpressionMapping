@@ -85,11 +85,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Expression<Func<UserModel, IEnumerable<string>>> selection = s => s.AccountModel.ThingModels.Select<ThingModel, string>(x => x.Color);
 
             //Act
-            Expression<Func<User, IEnumerable<Car>>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<User, IEnumerable<Car>>>>(selection);
-            List<Car> cars = Users.SelectMany(selectionMapped).ToList();
+            Expression<Func<User, object>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<User, object>>>(selection);
+            List<object> listOfCarLists = Users.Select(selectionMapped).ToList();
 
             //Assert
-            Assert.True(cars.Count == 4);
+            Assert.True(listOfCarLists.Count == 2);
         }
 
         [Fact]
