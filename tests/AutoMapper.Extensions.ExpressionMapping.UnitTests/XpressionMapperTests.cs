@@ -79,6 +79,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Map_collection_includes_with_flattened_string()
+        {
+            //Arrange
+            Expression<Func<UserModel, IEnumerable<string>>> selection = s => s.AccountModel.ThingModels.Select<ThingModel, string>(x => x.Color);
+
+            //Act
+            Expression<Func<User, IEnumerable<Car>>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<User, IEnumerable<Car>>>>(selection);
+            List<Car> cars = Users.SelectMany(selectionMapped).ToList();
+
+            //Assert
+            Assert.True(cars.Count == 4);
+        }
+
+        [Fact]
         public void Map_includes_trim_string_nested_in_select_using_object()
         {
             //Arrange
