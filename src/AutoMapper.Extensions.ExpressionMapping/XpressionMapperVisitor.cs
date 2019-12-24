@@ -124,7 +124,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             var ex = this.Visit(node.Body);
 
-            var mapped = Expression.Lambda(ex, node.GetDestinationParameterExpressions(this.InfoDictionary, this.TypeMappings));
+            var mapped = Expression.Lambda(this.TypeMappings.ReplaceType(node.Type), ex, node.GetDestinationParameterExpressions(this.InfoDictionary, this.TypeMappings));
             this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, mapped.Type);
             return mapped;
         }
@@ -214,7 +214,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             //type args are the generic type args e.g. T1 and T2 MethodName<T1, T2>(method arguments);
             var typeArgsForNewMethod = node.Method.IsGenericMethod
-                ? node.Method.GetGenericArguments().Select(i => TypeMappings.ContainsKey(i) ? TypeMappings[i] : i).ToList()//not converting the type it is not in the typeMappings dictionary
+                ? node.Method.GetGenericArguments().Select(type => this.TypeMappings.ReplaceType(type)).ToList()//not converting the type it is not in the typeMappings dictionary
                 : null;
 
             ConvertTypesIfNecessary(node.Method.GetParameters(), listOfArgumentsForNewMethod, node.Method);

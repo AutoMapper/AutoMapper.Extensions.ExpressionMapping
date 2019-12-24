@@ -470,6 +470,19 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Map_orderBy_thenBy_GroupBy_SelectMany_expression()
+        {
+            //Arrange
+            Expression<Func<IQueryable<UserModel>, IQueryable<UserModel>>> grouped = q => q.OrderBy(s => s.Id).ThenBy(s => s.FullName).GroupBy(s => s.AgeInYears).SelectMany(grp => grp);
+
+            //Act
+            Expression<Func<IQueryable<User>, IQueryable<User>>> expMapped = mapper.MapExpression<Expression<Func<IQueryable<User>, IQueryable<User>>>>(grouped);
+            List<User> users = expMapped.Compile().Invoke(Users).ToList();
+
+            Assert.True(users.Count == 2);
+        }
+
+        [Fact]
         public void Map_orderBy_thenBy_To_Dictionary_Select_expression()
         {
             //Arrange
