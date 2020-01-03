@@ -146,11 +146,15 @@ namespace AutoMapper.Extensions.ExpressionMapping
                             newLeft,
                             newRight,
                             node.IsLiftedToNull,
-                            Expression.MakeBinary(node.NodeType, newLeft, newRight).Method
+                            TypesChanged()
+                                ? Expression.MakeBinary(node.NodeType, newLeft, newRight).Method
+                                : node.Method
                         );
                 }
 
                 return node;
+
+                bool TypesChanged() => newLeft.Type != node.Left.Type || newRight.Type != node.Right.Type;
             }
         }
 

@@ -177,6 +177,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Uses_the_correct_Add_expression_when_mapping_string_plus_operator()
+        {
+            //Arrange
+            Expression<Func<UserModel, bool>> selection = s => s.FullName + "FFF" == "";
+
+            //Act
+            Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Expression<Func<User, bool>>>(selection);
+            List<User> users = Users.Where(selectionMapped).ToList();
+
+            //Assert
+            Assert.True(users.Count == 0);
+        }
+
+        [Fact]
         public void Map__object_including_child_and_grandchild()
         {
             //Arrange
