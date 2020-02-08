@@ -416,6 +416,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Map__select_method_projecting_to_model_type()
+        {
+            //Arrange
+            Expression<Func<UserModel, IEnumerable<ThingModel>>> selection = s => s.AccountModel.ThingModels.Select(x => new ThingModel { Car = x.Car }).Where(b => b.Color.EndsWith("e"));
+
+            //Act
+            Expression<Func<User, IEnumerable<Thing>>> selectionMapped = mapper.MapExpression<Expression<Func<User, IEnumerable<Thing>>>>(selection);
+            List<Thing> bars = Users.SelectMany(selectionMapped).ToList();
+
+            //Assert
+            Assert.True(bars.Count == 2);
+        }
+
+        [Fact]
         public void Map__select_method_where_parent_type_is_grandchild_type()
         {
             //Arrange
