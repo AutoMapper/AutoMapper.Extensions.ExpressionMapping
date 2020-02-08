@@ -129,6 +129,40 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return mapped;
         }
 
+        protected override Expression VisitMemberInit(MemberInitExpression node)
+        {
+            if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
+            {
+                var typeMap = ConfigurationProvider.CheckIfMapExists(sourceType: newType, destinationType: node.Type);
+                //The destination becomes the source because to map a source expression to a destination expression,
+                //we need the expressions used to create the source from the destination
+
+                IEnumerable<MemberBinding> bindings = node.Bindings.Select
+                (
+                    binding =>
+                    {
+                        Expression bindingExpression = ((MemberAssignment)binding).Expression;
+                        return DoBind
+                        (
+                            typeMap.GetPropertyMapByDestinationProperty(binding.Member.Name),
+                            bindingExpression,
+                            this.Visit(bindingExpression)
+                        );
+                    }
+                );
+
+                return Expression.MemberInit(Expression.New(newType), bindings);
+            }
+
+            return base.VisitMemberInit(node);
+        }
+
+        private MemberBinding DoBind(PropertyMap propertyMap, Expression initial, Expression mapped)
+        {
+            this.TypeMappings.AddTypeMapping(ConfigurationProvider, initial.Type, mapped.Type);
+            return Expression.Bind(propertyMap.SourceMember, mapped);
+        }
+
         protected override Expression VisitBinary(BinaryExpression node)
         {
             return DoVisitBinary(this.Visit(node.Left), this.Visit(node.Right), this.Visit(node.Conversion));
