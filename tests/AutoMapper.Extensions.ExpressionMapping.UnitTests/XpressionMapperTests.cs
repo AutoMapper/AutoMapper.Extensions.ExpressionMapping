@@ -423,10 +423,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, IEnumerable<Thing>>> selectionMapped = mapper.MapExpression<Expression<Func<User, IEnumerable<Thing>>>>(selection);
-            List<Thing> bars = Users.SelectMany(selectionMapped).ToList();
+            List<Thing> things = Users.SelectMany(selectionMapped).ToList();
 
             //Assert
-            Assert.True(bars.Count == 2);
+            Assert.True(things.Count == 2);
         }
 
         [Fact]
