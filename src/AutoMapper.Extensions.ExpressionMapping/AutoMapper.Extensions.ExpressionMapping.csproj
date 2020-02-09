@@ -11,7 +11,7 @@
     <PackageId>AutoMapper.Extensions.ExpressionMapping</PackageId>
     <PackageIconUrl>https://s3.amazonaws.com/automapper/icon.png</PackageIconUrl>
     <PackageProjectUrl>http://automapper.org</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/AutoMapper.Extensions.ExpressionMapping/AutoMapper.Extensions.ExpressionMapping/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl>https://github.com/AutoMapper/AutoMapper.Extensions.ExpressionMapping/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/AutoMapper/AutoMapper.Extensions.ExpressionMapping</RepositoryUrl>
   </PropertyGroup>
