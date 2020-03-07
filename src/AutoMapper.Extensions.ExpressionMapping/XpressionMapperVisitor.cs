@@ -234,8 +234,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             Expression DoVisitUnary(Expression updated)
             {
                 if (this.TypeMappings.TryGetValue(node.Type, out Type mappedType))
-                {
-                    Expression exp = Expression.MakeUnary
+                    return Expression.MakeUnary
                     (
                         node.NodeType,
                         updated != node.Operand
@@ -243,8 +242,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
                             : node.Operand,
                         mappedType
                     );
-                    return exp;
-                }
 
                 return updated != node.Operand
                         ? node.Update(updated)
