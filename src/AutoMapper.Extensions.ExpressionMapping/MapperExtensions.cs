@@ -272,10 +272,28 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 {
                     typeMappings.AddUnderlyingTypes(configurationProvider, sourceType, destType);
                     typeMappings.FindChildPropertyTypeMaps(configurationProvider, sourceType, destType);
+                    typeMappings.AddIncludedTypeMaps(configurationProvider, sourceType, destType);
                 }
             }
 
             return typeMappings;
+        }
+
+        private static void AddIncludedTypeMaps(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type source, Type dest)
+        {
+            AddTypeMaps(configurationProvider.ResolveTypeMap(source, dest));
+
+            void AddTypeMaps(TypeMap typeMap)
+            {
+                if (typeMap == null)
+                    return;
+
+                foreach (var includedBase in typeMap.IncludedBaseTypes)
+                    typeMappings.AddTypeMapping(configurationProvider, includedBase.SourceType, includedBase.DestinationType);
+
+                foreach (var includedDerived in typeMap.IncludedDerivedTypes)
+                    typeMappings.AddTypeMapping(configurationProvider, includedDerived.SourceType, includedDerived.DestinationType);
+            }
         }
 
         /// <summary>

@@ -30,6 +30,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Works_for_inherited_properties_on_base_types()
+        {
+            //Arrange
+            Expression<Func<RootModel, bool>> selection = s => ((DerivedModel)s).Nested.NestedTitle2 == "nested test";
+
+            //Act
+            Expression<Func<DataModel, bool>> selectionMapped = mapper.MapExpression<Expression<Func<DataModel, bool>>>(selection);
+            List<DataModel> items = DataObjects.Where(selectionMapped).ToList();
+
+            //Assert
+            Assert.True(items.Count == 1);
+        }
+
+        [Fact]
         public void Works_for_top_level_string_member()
         {
             //Arrange
@@ -217,9 +231,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     {
         public ForPathCustomerProfile()
         {
+            CreateMap<RootModel, DataModel>()
+                .Include<DerivedModel, DerivedDataModel>();
+
             CreateMap<DerivedDataModel, DerivedModel>()
                 .ForPath(d => d.Nested.NestedTitle, opt => opt.MapFrom(src => src.Title))
-                .ForPath(d => d.Nested.NestedTitle2, opt => opt.MapFrom(src => src.Title2));
+                .ForPath(d => d.Nested.NestedTitle2, opt => opt.MapFrom(src => src.Title2))
+                .ReverseMap();
 
             CreateMap<OrderDto, Order>()
                 .ForPath(o => o.CustomerHolder.Customer.Name, o => o.MapFrom(s => s.Customer.Name))
