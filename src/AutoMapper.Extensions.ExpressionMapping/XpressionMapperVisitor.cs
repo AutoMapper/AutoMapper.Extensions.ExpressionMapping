@@ -205,6 +205,28 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
         }
 
+        protected override Expression VisitTypeBinary(TypeBinaryExpression node)
+        {
+            if (this.TypeMappings.TryGetValue(node.TypeOperand, out Type mappedType))
+                return MapTypeBinary(this.Visit(node.Expression));
+
+            return base.VisitTypeBinary(node);
+
+            Expression MapTypeBinary(Expression mapped)
+            {
+                if (mapped == node.Expression)
+                    return base.VisitTypeBinary(node);
+
+                switch (node.NodeType)
+                {
+                    case ExpressionType.TypeIs:
+                        return Expression.TypeIs(mapped, mappedType);
+                }
+
+                return base.VisitTypeBinary(node);
+            }
+        }
+
         protected override Expression VisitUnary(UnaryExpression node)
         {
             return DoVisitUnary(Visit(node.Operand));
@@ -212,14 +234,17 @@ namespace AutoMapper.Extensions.ExpressionMapping
             Expression DoVisitUnary(Expression updated)
             {
                 if (this.TypeMappings.TryGetValue(node.Type, out Type mappedType))
-                    return Expression.MakeUnary
+                {
+                    Expression exp = Expression.MakeUnary
                     (
-                        node.NodeType, 
+                        node.NodeType,
                         updated != node.Operand
                             ? updated
-                            : node.Operand, 
+                            : node.Operand,
                         mappedType
                     );
+                    return exp;
+                }
 
                 return updated != node.Operand
                         ? node.Update(updated)
