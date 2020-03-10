@@ -13,27 +13,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         private List<BaseEntity> _source;
         private IQueryable<BaseEntity> entityQuery;
 
-        public class BaseDTO
-        {
-            public Guid Id { get; set; }
-        }
-
-        public class BaseEntity
-        {
-            public Guid Id { get; set; }
-        }
-
-        public class DTO : BaseDTO
-        {
-            public string Name { get; set; }
-            public string Description { get; set; }
-        }
-
-        public class Entity : BaseEntity
-        {
-            public string Name { get; set; }
-        }
-
         protected override MapperConfiguration Configuration
         {
             get
@@ -41,15 +20,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 var config = new MapperConfiguration(cfg =>
                 {
                     cfg.AddExpressionMapping();
-
-                    cfg.CreateMap<BaseEntity, BaseDTO>();
-                    cfg.CreateMap<BaseDTO, BaseEntity>();
-
-                    cfg.CreateMap<Entity, DTO>()
-                        .ForMember(dest => dest.Description, opts => opts.MapFrom(src => string.Concat(src.Id.ToString(), " - ", src.Name)))
-                    .IncludeBase<BaseEntity, BaseDTO>();
-                    cfg.CreateMap<DTO, Entity>()
-                        .IncludeBase<BaseDTO, BaseEntity>();
+                    cfg.AddProfile(typeof(DerivedTypeProfile));
                 });
                 return config;
             }
@@ -87,6 +58,39 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             // Assert
             entityQuery.ToList().Count().ShouldBe(1);
+        }
+
+        public class DerivedTypeProfile : Profile
+        {
+            public DerivedTypeProfile()
+            {
+                CreateMap<BaseEntity, BaseDTO>();
+
+                CreateMap<Entity, DTO>()
+                    .ForMember(dest => dest.Description, opts => opts.MapFrom(src => string.Concat(src.Id.ToString(), " - ", src.Name)))
+                .IncludeBase<BaseEntity, BaseDTO>();
+            }
+        }
+
+        public class BaseDTO
+        {
+            public Guid Id { get; set; }
+        }
+
+        public class BaseEntity
+        {
+            public Guid Id { get; set; }
+        }
+
+        public class DTO : BaseDTO
+        {
+            public string Name { get; set; }
+            public string Description { get; set; }
+        }
+
+        public class Entity : BaseEntity
+        {
+            public string Name { get; set; }
         }
     }
 }
