@@ -22,8 +22,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Expression<Func<DerivedModel, bool>> selection = s => s.Nested.NestedTitle2 == "nested test";
 
             //Act
-            Expression<Func<DerivedDataModel, bool>> selectionMapped = mapper.Map<Expression<Func<DerivedDataModel, bool>>>(selection);
-            List<DerivedDataModel> items = DataObjects.Where(selectionMapped).ToList();
+            Expression<Func<DerivedData, bool>> selectionMapped = mapper.Map<Expression<Func<DerivedData, bool>>>(selection);
+            List<DerivedData> items = DataObjects.Where(selectionMapped).ToList();
 
             //Assert
             Assert.True(items.Count == 1);
@@ -36,8 +36,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Expression<Func<RootModel, bool>> selection = s => ((DerivedModel)s).Nested.NestedTitle2 == "nested test";
 
             //Act
-            Expression<Func<DataModel, bool>> selectionMapped = mapper.MapExpression<Expression<Func<DataModel, bool>>>(selection);
-            List<DataModel> items = DataObjects.Where(selectionMapped).ToList();
+            Expression<Func<RootData, bool>> selectionMapped = mapper.MapExpression<Expression<Func<RootData, bool>>>(selection);
+            List<RootData> items = DataObjects.Where(selectionMapped).ToList();
 
             //Assert
             Assert.True(items.Count == 1);
@@ -122,11 +122,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         private void SetupQueryableCollection()
         {
-            DataObjects = new DerivedDataModel[]
+            DataObjects = new DerivedData[]
             {
-                new DerivedDataModel() { OtherID = 2, Title2 = "nested test", ID = 1, Title = "test", DescendantField = "descendant field" },
-                new DerivedDataModel() { OtherID = 3, Title2 = "nested", ID = 4, Title = "title", DescendantField = "some text" }
-            }.AsQueryable<DerivedDataModel>();
+                new DerivedData() { OtherID = 2, Title2 = "nested test", ID = 1, Title = "test", DescendantField = "descendant field" },
+                new DerivedData() { OtherID = 3, Title2 = "nested", ID = 4, Title = "title", DescendantField = "some text" }
+            }.AsQueryable<DerivedData>();
 
             Orders = new OrderDto[]
             {
@@ -146,7 +146,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         private static IQueryable<OrderDto> Orders { get; set; }
-        private static IQueryable<DerivedDataModel> DataObjects { get; set; }
+        private static IQueryable<DerivedData> DataObjects { get; set; }
 
         private void SetupAutoMapper()
         {
@@ -181,7 +181,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public string DescendantField { get; set; }
     }
 
-    public class DataModel
+    public class RootData
     {
         public int ID { get; set; }
         public string Title { get; set; }
@@ -190,7 +190,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public string Title2 { get; set; }
     }
 
-    public class DerivedDataModel : DataModel
+    public class DerivedData : RootData
     {
         public string DescendantField { get; set; }
     }
@@ -231,10 +231,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     {
         public ForPathCustomerProfile()
         {
-            CreateMap<RootModel, DataModel>()
-                .Include<DerivedModel, DerivedDataModel>();
+            CreateMap<RootData, RootModel>()
+                .Include<DerivedData, DerivedModel>();
 
-            CreateMap<DerivedDataModel, DerivedModel>()
+            CreateMap<DerivedData, DerivedModel>()
                 .ForPath(d => d.Nested.NestedTitle, opt => opt.MapFrom(src => src.Title))
                 .ForPath(d => d.Nested.NestedTitle2, opt => opt.MapFrom(src => src.Title2))
                 .ReverseMap();

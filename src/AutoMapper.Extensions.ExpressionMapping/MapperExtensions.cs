@@ -279,20 +279,22 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return typeMappings;
         }
 
-        private static void AddIncludedTypeMaps(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type source, Type dest)
+        private static void AddIncludedTypeMaps(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type source/*model*/, Type dest/*data*/)//model to date
         {
-            AddTypeMaps(configurationProvider.ResolveTypeMap(source, dest));
+            //Stay with the existing design of using configured data to model maps to retrieve the type mappings.
+            //This is needed for property map custom expressions.
+            AddTypeMaps(configurationProvider.ResolveTypeMap(sourceType: dest/*data*/, destinationType: source/*model*/));
 
             void AddTypeMaps(TypeMap typeMap)
             {
                 if (typeMap == null)
                     return;
 
-                foreach (var includedBase in typeMap.IncludedBaseTypes)
-                    typeMappings.AddTypeMapping(configurationProvider, includedBase.SourceType, includedBase.DestinationType);
+                foreach (TypePair baseTypePair in typeMap.IncludedBaseTypes)
+                    typeMappings.AddTypeMapping(configurationProvider, baseTypePair.DestinationType/*model*/, baseTypePair.SourceType/*data*/);
 
-                foreach (var includedDerived in typeMap.IncludedDerivedTypes)
-                    typeMappings.AddTypeMapping(configurationProvider, includedDerived.SourceType, includedDerived.DestinationType);
+                foreach (TypePair derivedTypePair in typeMap.IncludedDerivedTypes)
+                    typeMappings.AddTypeMapping(configurationProvider, derivedTypePair.DestinationType/*model*/, derivedTypePair.SourceType/*data*/);
             }
         }
 
