@@ -129,6 +129,14 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return mapped;
         }
 
+        protected override Expression VisitNew(NewExpression node)
+        {
+            if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
+                return Expression.New(newType);
+
+            return base.VisitNew(node);
+        }
+
         protected override Expression VisitMemberInit(MemberInitExpression node)
         {
             if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
