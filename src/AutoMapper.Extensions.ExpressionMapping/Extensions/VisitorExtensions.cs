@@ -111,9 +111,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
                 case ExpressionType.Parameter:
                     return (ParameterExpression)expression;
                 case ExpressionType.Quote:
-                    return GetParameterExpression(GetMemberExpression((LambdaExpression)((UnaryExpression)expression).Operand));
+                    return GetParameterExpression(((UnaryExpression)expression).Operand);
                 case ExpressionType.Lambda:
-                    return GetParameterExpression(GetMemberExpression((LambdaExpression)expression));
+                    return GetParameterExpression(((LambdaExpression)expression).Body);
                 case ExpressionType.ConvertChecked:
                 case ExpressionType.Convert:
                     var ue = expression as UnaryExpression;

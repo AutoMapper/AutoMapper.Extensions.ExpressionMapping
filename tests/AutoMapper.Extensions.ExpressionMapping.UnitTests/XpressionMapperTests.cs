@@ -430,6 +430,32 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Map_MemberInit()
+        {
+            //Arrange
+            Expression<Func<ThingModel, ThingModel>> selection = s => new ThingModel { Car = s.Car };
+
+            //Act
+            Expression<Func<Thing, Thing>> selectionMapped = mapper.MapExpression<Expression<Func<Thing, Thing>>>(selection);
+
+            //Assert
+            Assert.NotNull(selectionMapped);
+        }
+
+        [Fact]
+        public void Map_Constructor_NoParams()
+        {
+            //Arrange
+            Expression<Func<ThingModel, ThingModel>> selection = s => new ThingModel();
+
+            //Act
+            Expression<Func<Thing, Thing>> selectionMapped = mapper.MapExpression<Expression<Func<Thing, Thing>>>(selection);
+
+            //Assert
+            Assert.NotNull(selectionMapped);
+        }
+
+        [Fact]
         public void Map__select_method_where_parent_type_is_grandchild_type()
         {
             //Arrange
