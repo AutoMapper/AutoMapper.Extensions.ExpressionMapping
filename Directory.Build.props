@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Authors>Jimmy Bogard</Authors>
     <LangVersion>latest</LangVersion>
-    <VersionPrefix>3.1.1-preview01</VersionPrefix>
+    <VersionPrefix>3.1.1</VersionPrefix>
     <WarningsAsErrors>true</WarningsAsErrors>
     <NoWarn>$(NoWarn);1701;1702;1591</NoWarn>
   </PropertyGroup>

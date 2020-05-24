@@ -37,9 +37,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
         public static bool IsListType(this Type type)
             => PrimitiveHelper.IsListType(type);
 
-        public static bool IsListOrDictionaryType(this Type type)
-            => PrimitiveHelper.IsListOrDictionaryType(type);
-
         public static bool IsDictionaryType(this Type type)
             => PrimitiveHelper.IsDictionaryType(type);
 
