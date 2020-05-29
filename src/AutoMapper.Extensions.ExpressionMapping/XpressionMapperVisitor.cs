@@ -167,6 +167,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         private MemberBinding DoBind(PropertyMap propertyMap, Expression initial, Expression mapped)
         {
+            mapped = mapped.ConvertTypeIfNecessary(propertyMap.SourceMember.GetMemberType());
             this.TypeMappings.AddTypeMapping(ConfigurationProvider, initial.Type, mapped.Type);
             return Expression.Bind(propertyMap.SourceMember, mapped);
         }

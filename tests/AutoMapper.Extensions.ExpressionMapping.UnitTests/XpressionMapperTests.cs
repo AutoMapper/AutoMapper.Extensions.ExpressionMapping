@@ -430,13 +430,39 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
-        public void Map_MemberInit()
+        public void Map_member_init()
         {
             //Arrange
             Expression<Func<ThingModel, ThingModel>> selection = s => new ThingModel { Car = s.Car };
 
             //Act
             Expression<Func<Thing, Thing>> selectionMapped = mapper.MapExpression<Expression<Func<Thing, Thing>>>(selection);
+
+            //Assert
+            Assert.NotNull(selectionMapped);
+        }
+
+        [Fact]
+        public void Map_member_init_when_source_member_is_enum_and_destination_member_is_int()
+        {
+            //Arrange
+            Expression<Func<ModelWithEnumMembers, ModelWithEnumMembers>> selection = m => new ModelWithEnumMembers { EnumValue = m.EnumValue };
+
+            //Act
+            var selectionMapped = mapper.MapExpression<Expression<Func<EntityWithIntMembers, EntityWithIntMembers>>>(selection);
+
+            //Assert
+            Assert.NotNull(selectionMapped);
+        }
+
+        [Fact]
+        public void Map_member_init_when_source_member_is_nullable_enum_and_destination_member_is_int()
+        {
+            //Arrange
+            Expression<Func<ModelWithEnumMembers, ModelWithEnumMembers>> selection = m => new ModelWithEnumMembers { NullableEnumValue = m.NullableEnumValue };
+
+            //Act
+            var selectionMapped = mapper.MapExpression<Expression<Func<EntityWithIntMembers, EntityWithIntMembers>>>(selection);
 
             //Assert
             Assert.NotNull(selectionMapped);
@@ -842,9 +868,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Can_map_expression_with_condittional_logic_while_deflattening()
         {
-            /*
-             CreateMap<TestEntity, TestDTO>()
-                .ForMember(dst => dst.NestedClass, opt => opt.MapFrom(src => src.ConditionField == 1 ? src : default));*/
             Expression<Func<TestDTO, bool>> expr = x => x.NestedClass.NestedField == 1;
 
             var mappedExpression = mapper.MapExpression<Expression<Func<TestEntity, bool>>>(expr);
@@ -1303,6 +1326,24 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public int? NestedField { get; set; }
     }
 
+    public enum TestEnum
+    {
+        Prop0 = 0,
+        Prop1 = 1
+    }
+
+    public class EntityWithIntMembers
+    {
+        public int IntValue { get; set; }
+        public int OtherIntValue { get; set; }
+    }
+
+    public class ModelWithEnumMembers
+    {
+        public TestEnum EnumValue { get; set; }
+        public TestEnum? NullableEnumValue { get; set; }
+    }
+
     public class OrganizationProfile : Profile
     {
         public OrganizationProfile()
@@ -1415,6 +1456,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             CreateMap<TestEntity, TestDTONestedClass>()
                 .ForMember(dst => dst.NestedField, opt => opt.MapFrom(src => (int?)src.ToBeNestedField));
+
+            CreateMap<EntityWithIntMembers, ModelWithEnumMembers>()
+                .ForMember(e => e.EnumValue, o => o.MapFrom(s => (TestEnum)s.IntValue))
+                .ForMember(e => e.NullableEnumValue, o => o.MapFrom(s => ((TestEnum)s.OtherIntValue) as TestEnum?));
         }
     }
 
