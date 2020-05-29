@@ -82,6 +82,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
 
         public static Expression ConvertTypeIfNecessary(this Expression expression, Type memberType)
         {
+            if (memberType == expression.Type)
+                return expression;
+
             expression = expression.GetUnconvertedMemberExpression();
             if (memberType != expression.Type)
                 return Expression.Convert(expression, memberType);
