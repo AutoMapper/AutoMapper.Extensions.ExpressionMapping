@@ -67,32 +67,26 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             }
         }
 
-        private static MemberExpression GetMemberExpression(LambdaExpression expr)
+        private static Expression GetUnconvertedMemberExpression(this Expression expression)
         {
-            MemberExpression me;
-            switch (expr.Body.NodeType)
+            switch (expression.NodeType)
             {
                 case ExpressionType.Convert:
                 case ExpressionType.ConvertChecked:
-                    var ue = expr.Body as UnaryExpression;
-                    me = ue?.Operand as MemberExpression;
-                    break;
+                case ExpressionType.TypeAs:
+                    return ((UnaryExpression)expression).Operand.GetUnconvertedMemberExpression();
                 default:
-                    me = expr.Body as MemberExpression;
-                    if (me == null)
-                    {
-                        if (expr.Body is BinaryExpression binaryExpression)
-                        {
-                            if (binaryExpression.Left is MemberExpression left)
-                                return left;
-                            if (binaryExpression.Right is MemberExpression right)
-                                return right;
-                        }
-                    }
-                    break;
+                    return expression;
             }
+        }
 
-            return me;
+        public static Expression ConvertTypeIfNecessary(this Expression expression, Type memberType)
+        {
+            expression = expression.GetUnconvertedMemberExpression();
+            if (memberType != expression.Type)
+                return Expression.Convert(expression, memberType);
+
+            return expression;
         }
 
         /// <summary>
