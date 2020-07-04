@@ -34,6 +34,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Act
             var output1 = source.AsQueryable().GetItems<GarageModel, Garage>(mapper, q => q.Truck.Equals(default(TruckModel)));
             var output2 = source.AsQueryable().Query<GarageModel, Garage, GarageModel, Garage>(mapper, q => q.First());
+
+            //Assert
             output1.First().Truck.ShouldBe(default);
             output2.Truck.ShouldBe(default);
         }
@@ -63,6 +65,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var output1 = source.AsQueryable().GetItems<GarageModel, Garage>(mapper, q => q.Truck.Year == 2000).Select(g => g.Truck);
             var output2 = source.AsQueryable().Query<GarageModel, Garage, TruckModel, Truck>(mapper, q => q.Select(g => g.Truck).First());
 
+            //Assert
             output1.First().Year.ShouldBe(2000);
             output2.Year.ShouldBe(2000);
         }
@@ -70,6 +73,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Replace_operator_when_operands_change()
         {
+            // Arrange
             var config = new MapperConfiguration(cfg => {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<Source, Dest>().ReverseMap();
@@ -79,7 +83,87 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             Expression<Func<Source, bool>> expression = x => x == default(Source);
 
+            //Act
             var mapped = mapper.MapExpression<Expression<Func<Dest, bool>>>(expression);
+
+            //Assert
+            Assert.NotNull(mapped);
+        }
+
+        [Fact]
+        public void Can_map_local_variable_in_filter()
+        {
+            // Arrange
+            var config = new MapperConfiguration(c =>
+            {
+                c.CreateMap<GarageModel, Garage>()
+                    .ReverseMap()
+                        .ForMember(d => d.Color, opt => opt.MapFrom(s => s.Truck.Color));
+                c.CreateMap<TruckModel, Truck>()
+                    .ReverseMap();
+            });
+
+            config.AssertConfigurationIsValid();
+            var mapper = config.CreateMapper();
+            Truck truck = new Truck { Color = "Red", Year = 1999 };
+            Expression<Func<Garage, bool>> filter = m => m.Truck == truck;
+
+            //Act
+            var mappedfilter = mapper.MapExpression<Expression<Func<GarageModel, bool>>>(filter);
+
+            //Assert
+            Assert.NotNull(mappedfilter);
+        }
+
+        [Fact]
+        public void Can_map_child_property_of_local_variable_in_filter()
+        {
+            // Arrange
+            var config = new MapperConfiguration(c =>
+            {
+                c.CreateMap<GarageModel, Garage>()
+                    .ReverseMap()
+                        .ForMember(d => d.Color, opt => opt.MapFrom(s => s.Truck.Color));
+                c.CreateMap<TruckModel, Truck>()
+                    .ReverseMap();
+            });
+
+            config.AssertConfigurationIsValid();
+            var mapper = config.CreateMapper();
+            Garage garage = new Garage { Truck = new Truck { Color = "Red", Year = 1999 } };
+            Expression<Func<Garage, bool>> filter = m => m.Truck == garage.Truck;
+
+            //Act
+            var mappedfilter = mapper.MapExpression<Expression<Func<GarageModel, bool>>>(filter);
+
+            //Assert
+            Assert.NotNull(mappedfilter);
+        }
+
+        [Fact]
+        public void Can_map_listeral_child_property_of_local_variable_in_filter()
+        {
+            // Arrange
+            var config = new MapperConfiguration(c =>
+            {
+                c.CreateMap<GarageModel, Garage>()
+                    .ReverseMap()
+                        .ForMember(d => d.Color, opt => opt.MapFrom(s => s.Truck.Color));
+                c.CreateMap<TruckModel, Truck>()
+                    .ReverseMap();
+            });
+
+            config.AssertConfigurationIsValid();
+            var mapper = config.CreateMapper();
+
+            GarageModel garage = new GarageModel { Color = "Blue", Truck = new TruckModel { Color = "Red", Year = 1999 } };
+            Expression<Func<GarageModel, bool>> filter = m => m.Color == garage.Color;
+
+            //Act
+            var mappedfilter = mapper.MapExpression<Expression<Func<Garage, bool>>>(filter);
+
+            //Assert
+            Assert.NotNull(mappedfilter);
         }
     }
 
@@ -238,12 +322,54 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     {
         public string Color { get; set; }
         public int Year { get; set; }
+
+        public static bool operator ==(Truck m1, Truck m2)
+        {
+            return m1.Year == m2.Year && m1.Color == m2.Color;
+        }
+        public static bool operator !=(Truck m1, Truck m2)
+        {
+            return !(m1 == m2);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is Truck mb)
+            {
+                return this == mb;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return Year.GetHashCode();
+        }
     }
 
     public struct TruckModel
     {
         public string Color { get; set; }
         public int Year { get; set; }
+
+        public static bool operator ==(TruckModel m1, TruckModel m2)
+        {
+            return m1.Year == m2.Year && m1.Color == m2.Color;
+        }
+        public static bool operator !=(TruckModel m1, TruckModel m2)
+        {
+            return !(m1 == m2);
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is TruckModel mb)
+            {
+                return this == mb;
+            }
+            return false;
+        }
+        public override int GetHashCode()
+        {
+            return Year.GetHashCode();
+        }
     }
 
     static class Extensions

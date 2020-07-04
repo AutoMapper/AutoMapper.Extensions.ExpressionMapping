@@ -4,15 +4,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper.Extensions.ExpressionMapping;
+using AutoMapper.Internal;
 using static System.Linq.Expressions.Expression;
 
 namespace AutoMapper.Mappers
 {
     public class ExpressionMapper : IObjectMapper
     {
-        private static TDestination Map<TSource, TDestination>(TSource expression, ResolutionContext context)
+        private static TDestination Map<TSource, TDestination>(TSource expression, ResolutionContext context, IConfigurationProvider configurationProvider)
             where TSource : LambdaExpression
-            where TDestination : LambdaExpression => context.Mapper.MapExpression<TDestination>(expression);
+            where TDestination : LambdaExpression => configurationProvider.CreateMapper().MapExpression<TDestination>(expression);
 
         private static readonly MethodInfo MapMethodInfo = typeof(ExpressionMapper).GetDeclaredMethod(nameof(Map));
 
@@ -25,7 +26,8 @@ namespace AutoMapper.Mappers
             Call(null, 
                 MapMethodInfo.MakeGenericMethod(sourceExpression.Type, destExpression.Type), 
                 sourceExpression, 
-                contextExpression);
+                contextExpression,
+                Constant(configurationProvider));
 
         internal class MappingVisitor : ExpressionVisitor
         {

@@ -1,11 +1,10 @@
-﻿using System;
+﻿using AutoMapper.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using static System.Linq.Expressions.Expression;
 using System.Reflection;
-using AutoMapper.Mappers.Internal;
-using AutoMapper.Internal;
+using static System.Linq.Expressions.Expression;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {
@@ -36,9 +35,21 @@ namespace AutoMapper.Extensions.ExpressionMapping
             where TDestDelegate : LambdaExpression
             => mapper.MapExpression<TSourceDelegate, TDestDelegate>(expression);
 
-
         private static MethodInfo GetMapExpressionMethod(this string methodName)
             => typeof(MapperExtensions).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
+
+        public static object MapObject(this IMapper mapper, object obj, Type sourceType, Type destType) 
+            => "_MapObject".GetMapObjectMethod().MakeGenericMethod
+            (
+                sourceType,
+                destType
+            ).Invoke(null, new object[] { mapper, obj });
+
+        private static TDest _MapObject<TSource, TDest>(IMapper mapper, TSource source) 
+            => mapper.Map<TSource, TDest>(source);
+
+        private static MethodInfo GetMapObjectMethod(this string methodName)
+           => typeof(MapperExtensions).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
 
         /// <summary>
         /// Maps an expression given a dictionary of types where the source type is the key and the destination type is the value.

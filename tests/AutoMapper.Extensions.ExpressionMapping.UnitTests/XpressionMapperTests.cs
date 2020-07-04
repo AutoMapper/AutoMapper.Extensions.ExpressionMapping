@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using Shouldly;
 using Xunit;
-using AutoMapper;
 
 namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 {
-    using Configuration.Internal;
+    using AutoMapper.Internal;
 
     public class XpressionMapperTests
     {
@@ -209,9 +208,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             //Arrange
             ParameterExpression userParam = Expression.Parameter(typeof(UserModel), "s");
-            MemberExpression accountModelProperty = Expression.MakeMemberAccess(userParam, PrimitiveHelper.GetFieldOrProperty(typeof(UserModel), "AccountModel"));
-            MemberExpression branchModelProperty = Expression.MakeMemberAccess(accountModelProperty, PrimitiveHelper.GetFieldOrProperty(typeof(AccountModel), "Branch"));
-            MemberExpression nameProperty = Expression.MakeMemberAccess(branchModelProperty, PrimitiveHelper.GetFieldOrProperty(typeof(BranchModel), "Name"));
+            MemberExpression accountModelProperty = Expression.MakeMemberAccess(userParam, TypeExtensions.GetFieldOrProperty(typeof(UserModel), "AccountModel"));
+            MemberExpression branchModelProperty = Expression.MakeMemberAccess(accountModelProperty, TypeExtensions.GetFieldOrProperty(typeof(AccountModel), "Branch"));
+            MemberExpression nameProperty = Expression.MakeMemberAccess(branchModelProperty, TypeExtensions.GetFieldOrProperty(typeof(BranchModel), "Name"));
 
             //{s => (IIF((IIF((s.AccountModel == null), null, s.AccountModel.Branch) == null), null, s.AccountModel.Branch.Name) == "Leeds")}
             Expression<Func<UserModel, bool>> selection = Expression.Lambda<Func<UserModel, bool>>
@@ -255,7 +254,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Arrange
             //Expression<Func<UserModel, bool>> selection = s => s != null && s.AccountModel != null && s.AccountModel.Bal > 555.20;
             ParameterExpression userParam = Expression.Parameter(typeof(UserModel), "s");
-            MemberExpression accountModelProperty = Expression.MakeMemberAccess(userParam, PrimitiveHelper.GetFieldOrProperty(typeof(UserModel), "AccountModel"));
+            MemberExpression accountModelProperty = Expression.MakeMemberAccess(userParam, TypeExtensions.GetFieldOrProperty(typeof(UserModel), "AccountModel"));
             Expression<Func<UserModel, bool>> selection = Expression.Lambda<Func<UserModel, bool>>
                 (
                     Expression.AndAlso
@@ -267,7 +266,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                                 ),
                             Expression.GreaterThan
                                 (
-                                    Expression.MakeMemberAccess(accountModelProperty, PrimitiveHelper.GetFieldOrProperty(typeof(AccountModel), "Bal")),
+                                    Expression.MakeMemberAccess(accountModelProperty, TypeExtensions.GetFieldOrProperty(typeof(AccountModel), "Bal")),
                                     Expression.Constant(555.20, typeof(double))
                                 )
                         ),

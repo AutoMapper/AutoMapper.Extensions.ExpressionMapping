@@ -92,6 +92,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             return expression;
         }
 
+        public static MemberExpression GetMemberExpression(this LambdaExpression expr)
+            => expr.Body.GetUnconvertedMemberExpression() as MemberExpression;
+
         /// <summary>
         /// Returns the ParameterExpression for the LINQ parameter.
         /// </summary>
@@ -140,10 +143,15 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
         /// </summary>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public static Expression GetBaseOfMemberExpression(this MemberExpression expression) 
-            => expression.Expression.NodeType == ExpressionType.MemberAccess
-                ? GetBaseOfMemberExpression((MemberExpression)expression.Expression)
-                : expression.Expression;
+        public static Expression GetBaseOfMemberExpression(this MemberExpression expression)
+        {
+            if (expression.Expression == null)
+                return null;
+
+            return expression.Expression.NodeType == ExpressionType.MemberAccess
+                           ? GetBaseOfMemberExpression((MemberExpression)expression.Expression)
+                           : expression.Expression;
+        }
 
         /// <summary>
         /// Adds member expressions to an existing expression.
