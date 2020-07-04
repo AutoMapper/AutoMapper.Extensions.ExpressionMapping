@@ -138,7 +138,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 7).Take(1)
               .OrderByDescending(s => s.DestValue).Select(s => s.Strings);
 
-            result.First().Count().ShouldBe(0);
+            result.First().ShouldBe(null);
         }
 
 

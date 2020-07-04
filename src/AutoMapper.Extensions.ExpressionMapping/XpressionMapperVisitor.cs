@@ -38,11 +38,40 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return !pair.Equals(default(KeyValuePair<Type, MapperInfo>)) ? pair.Value.NewParameter : base.VisitParameter(node);
         }
 
+        private object GetConstantValue(object constantObject, string fullName, Type parentType)
+        {
+            return fullName.Split('.').Aggregate(constantObject, (parent, memberName) =>
+            {
+                MemberInfo memberInfo = parentType.GetFieldOrProperty(memberName);
+                parentType = memberInfo.GetMemberType();
+                return memberInfo.GetMemberValue(parent);
+            });
+        }
+
         protected override Expression VisitMember(MemberExpression node)
         {
             var parameterExpression = node.GetParameterExpression();
             if (parameterExpression == null)
+            {
+                var baseExpression = node.GetBaseOfMemberExpression();
+                if (baseExpression?.NodeType == ExpressionType.Constant)
+                {
+                    return this.Visit
+                    (
+                        Expression.Constant
+                        (
+                            GetConstantValue
+                            (
+                                ((ConstantExpression)baseExpression).Value,
+                                node.GetPropertyFullName(),
+                                baseExpression.Type
+                            )
+                        )
+                    );
+                }
+
                 return base.VisitMember(node);
+            }
 
             InfoDictionary.Add(parameterExpression, TypeMappings);
             return GetMappedMemberExpression(node.GetBaseOfMemberExpression(), new List<PropertyMapInfo>());
@@ -145,19 +174,39 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 //The destination becomes the source because to map a source expression to a destination expression,
                 //we need the expressions used to create the source from the destination
 
-                IEnumerable<MemberBinding> bindings = node.Bindings.Select
-                (
-                    binding =>
-                    {
-                        Expression bindingExpression = ((MemberAssignment)binding).Expression;
-                        return DoBind
+                //IEnumerable<MemberBinding> bindings = node.Bindings.Select
+                //(
+                //    binding =>
+                //    {
+                //        Expression bindingExpression = ((MemberAssignment)binding).Expression;
+                //        return DoBind
+                //        (
+                //            GetSourceMember(typeMap.GetPropertyMapByDestinationProperty(binding.Member.Name)),
+                //            bindingExpression,
+                //            this.Visit(bindingExpression)
+                //        );
+                //    }
+                //);
+
+                IEnumerable<MemberBinding> bindings = node.Bindings.Aggregate(new List<MemberBinding>(), (list, binding) =>
+                {
+                    var propertyMap = typeMap.PropertyMaps.SingleOrDefault(item => item.DestinationName == binding.Member.Name);
+                    if (propertyMap == null)
+                        return list;
+
+                    Expression bindingExpression = ((MemberAssignment)binding).Expression;
+                    list.Add
+                    (
+                        DoBind
                         (
-                            typeMap.GetPropertyMapByDestinationProperty(binding.Member.Name),
+                            GetSourceMember(propertyMap),
                             bindingExpression,
                             this.Visit(bindingExpression)
-                        );
-                    }
-                );
+                        )
+                    );
+
+                    return list;
+                });
 
                 return Expression.MemberInit(Expression.New(newType), bindings);
             }
@@ -165,12 +214,17 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return base.VisitMemberInit(node);
         }
 
-        private MemberBinding DoBind(PropertyMap propertyMap, Expression initial, Expression mapped)
+        private MemberBinding DoBind(MemberInfo sourceMember, Expression initial, Expression mapped)
         {
-            mapped = mapped.ConvertTypeIfNecessary(propertyMap.SourceMember.GetMemberType());
+            mapped = mapped.ConvertTypeIfNecessary(sourceMember.GetMemberType());
             this.TypeMappings.AddTypeMapping(ConfigurationProvider, initial.Type, mapped.Type);
-            return Expression.Bind(propertyMap.SourceMember, mapped);
+            return Expression.Bind(sourceMember, mapped);
         }
+
+        private MemberInfo GetSourceMember(PropertyMap propertyMap)
+            => propertyMap.CustomMapExpression != null
+                ? propertyMap.CustomMapExpression.GetMemberExpression()?.Member
+                : propertyMap.SourceMember;
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
@@ -261,7 +315,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
         protected override Expression VisitConstant(ConstantExpression node)
         {
             if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
-                return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
+                return base.VisitConstant(Expression.Constant(Mapper.MapObject(node.Value, node.Type, newType), newType));
+            //Issue 3455 (Non-Generic Mapper.Map failing for structs in v10)
+            //return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
 
             return base.VisitConstant(node);
         }

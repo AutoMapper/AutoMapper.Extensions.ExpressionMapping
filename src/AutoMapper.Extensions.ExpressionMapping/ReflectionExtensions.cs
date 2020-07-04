@@ -17,12 +17,6 @@ namespace AutoMapper
         public static object MapMember(this ResolutionContext context, MemberInfo member, object value, object destination = null)
             => ReflectionHelper.MapMember(context, member, value, destination);
 
-        public static bool IsDynamic(this object obj)
-            => ReflectionHelper.IsDynamic(obj);
-
-        public static bool IsDynamic(this Type type)
-            => ReflectionHelper.IsDynamic(type);
-
         public static void SetMemberValue(this MemberInfo propertyOrField, object target, object value)
             => ReflectionHelper.SetMemberValue(propertyOrField, target, value);
 
@@ -38,26 +32,11 @@ namespace AutoMapper
         public static MemberPaths GetMemberPaths<TResult>(Expression<Func<TResult, object>>[] membersToExpand) =>
             membersToExpand.Select(expr => MemberVisitor.GetMemberPath(expr));
 
-        public static MemberInfo GetFieldOrProperty(this LambdaExpression expression)
-            => ReflectionHelper.GetFieldOrProperty(expression);
-
         public static MemberInfo FindProperty(LambdaExpression lambdaExpression)
             => ReflectionHelper.FindProperty(lambdaExpression);
 
         public static Type GetMemberType(this MemberInfo memberInfo)
             => ReflectionHelper.GetMemberType(memberInfo);
-
-        /// <summary>
-        /// if targetType is oldType, method will return newType
-        /// if targetType is not oldType, method will return targetType
-        /// if targetType is generic type with oldType arguments, method will replace all oldType arguments on newType
-        /// </summary>
-        /// <param name="targetType"></param>
-        /// <param name="oldType"></param>
-        /// <param name="newType"></param>
-        /// <returns></returns>
-        public static Type ReplaceItemType(this Type targetType, Type oldType, Type newType)
-            => ReflectionHelper.ReplaceItemType(targetType, oldType, newType);
 
         public static IEnumerable<TypeInfo> GetDefinedTypes(this Assembly assembly) =>
             assembly.DefinedTypes;

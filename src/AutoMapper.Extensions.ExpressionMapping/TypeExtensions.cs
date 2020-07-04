@@ -1,4 +1,4 @@
-using AutoMapper.Configuration.Internal;
+using AutoMapper.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -124,7 +124,7 @@ namespace AutoMapper
 
         public static bool IsLiteralType(this Type type)
         {
-            if (PrimitiveHelper.IsNullableType(type))
+            if (type.IsNullableType())
                 type = Nullable.GetUnderlyingType(type);
 
             return LiteralTypes.Contains(type);
@@ -165,5 +165,11 @@ namespace AutoMapper
         public static MethodInfo GetSetMethod(this PropertyInfo propertyInfo) => propertyInfo.SetMethod;
 
         public static FieldInfo GetField(this Type type, string name) => type.GetRuntimeField(name);
+
+        public static bool IsQueryableType(this Type type)
+           => typeof(IQueryable).IsAssignableFrom(type);
+
+        public static Type GetGenericElementType(this Type type)
+            => type.HasElementType ? type.GetElementType() : type.GetTypeInfo().GenericTypeArguments[0];
     }
 }

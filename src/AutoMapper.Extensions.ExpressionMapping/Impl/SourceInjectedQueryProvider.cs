@@ -1,3 +1,5 @@
+using AutoMapper.Internal;
+using AutoMapper.Mappers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -5,15 +7,12 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using AutoMapper.Mappers;
-using AutoMapper.Mappers.Internal;
-using AutoMapper.QueryableExtensions;
 
 namespace AutoMapper.Extensions.ExpressionMapping.Impl
 {
+    using static Expression;
     using MemberPaths = IEnumerable<IEnumerable<MemberInfo>>;
     using ParameterBag = IDictionary<string, object>;
-    using static Expression;
 
     public class SourceInjectedQueryProvider<TSource, TDestination> : IQueryProvider
     {
