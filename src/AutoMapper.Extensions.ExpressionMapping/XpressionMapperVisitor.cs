@@ -174,24 +174,14 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 //The destination becomes the source because to map a source expression to a destination expression,
                 //we need the expressions used to create the source from the destination
 
-                //IEnumerable<MemberBinding> bindings = node.Bindings.Select
-                //(
-                //    binding =>
-                //    {
-                //        Expression bindingExpression = ((MemberAssignment)binding).Expression;
-                //        return DoBind
-                //        (
-                //            GetSourceMember(typeMap.GetPropertyMapByDestinationProperty(binding.Member.Name)),
-                //            bindingExpression,
-                //            this.Visit(bindingExpression)
-                //        );
-                //    }
-                //);
-
                 IEnumerable<MemberBinding> bindings = node.Bindings.Aggregate(new List<MemberBinding>(), (list, binding) =>
                 {
                     var propertyMap = typeMap.PropertyMaps.SingleOrDefault(item => item.DestinationName == binding.Member.Name);
                     if (propertyMap == null)
+                        return list;
+
+                    var sourceMember = GetSourceMember(propertyMap);
+                    if (sourceMember == null)
                         return list;
 
                     Expression bindingExpression = ((MemberAssignment)binding).Expression;
@@ -199,7 +189,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     (
                         DoBind
                         (
-                            GetSourceMember(propertyMap),
+                            sourceMember,
                             bindingExpression,
                             this.Visit(bindingExpression)
                         )
