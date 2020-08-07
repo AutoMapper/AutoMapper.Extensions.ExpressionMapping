@@ -65,7 +65,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
                                 ((ConstantExpression)baseExpression).Value,
                                 node.GetPropertyFullName(),
                                 baseExpression.Type
-                            )
+                            ),
+                            node.Type
                         )
                     );
                 }
