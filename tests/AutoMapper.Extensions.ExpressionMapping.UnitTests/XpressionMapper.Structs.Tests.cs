@@ -165,6 +165,57 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Assert
             Assert.NotNull(mappedfilter);
         }
+
+        [Fact]
+        public void Can_map_local_variable_literal_in_filter()
+        {
+            // Arrange
+            var config = new MapperConfiguration(c =>
+            {
+                c.CreateMap<ItemWithDateLiteral, ItemWithDateLiteralDto>()
+                .ForMember(dest => dest.CreateDate, opts => opts.MapFrom(x => x.Date));
+            });
+
+            config.AssertConfigurationIsValid();
+            var mapper = config.CreateMapper();
+
+            DateTime firstReleaseDate = new DateTime();
+            DateTime lastReleaseDate = new DateTime();
+
+            Expression<Func<ItemWithDateLiteralDto, bool>> exp = x => (firstReleaseDate == null || x.CreateDate >= firstReleaseDate) &&
+                                      (lastReleaseDate == null || x.CreateDate <= lastReleaseDate);
+
+            //Act
+            Expression<Func<ItemWithDateLiteral, bool>> expMapped = mapper.MapExpression<Expression<Func<ItemWithDateLiteral, bool>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
+
+        [Fact]
+        public void Can_map_local_variable_nullable_in_filter()
+        {
+            // Arrange
+            var config = new MapperConfiguration(c =>
+            {
+                c.CreateMap<ItemWithDateLiteral, ItemWithDateLiteralDto>()
+                .ForMember(dest => dest.CreateDate, opts => opts.MapFrom(x => x.Date));
+            });
+
+            config.AssertConfigurationIsValid();
+            var mapper = config.CreateMapper();
+            DateTime? firstReleaseDate = new DateTime();
+            DateTime? lastReleaseDate = new DateTime();
+
+            Expression<Func<ItemWithDateLiteralDto, bool>> exp = x => (firstReleaseDate == null || x.CreateDate >= firstReleaseDate) &&
+                                      (lastReleaseDate == null || x.CreateDate <= lastReleaseDate);
+
+            //Act
+            Expression<Func<ItemWithDateLiteral, bool>> expMapped = mapper.MapExpression<Expression<Func<ItemWithDateLiteral, bool>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
     }
 
     public struct Source
@@ -370,6 +421,16 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             return Year.GetHashCode();
         }
+    }
+
+    public struct ItemWithDateLiteralDto
+    {
+        public DateTime CreateDate { get; set; }
+    }
+
+    public struct ItemWithDateLiteral
+    {
+        public DateTime Date { get; set; }
     }
 
     static class Extensions

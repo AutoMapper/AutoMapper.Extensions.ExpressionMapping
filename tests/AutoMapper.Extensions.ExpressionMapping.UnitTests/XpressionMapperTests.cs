@@ -704,6 +704,54 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Map_accountModel_to_account_with_local_nullables()
+        {
+            DateTime? firstReleaseDate = null;
+            DateTime? lastReleaseDate = null;
+
+            Expression<Func<AccountModel, bool>> exp = x => (firstReleaseDate == null || x.DateCreated >= firstReleaseDate) &&
+                                      (lastReleaseDate == null || x.DateCreated <= lastReleaseDate);
+
+            //Act
+            Expression<Func<Account, bool>> expMapped = mapper.MapExpression<Expression<Func<Account, bool>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
+
+        [Fact]
+        public void Map_ItemDto_to_ItemDto_with_local_nullables()
+        {
+            DateTime? firstReleaseDate = new DateTime();
+            DateTime? lastReleaseDate = new DateTime();
+
+            Expression<Func<ItemDto, bool>> exp = x => (firstReleaseDate == null || x.CreateDate >= firstReleaseDate) &&
+                                      (lastReleaseDate == null || x.CreateDate <= lastReleaseDate);
+
+            //Act
+            Expression<Func<Item, bool>> expMapped = mapper.MapExpression<Expression<Func<Item, bool>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
+
+        [Fact]
+        public void Map_ItemDto_to_ItemDto_with_local_literal_types()
+        {
+            DateTime firstReleaseDate = new DateTime();
+            DateTime lastReleaseDate = new DateTime();
+
+            Expression<Func<ItemDto, bool>> exp = x => (firstReleaseDate == null || x.CreateDate >= firstReleaseDate) &&
+                                      (lastReleaseDate == null || x.CreateDate <= lastReleaseDate);
+
+            //Act
+            Expression<Func<Item, bool>> expMapped = mapper.MapExpression<Expression<Func<Item, bool>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
+
+        [Fact]
         public void Map_accountModel_to_account_with_null_checks_against_value_types()
         {
             //Arrange
