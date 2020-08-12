@@ -1438,7 +1438,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 .ForMember(d => d.Bal, opt => opt.MapFrom(s => s.Balance))
                 .ForMember(d => d.DateCreated, opt => opt.MapFrom(s => Helpers.TruncateTime(s.CreateDate).Value))
                 .ForMember(d => d.Description, opt => opt.MapFrom(s => string.Concat(s.Type, " ", s.Number)))
-                //.ForMember(d => d.ComboName, opt => opt.ResolveUsing<CustomResolver>())
                 .ForMember(d => d.ThingModels, opt => opt.MapFrom(s => s.Things))
                 .ForMember(d => d.UserModels, opt => opt.MapFrom(s => s.Users));
 
@@ -1446,6 +1445,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 .ForMember(d => d.Balance, opt => opt.MapFrom(s => s.Bal))
                 .ForMember(d => d.Things, opt => opt.MapFrom(s => s.ThingModels))
                 .ForMember(d => d.Users, opt => opt.MapFrom(s => s.UserModels));
+
+            CreateMap<BranchModel, Branch>();
 
             CreateMap<Thing, ThingModel>()
                 .ForMember(d => d.FooModel, opt => opt.MapFrom(s => s.Foo))
