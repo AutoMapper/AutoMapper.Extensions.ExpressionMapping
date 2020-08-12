@@ -305,7 +305,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
+            if (this.TypeMappings.TryGetValue(node.Type, out Type newType)
+                && ConfigurationProvider.ResolveTypeMap(node.Type, newType) != null)
                 return base.VisitConstant(Expression.Constant(Mapper.MapObject(node.Value, node.Type, newType), newType));
             //Issue 3455 (Non-Generic Mapper.Map failing for structs in v10)
             //return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
