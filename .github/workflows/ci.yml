@@ -16,7 +16,7 @@ jobs:
 
     - name: Set Variables
       run: |
-        echo '::set-env name=VERSION_NUMBER::4.0.1-preview-3'
+        echo '::set-env name=VERSION_NUMBER::4.0.1-preview-4'
         echo '::set-env name=DEPLOY_PACKAGE_URL::https://www.myget.org/F/automapperdev/api/v3/index.json'
         echo '::set-env name=DEPLOY_PACKAGE_API_KEY::${{ secrets.MYGET_CI_API_KEY }}'
         echo '::set-env name=REPO::${{ github.repository }}'
