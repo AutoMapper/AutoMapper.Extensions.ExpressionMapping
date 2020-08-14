@@ -375,6 +375,11 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
         }
 
+        private static Type GetSourceMemberType(this PropertyMap propertyMap)
+            => propertyMap.CustomMapExpression != null
+                ? propertyMap.CustomMapExpression.ReturnType
+                : propertyMap.SourceMember.GetMemberType();
+
         private static void FindChildPropertyTypeMaps(this Dictionary<Type, Type> typeMappings, IConfigurationProvider ConfigurationProvider, Type source, Type dest)
         {
             //The destination becomes the source because to map a source expression to a destination expression,
@@ -395,7 +400,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     AddChildMappings
                     (
                         source.GetFieldOrProperty(pm.DestinationMember.Name).GetMemberType(),
-                        pm.SourceMember.GetMemberType()
+                        pm.GetSourceMemberType()
                     );
                     void AddChildMappings(Type sourcePropertyType, Type destPropertyType)
                     {
