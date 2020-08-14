@@ -23,14 +23,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var mapper = config.CreateMapper();
 
             var items = new string[] { "item1", "item2" };
-            Expression<Func<SourceDto, bool>> expression1 = o => items.Contains("");
-            Expression<Func<SourceDto, bool>> expression2 = o => o.Items.Contains("");
+            Expression<Func<SourceDto, bool>> expression1 = o => items.Contains("item1");
+            Expression<Func<SourceDto, bool>> expression2 = o => items.Contains("");
+            Expression<Func<SourceDto, bool>> expression3 = o => o.Items.Contains("item1");
+            Expression<Func<SourceDto, bool>> expression4 = o => o.Items.Contains("B");
 
             var mapped1 = mapper.MapExpression<Expression<Func<Source, bool>>>(expression1);
             var mapped2 = mapper.MapExpression<Expression<Func<Source, bool>>>(expression2);
+            var mapped3 = mapper.MapExpression<Expression<Func<Source, bool>>>(expression3);
+            var mapped4 = mapper.MapExpression<Expression<Func<Source, bool>>>(expression4);
 
-            Assert.NotNull(mapped1);
-            Assert.NotNull(mapped2);
+            Assert.Equal(1, new Source[] { new Source { } }.AsQueryable().Where(mapped1).Count());
+            Assert.Equal(0, new Source[] { new Source { } }.AsQueryable().Where(mapped2).Count());
+            Assert.Equal(1, new Source[] { new Source { Items = new List<SubSource> { new SubSource { Name = "item1" } } } }.AsQueryable().Where(mapped3).Count());
+            Assert.Equal(0, new Source[] { new Source { Items = new List<SubSource> { new SubSource { Name = "" } } } }.AsQueryable().Where(mapped4).Count());
         }
 
         public class Source { public ICollection<SubSource> Items { get; set; } }
