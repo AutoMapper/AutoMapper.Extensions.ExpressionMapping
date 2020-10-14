@@ -173,7 +173,7 @@ namespace AutoMapper.Mappers
                     from t in expression.Parameters
                     let sourceParamType = t.Type
                     from destParamType in _destSubTypes.Where(dt => dt != sourceParamType)
-                    let a = destParamType.IsGenericType() ? destParamType.GetTypeInfo().GenericTypeArguments[0] : destParamType
+                    let a = destParamType.IsEnumerableType(out var itemType) ? itemType : destParamType
                     let typeMap = _configurationProvider.ResolveTypeMap(a, sourceParamType)
                     where typeMap != null
                     let oldParam = t
