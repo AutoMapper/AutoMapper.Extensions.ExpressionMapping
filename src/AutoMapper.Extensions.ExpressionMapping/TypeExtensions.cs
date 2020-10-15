@@ -171,5 +171,8 @@ namespace AutoMapper
 
         public static Type GetGenericElementType(this Type type)
             => type.HasElementType ? type.GetElementType() : type.GetTypeInfo().GenericTypeArguments[0];
+
+        public static bool IsEnumerableType(this Type type) =>
+            type.IsGenericType && typeof(System.Collections.IEnumerable).IsAssignableFrom(type);
     }
 }
