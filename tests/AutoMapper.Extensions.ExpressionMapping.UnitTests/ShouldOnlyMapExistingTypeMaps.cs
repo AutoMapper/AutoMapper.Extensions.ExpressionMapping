@@ -34,6 +34,27 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Assert.NotNull(mapped2);
         }
 
+        [Fact]
+        public void Issue93()
+        {
+            var config = new MapperConfiguration(cfg =>
+            {
+                cfg.AddExpressionMapping();
+
+                cfg.CreateMap<Source, SourceDto>()
+                    .ForMember(o => o.Items, config => config.MapFrom(p => p.Items.Select(s => s.Name)));
+            });
+
+            var mapper = config.CreateMapper();
+
+            Expression<Func<SourceDto, bool>> expression1 =
+                src => ((src != null ? src : null) != null) && src.Items.Any(x => x == "item1");
+ 
+            var mapped1 = mapper.MapExpression<Expression<Func<Source, bool>>>(expression1);
+
+            Assert.NotNull(mapped1);
+        }
+
         public class Source { public ICollection<SubSource> Items { get; set; } }
 
         public class SubSource { public int ID { get; set; } public string Name { get; set; } }

@@ -102,7 +102,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
         }
 
-        protected MemberExpression GetMemberExpressionFromMemberMaps(string fullName, Expression visitedParentExpr) 
+        protected MemberExpression GetMemberExpressionFromMemberMaps(string fullName, Expression visitedParentExpr)
             => ExpressionHelpers.MemberAccesses(fullName, visitedParentExpr);
 
         private Expression GetMemberExpressionFromCustomExpression(PropertyMapInfo lastWithCustExpression,
@@ -130,7 +130,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 );
         }
 
-        protected Expression GetMemberExpressionFromCustomExpression(List<PropertyMapInfo> propertyMapInfoList, PropertyMapInfo lastWithCustExpression, Expression mappedParentExpr) 
+        protected Expression GetMemberExpressionFromCustomExpression(List<PropertyMapInfo> propertyMapInfoList, PropertyMapInfo lastWithCustExpression, Expression mappedParentExpr)
             => GetMemberExpressionFromCustomExpression
             (
                 lastWithCustExpression,
@@ -306,7 +306,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
         protected override Expression VisitConstant(ConstantExpression node)
         {
             if (this.TypeMappings.TryGetValue(node.Type, out Type newType)
-                && ConfigurationProvider.ResolveTypeMap(node.Type, newType) != null)
+                && ConfigurationProvider.ResolveTypeMap(newType, node.Type) != null)
+                //The destination becomes the source because to map a source expression to a destination expression,
+                //we need the expressions used to create the source from the destination
                 return base.VisitConstant(Expression.Constant(Mapper.MapObject(node.Value, node.Type, newType), newType));
             //Issue 3455 (Non-Generic Mapper.Map failing for structs in v10)
             //return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
@@ -410,13 +412,13 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
         }
 
-        private bool GenericTypeDefinitionsAreEquivalent(Type typeSource, Type typeDestination) 
+        private bool GenericTypeDefinitionsAreEquivalent(Type typeSource, Type typeDestination)
             => typeSource.IsGenericType() && typeDestination.IsGenericType() && typeSource.GetGenericTypeDefinition() == typeDestination.GetGenericTypeDefinition();
 
         protected void FindDestinationFullName(Type typeSource, Type typeDestination, string sourceFullName, List<PropertyMapInfo> propertyMapInfoList)
         {
             const string period = ".";
-            
+
             if (typeSource == typeDestination)
             {
                 var sourceFullNameArray = sourceFullName.Split(new[] { period[0] }, StringSplitOptions.RemoveEmptyEntries);
@@ -459,7 +461,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
                     var sourceType = typeSource.GetFieldOrProperty(propertyName).GetMemberType();
                     var destType = typeDestination.GetFieldOrProperty(propertyName).GetMemberType();
-                    
+
                     TypeMappings.AddTypeMapping(ConfigurationProvider, sourceType, destType);
 
                     var childFullName = sourceFullName.Substring(sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) + 1);
