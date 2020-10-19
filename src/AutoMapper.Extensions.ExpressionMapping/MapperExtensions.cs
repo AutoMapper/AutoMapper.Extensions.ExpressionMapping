@@ -67,11 +67,15 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return mapper.MapExpression<TDestDelegate>
             (
                 expression, 
-                (config, mappings) => new XpressionMapperVisitor(mapper, config, mappings)
+                (config, mappings) => new XpressionMapperVisitor(mapper, config, mappings),
+                (desType) => IsFuncType(desType)
             );
         }
 
-        private static TDestDelegate MapExpression<TDestDelegate>(this IMapper mapper, LambdaExpression expression, Func<IConfigurationProvider, Dictionary<Type, Type>, XpressionMapperVisitor> getVisitor)
+        private static TDestDelegate MapExpression<TDestDelegate>(this IMapper mapper, 
+            LambdaExpression expression, 
+            Func<IConfigurationProvider, Dictionary<Type, Type>, XpressionMapperVisitor> getVisitor, 
+            Func<Type, bool> shouldConvertMappedBodyToDestType)
             where TDestDelegate : LambdaExpression
         {
             return MapExpression<TDestDelegate>
@@ -80,7 +84,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 expression,
                 expression.GetType().GetGenericArguments()[0],
                 typeof(TDestDelegate).GetGenericArguments()[0],
-                getVisitor
+                getVisitor,
+                shouldConvertMappedBodyToDestType
             );
         }
 
@@ -88,7 +93,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
             LambdaExpression expression,
             Type typeSourceFunc,
             Type typeDestFunc,
-            Func<IConfigurationProvider, Dictionary<Type, Type>, XpressionMapperVisitor> getVisitor)
+            Func<IConfigurationProvider, Dictionary<Type, Type>, XpressionMapperVisitor> getVisitor,
+            Func<Type, bool> shouldConvertMappedBodyToDestType)
             where TDestDelegate : LambdaExpression
         {
             return CreateVisitor(new Dictionary<Type, Type>().AddTypeMappingsFromDelegates(configurationProvider, typeSourceFunc, typeDestFunc));
@@ -99,15 +105,15 @@ namespace AutoMapper.Extensions.ExpressionMapping
             TDestDelegate MapBody(Dictionary<Type, Type> typeMappings, XpressionMapperVisitor visitor)
                 => GetLambda(typeMappings, visitor, visitor.Visit(expression.Body));
 
-            TDestDelegate GetLambda(Dictionary<Type, Type> typeMappings, XpressionMapperVisitor visitor, Expression remappedBody)
+            TDestDelegate GetLambda(Dictionary<Type, Type> typeMappings, XpressionMapperVisitor visitor, Expression mappedBody)
             {
-                if (remappedBody == null)
+                if (mappedBody == null)
                     throw new InvalidOperationException(Resource.cantRemapExpression);
 
                 return (TDestDelegate)Lambda
                 (
                     typeDestFunc,
-                    typeDestFunc.IsFuncType() ? ExpressionFactory.ToType(remappedBody, typeDestFunc.GetGenericArguments().Last()) : remappedBody,
+                    shouldConvertMappedBodyToDestType(typeDestFunc) ? ExpressionFactory.ToType(mappedBody, typeDestFunc.GetGenericArguments().Last()) : mappedBody,
                     expression.GetDestinationParameterExpressions(visitor.InfoDictionary, typeMappings)
                 );
             }
@@ -145,7 +151,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return mapper.MapExpression<TDestDelegate>
             (
                 expression,
-                (config, mappings) => new MapIncludesVisitor(mapper, config, mappings)
+                (config, mappings) => new MapIncludesVisitor(mapper, config, mappings),
+                desType => false
             );
         }
 
