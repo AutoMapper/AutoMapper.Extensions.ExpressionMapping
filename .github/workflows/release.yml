@@ -11,14 +11,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-
-    - name: Set Variables
-      run: |
-        echo '::set-env name=VERSION_NUMBER::4.0.2-preview-3'
-        echo '::set-env name=DEPLOY_PACKAGE_URL::https://api.nuget.org/v3/index.json'
-        echo '::set-env name=DEPLOY_PACKAGE_API_KEY::${{ secrets.NUGET_API_KEY }}'
-        echo '::set-env name=REPO::${{ github.repository }}'
-        echo '::set-env name=REPO_OWNER::${{ github.repository_owner }}'
+      with:
+        fetch-depth: 0
 
     - name: Restore
       run: dotnet restore
@@ -29,7 +23,12 @@ jobs:
     - name: Test
       run: dotnet test --no-restore --verbosity normal
 
-    - run: echo '::set-env name=PROJECT_NAME::AutoMapper.Extensions.ExpressionMapping'
     - name: Pack and push
+      env:
+        PROJECT_NAME: AutoMapper.Extensions.ExpressionMapping
+        DEPLOY_PACKAGE_URL: https://api.nuget.org/v3/index.json
+        DEPLOY_PACKAGE_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        REPO: ${{ github.repository }}
+        REPO_OWNER: ${{ github.repository_owner }}
       run: ./Pack_Push.ps1
       shell: pwsh
