@@ -4,7 +4,7 @@ Write-Host "Owner ${Env:REPO_OWNER}"
 Write-Host "Repository ${Env:REPO}"
 
 $PROJECT_PATH = ".\src\$($Env:PROJECT_NAME)\$($Env:PROJECT_NAME).csproj"
-$NUGET_PACKAGE_PATH = ".\artifacts\$($Env:PROJECT_NAME).$($Env:VERSION_NUMBER).nupkg"
+$NUGET_PACKAGE_PATH = ".\artifacts\$($Env:PROJECT_NAME).*.nupkg"
 
 Write-Host "Project Path ${PROJECT_PATH}"
 Write-Host "Package Path ${NUGET_PACKAGE_PATH}"
