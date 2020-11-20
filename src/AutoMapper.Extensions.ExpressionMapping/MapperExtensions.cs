@@ -123,7 +123,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     if (!shouldConvertMappedBodyToDestType(typeDestFunc))
                         return mappedBody;
 
-                    mappedBody = mappedBody.GetUnconvertedMemberExpression();
+                    mappedBody = mappedBody.GetUnconvertedExpression();
 
                     return ExpressionFactory.ToType(mappedBody, typeDestFunc.GetGenericArguments().Last());
                 }

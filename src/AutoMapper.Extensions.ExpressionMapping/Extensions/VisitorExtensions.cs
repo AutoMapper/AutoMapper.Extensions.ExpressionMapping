@@ -67,14 +67,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             }
         }
 
-        public static Expression GetUnconvertedMemberExpression(this Expression expression)
+        public static Expression GetUnconvertedExpression(this Expression expression)
         {
             switch (expression.NodeType)
             {
                 case ExpressionType.Convert:
                 case ExpressionType.ConvertChecked:
                 case ExpressionType.TypeAs:
-                    return ((UnaryExpression)expression).Operand.GetUnconvertedMemberExpression();
+                    return ((UnaryExpression)expression).Operand.GetUnconvertedExpression();
                 default:
                     return expression;
             }
@@ -85,7 +85,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             if (memberType == expression.Type)
                 return expression;
 
-            expression = expression.GetUnconvertedMemberExpression();
+            expression = expression.GetUnconvertedExpression();
             if (memberType != expression.Type)
                 return Expression.Convert(expression, memberType);
 
@@ -93,10 +93,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
         }
 
         public static MemberExpression GetMemberExpression(this LambdaExpression expr)
-            => expr.Body.GetUnconvertedMemberExpression() as MemberExpression;
+            => expr.Body.GetUnconvertedExpression() as MemberExpression;
 
         public static MemberExpression GetMemberExpression(this Expression expr)
-            => expr.GetUnconvertedMemberExpression() as MemberExpression;
+            => expr.GetUnconvertedExpression() as MemberExpression;
 
         /// <summary>
         /// Returns the ParameterExpression for the LINQ parameter.
@@ -181,7 +181,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
                 case ExpressionType.Convert:
                 case ExpressionType.ConvertChecked:
                 case ExpressionType.TypeAs:
-                    me = expr.Body.GetUnconvertedMemberExpression() as MemberExpression;
+                    me = expr.Body.GetUnconvertedExpression() as MemberExpression;
                     break;
                 default:
                     me = expr.Body as MemberExpression;
