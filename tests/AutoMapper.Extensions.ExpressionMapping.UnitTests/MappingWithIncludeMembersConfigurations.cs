@@ -11,41 +11,16 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void ShouldMapWhenParenIsConfiguredUsingIncludeMembers()
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<Player, PlayerModel>()
-                    .IncludeMembers(p => p.StatsA/*, p => p.StatsB*/);
-
-                cfg.CreateMap<Stats, PlayerModel>()
-                    .ForMember(d => d.Name, opt => opt.Ignore())
-                    .ForMember(d => d.StatsARating, opt => opt.MapFrom(s => s.Rating))
-                    .ForMember(d => d.StatsBRating, opt => opt.MapFrom(s => s.Rating))
-                    .ForMember(d => d.StatsASpeed, opt => opt.MapFrom(s => s.SpeedValue))
-                    .ForMember(d => d.StatsBSpeed, opt => opt.MapFrom(s => s.SpeedValue))
-                    .ForMember(d => d.StatsAPower, opt => opt.MapFrom(s => s.Power))
-                    .ForMember(d => d.StatsBPower, opt => opt.MapFrom(s => s.Power))
-                    .IncludeMembers(p => p.StatsBuilder);
-
-                cfg.CreateMap<Builder, PlayerModel>()
-                    .ForMember(d => d.StatsABuilderCity, opt => opt.MapFrom(s => s.City))
-                    .ForMember(d => d.StatsABuilderId, opt => opt.MapFrom(s => s.Id))
-                    .ForMember(d => d.StatsBBuilderCity, opt => opt.MapFrom(s => s.City))
-                    .ForMember(d => d.StatsBBuilderId, opt => opt.MapFrom(s => s.Id))
-                    .ForMember(d => d.Name, opt => opt.Ignore())
-                    .ForMember(d => d.StatsASpeed, opt => opt.Ignore())
-                    .ForMember(d => d.StatsAPower, opt => opt.Ignore())
-                    .ForMember(d => d.StatsARating, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBSpeed, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBPower, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBRating, opt => opt.Ignore());
-            });
-
+            //Arrange
+            var config = GetConfigurationWiithIncludeMembers();
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
 
+            //Act
             List<PlayerModel> models = mapper.ProjectTo<PlayerModel>(Players).ToList();
-            Assert.Equal("Jack", models[0].Name);
 
+            //Assert
+            Assert.Equal("Jack", models[0].Name);
             Assert.Equal(1, models[0].StatsAPower);
             Assert.Equal(2, models[0].StatsASpeed);
             Assert.Equal(5, models[0].StatsARating);
@@ -62,35 +37,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Map_member_init_with_include_members()
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddExpressionMapping();
-
-                cfg.CreateMap<Player, PlayerModel>()
-                    .ForMember(d => d.StatsABuilderCity, opt => opt.Ignore())
-                    .ForMember(d => d.StatsABuilderId, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBBuilderCity, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBBuilderId, opt => opt.Ignore())
-                    .IncludeMembers(p => p.StatsA);
-
-                cfg.CreateMap<Stats, PlayerModel>()
-                    .ForMember(d => d.Name, opt => opt.Ignore())
-                    .ForMember(d => d.StatsABuilderCity, opt => opt.Ignore())
-                    .ForMember(d => d.StatsARating, opt => opt.MapFrom(s => s.Rating))
-                    .ForMember(d => d.StatsABuilderId, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBBuilderCity, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBRating, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBBuilderId, opt => opt.Ignore())
-                    .ForMember(d => d.StatsASpeed, opt => opt.MapFrom(s => s.SpeedValue))
-                    .ForMember(d => d.StatsBSpeed, opt => opt.MapFrom(s => s.SpeedValue))
-                    .ForMember(d => d.StatsAPower, opt => opt.MapFrom(s => s.Power))
-                    .ForMember(d => d.StatsBPower, opt => opt.MapFrom(s => s.Power));
-            });
-
+            //Arrange
+            var config = GetConfigurationWiithIncludeMembers();
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-
-            //Arrange
             Expression<Func<PlayerModel, PlayerModel>> selection = s => new PlayerModel { Name = s.Name, StatsASpeed = s.StatsASpeed, StatsAPower = s.StatsAPower, StatsARating = s.StatsARating };
 
             //Act
@@ -107,41 +57,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Map_member_init_with_include_members_and_nested_include_members()
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddExpressionMapping();
-
-                cfg.CreateMap<Player, PlayerModel>()
-                    .IncludeMembers(p => p.StatsA/*, p => p.StatsB*/);
-
-                cfg.CreateMap<Stats, PlayerModel>()
-                    .ForMember(d => d.Name, opt => opt.Ignore())
-                    .ForMember(d => d.StatsARating, opt => opt.MapFrom(s => s.Rating))
-                    .ForMember(d => d.StatsBRating, opt => opt.MapFrom(s => s.Rating))
-                    .ForMember(d => d.StatsASpeed, opt => opt.MapFrom(s => s.SpeedValue))
-                    .ForMember(d => d.StatsBSpeed, opt => opt.MapFrom(s => s.SpeedValue))
-                    .ForMember(d => d.StatsAPower, opt => opt.MapFrom(s => s.Power))
-                    .ForMember(d => d.StatsBPower, opt => opt.MapFrom(s => s.Power))
-                    .IncludeMembers(p => p.StatsBuilder);
-
-                cfg.CreateMap<Builder, PlayerModel>()
-                    .ForMember(d => d.StatsABuilderCity, opt => opt.MapFrom(s => s.City))
-                    .ForMember(d => d.StatsABuilderId, opt => opt.MapFrom(s => s.Id))
-                    .ForMember(d => d.StatsBBuilderCity, opt => opt.MapFrom(s => s.City))
-                    .ForMember(d => d.StatsBBuilderId, opt => opt.MapFrom(s => s.Id))
-                    .ForMember(d => d.Name, opt => opt.Ignore())
-                    .ForMember(d => d.StatsASpeed, opt => opt.Ignore())
-                    .ForMember(d => d.StatsAPower, opt => opt.Ignore())
-                    .ForMember(d => d.StatsARating, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBSpeed, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBPower, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBRating, opt => opt.Ignore());
-            });
-
+            //Arrange
+            var config = GetConfigurationWiithIncludeMembers();
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-
-            //Arrange
             Expression<Func<PlayerModel, PlayerModel>> selection = s => new PlayerModel
             {
                 Name = s.Name,
@@ -179,41 +98,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Map_member_expression_with_include_members_and_nested_include_members()
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddExpressionMapping();
-
-                cfg.CreateMap<Player, PlayerModel>()
-                    .IncludeMembers(p => p.StatsA);
-
-                cfg.CreateMap<Stats, PlayerModel>()
-                    .ForMember(d => d.Name, opt => opt.Ignore())
-                    .ForMember(d => d.StatsARating, opt => opt.MapFrom(s => s.Rating))
-                    .ForMember(d => d.StatsBRating, opt => opt.MapFrom(s => s.Rating))
-                    .ForMember(d => d.StatsASpeed, opt => opt.MapFrom(s => s.SpeedValue))
-                    .ForMember(d => d.StatsBSpeed, opt => opt.MapFrom(s => s.SpeedValue))
-                    .ForMember(d => d.StatsAPower, opt => opt.MapFrom(s => s.Power))
-                    .ForMember(d => d.StatsBPower, opt => opt.MapFrom(s => s.Power))
-                    .IncludeMembers(p => p.StatsBuilder);
-
-                cfg.CreateMap<Builder, PlayerModel>()
-                    .ForMember(d => d.StatsABuilderCity, opt => opt.MapFrom(s => s.City))
-                    .ForMember(d => d.StatsABuilderId, opt => opt.MapFrom(s => s.Id))
-                    .ForMember(d => d.StatsBBuilderCity, opt => opt.MapFrom(s => s.City))
-                    .ForMember(d => d.StatsBBuilderId, opt => opt.MapFrom(s => s.Id))
-                    .ForMember(d => d.Name, opt => opt.Ignore())
-                    .ForMember(d => d.StatsASpeed, opt => opt.Ignore())
-                    .ForMember(d => d.StatsAPower, opt => opt.Ignore())
-                    .ForMember(d => d.StatsARating, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBSpeed, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBPower, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBRating, opt => opt.Ignore());
-            });
-
+            //Arrange
+            var config = GetConfigurationWiithIncludeMembers();
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-
-            //Arrange
             Expression<Func<PlayerModel, string>> selection = p => p.StatsABuilderCity;
 
             //Act
@@ -228,25 +116,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Map_member_init_without_include_members()
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddExpressionMapping();
-
-                cfg.CreateMap<Player, PlayerModel>()
-                    .ForMember(d => d.StatsABuilderId, opt => opt.Ignore())
-                    .ForMember(d => d.StatsABuilderCity, opt => opt.MapFrom(s => s.StatsA.StatsBuilder.City))
-                    .ForMember(d => d.StatsBBuilderCity, opt => opt.Ignore())
-                    .ForMember(d => d.StatsBBuilderId, opt => opt.Ignore())
-                    .ForMember(d => d.StatsAPower, opt => opt.MapFrom(s => s.StatsA.Power))
-                    .ForMember(d => d.StatsASpeed, opt => opt.MapFrom(s => s.StatsA.SpeedValue))
-                    .ForMember(d => d.StatsBPower, opt => opt.MapFrom(s => s.StatsB.Power))
-                    .ForMember(d => d.StatsBSpeed, opt => opt.MapFrom(s => s.StatsB.SpeedValue));
-            });
-
+            //Arrange
+            var config = GetConfigurationWiithoutIncludeMembers();
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-
-            //Arrange
             Expression<Func<PlayerModel, PlayerModel>> selection = s => new PlayerModel { Name = s.Name, StatsASpeed = s.StatsASpeed, StatsAPower = s.StatsAPower, StatsARating = s.StatsARating };
 
             //Act
@@ -263,25 +136,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Map_member_init_without_include_members_and_including_nested_members()
         {
-            var config = new MapperConfiguration(cfg =>
-            {
-                cfg.AddExpressionMapping();
-
-                cfg.CreateMap<Player, PlayerModel>()
-                    .ForMember(d => d.StatsABuilderId, opt => opt.MapFrom(s => s.StatsA.StatsBuilder.Id))
-                    .ForMember(d => d.StatsABuilderCity, opt => opt.MapFrom(s => s.StatsA.StatsBuilder.City))
-                    .ForMember(d => d.StatsAPower, opt => opt.MapFrom(s => s.StatsA.Power))
-                    .ForMember(d => d.StatsASpeed, opt => opt.MapFrom(s => s.StatsA.SpeedValue))
-                    .ForMember(d => d.StatsBBuilderId, opt => opt.MapFrom(s => s.StatsB.StatsBuilder.Id))
-                    .ForMember(d => d.StatsBBuilderCity, opt => opt.MapFrom(s => s.StatsB.StatsBuilder.City))
-                    .ForMember(d => d.StatsBPower, opt => opt.MapFrom(s => s.StatsB.Power))
-                    .ForMember(d => d.StatsBSpeed, opt => opt.MapFrom(s => s.StatsB.SpeedValue));
-            });
-
+            //Arrange
+            var config = GetConfigurationWiithoutIncludeMembers();
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-
-            //Arrange
             Expression<Func<PlayerModel, PlayerModel>> selection = s => new PlayerModel
             {
                 Name = s.Name,
@@ -315,6 +173,54 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Assert.Equal(3, result[0].StatsB.StatsBuilder.Id);
             Assert.Equal("Columbia", result[0].StatsB.StatsBuilder.City);
         }
+
+        MapperConfiguration GetConfigurationWiithoutIncludeMembers() 
+            => new MapperConfiguration(cfg =>
+            {
+                cfg.AddExpressionMapping();
+
+                cfg.CreateMap<Player, PlayerModel>()
+                    .ForMember(d => d.StatsABuilderId, opt => opt.MapFrom(s => s.StatsA.StatsBuilder.Id))
+                    .ForMember(d => d.StatsABuilderCity, opt => opt.MapFrom(s => s.StatsA.StatsBuilder.City))
+                    .ForMember(d => d.StatsAPower, opt => opt.MapFrom(s => s.StatsA.Power))
+                    .ForMember(d => d.StatsASpeed, opt => opt.MapFrom(s => s.StatsA.SpeedValue))
+                    .ForMember(d => d.StatsBBuilderId, opt => opt.MapFrom(s => s.StatsB.StatsBuilder.Id))
+                    .ForMember(d => d.StatsBBuilderCity, opt => opt.MapFrom(s => s.StatsB.StatsBuilder.City))
+                    .ForMember(d => d.StatsBPower, opt => opt.MapFrom(s => s.StatsB.Power))
+                    .ForMember(d => d.StatsBSpeed, opt => opt.MapFrom(s => s.StatsB.SpeedValue));
+            });
+
+        MapperConfiguration GetConfigurationWiithIncludeMembers()
+            => new MapperConfiguration(cfg =>
+            {
+                cfg.AddExpressionMapping();
+
+                cfg.CreateMap<Player, PlayerModel>()
+                    .IncludeMembers(p => p.StatsA);
+
+                cfg.CreateMap<Stats, PlayerModel>()
+                    .ForMember(d => d.Name, opt => opt.Ignore())
+                    .ForMember(d => d.StatsARating, opt => opt.MapFrom(s => s.Rating))
+                    .ForMember(d => d.StatsBRating, opt => opt.MapFrom(s => s.Rating))
+                    .ForMember(d => d.StatsASpeed, opt => opt.MapFrom(s => s.SpeedValue))
+                    .ForMember(d => d.StatsBSpeed, opt => opt.MapFrom(s => s.SpeedValue))
+                    .ForMember(d => d.StatsAPower, opt => opt.MapFrom(s => s.Power))
+                    .ForMember(d => d.StatsBPower, opt => opt.MapFrom(s => s.Power))
+                    .IncludeMembers(p => p.StatsBuilder);
+
+                cfg.CreateMap<Builder, PlayerModel>()
+                    .ForMember(d => d.StatsABuilderCity, opt => opt.MapFrom(s => s.City))
+                    .ForMember(d => d.StatsABuilderId, opt => opt.MapFrom(s => s.Id))
+                    .ForMember(d => d.StatsBBuilderCity, opt => opt.MapFrom(s => s.City))
+                    .ForMember(d => d.StatsBBuilderId, opt => opt.MapFrom(s => s.Id))
+                    .ForMember(d => d.Name, opt => opt.Ignore())
+                    .ForMember(d => d.StatsASpeed, opt => opt.Ignore())
+                    .ForMember(d => d.StatsAPower, opt => opt.Ignore())
+                    .ForMember(d => d.StatsARating, opt => opt.Ignore())
+                    .ForMember(d => d.StatsBSpeed, opt => opt.Ignore())
+                    .ForMember(d => d.StatsBPower, opt => opt.Ignore())
+                    .ForMember(d => d.StatsBRating, opt => opt.Ignore());
+            });
 
         readonly IQueryable<Player> Players = new List<Player>
         {
