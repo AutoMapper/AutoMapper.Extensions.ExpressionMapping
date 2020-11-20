@@ -67,7 +67,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             }
         }
 
-        private static Expression GetUnconvertedMemberExpression(this Expression expression)
+        public static Expression GetUnconvertedMemberExpression(this Expression expression)
         {
             switch (expression.NodeType)
             {

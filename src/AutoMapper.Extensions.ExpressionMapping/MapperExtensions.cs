@@ -1,4 +1,5 @@
-﻿using AutoMapper.Internal;
+﻿using AutoMapper.Extensions.ExpressionMapping.Extensions;
+using AutoMapper.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -113,9 +114,19 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return (TDestDelegate)Lambda
                 (
                     typeDestFunc,
-                    shouldConvertMappedBodyToDestType(typeDestFunc) ? ExpressionFactory.ToType(mappedBody, typeDestFunc.GetGenericArguments().Last()) : mappedBody,
+                    ConvertBody(),
                     expression.GetDestinationParameterExpressions(visitor.InfoDictionary, typeMappings)
                 );
+
+                Expression ConvertBody()
+                {
+                    if (!shouldConvertMappedBodyToDestType(typeDestFunc))
+                        return mappedBody;
+
+                    mappedBody = mappedBody.GetUnconvertedMemberExpression();
+
+                    return ExpressionFactory.ToType(mappedBody, typeDestFunc.GetGenericArguments().Last());
+                }
             }
         }
 
