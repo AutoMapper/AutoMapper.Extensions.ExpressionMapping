@@ -95,6 +95,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
         public static MemberExpression GetMemberExpression(this LambdaExpression expr)
             => expr.Body.GetUnconvertedMemberExpression() as MemberExpression;
 
+        public static MemberExpression GetMemberExpression(this Expression expr)
+            => expr.GetUnconvertedMemberExpression() as MemberExpression;
+
         /// <summary>
         /// Returns the ParameterExpression for the LINQ parameter.
         /// </summary>
@@ -177,7 +180,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             {
                 case ExpressionType.Convert:
                 case ExpressionType.ConvertChecked:
-                    me = (expr.Body as UnaryExpression)?.Operand as MemberExpression;
+                case ExpressionType.TypeAs:
+                    me = expr.Body.GetUnconvertedMemberExpression() as MemberExpression;
                     break;
                 default:
                     me = expr.Body as MemberExpression;

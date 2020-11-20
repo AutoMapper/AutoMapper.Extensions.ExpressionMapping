@@ -1,15 +1,14 @@
-﻿using System;
+﻿using AutoMapper.Extensions.ExpressionMapping.Extensions;
+using AutoMapper.Extensions.ExpressionMapping.Structures;
+using AutoMapper.Internal;
+using AutoMapper.QueryableExtensions.Impl;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using AutoMapper.Extensions.ExpressionMapping.ArgumentMappers;
-using AutoMapper.Extensions.ExpressionMapping.Extensions;
-using AutoMapper.Extensions.ExpressionMapping.Structures;
-using AutoMapper.Internal;
-using AutoMapper.QueryableExtensions.Impl;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {
@@ -175,34 +174,119 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 //The destination becomes the source because to map a source expression to a destination expression,
                 //we need the expressions used to create the source from the destination
 
-                IEnumerable<MemberBinding> bindings = node.Bindings.Aggregate(new List<MemberBinding>(), (list, binding) =>
+                return GetMemberInit
+                (
+                    new MemberBindingGroup
+                    (
+                        declaringMemberKey: null,
+                        isRootMemberAssignment: true,
+                        newType: newType,
+                        memberAssignmentInfos: node.Bindings.OfType<MemberAssignment>().Aggregate(new List<MemberAssignmentInfo>(), (list, binding) =>
+                        {
+                            var propertyMap = typeMap.PropertyMaps.SingleOrDefault(item => item.DestinationName == binding.Member.Name);
+                            if (propertyMap == null)
+                                return list;
+
+                            list.Add(new MemberAssignmentInfo(propertyMap, binding));
+                            return list;
+                        })
+                    )
+                );
+            }
+
+            return base.VisitMemberInit(node);
+
+        }
+
+        private MemberInitExpression GetMemberInit(MemberBindingGroup memberBindingGroup)
+        {
+            Dictionary<DeclaringMemberKey, List<MemberAssignmentInfo>> includedMembers = new Dictionary<DeclaringMemberKey, List<MemberAssignmentInfo>>();
+
+            List<MemberBinding> bindings = memberBindingGroup.MemberAssignmentInfos.Aggregate(new List<MemberBinding>(), (list, next) =>
+            {
+                var propertyMap = next.PropertyMap;
+                var binding = next.MemberAssignment;
+
+                var sourceMember = GetSourceMember(propertyMap);//does the corresponding member mapping exist
+                if (sourceMember == null)
+                    return list;
+
+                DeclaringMemberKey declaringMemberKey = new DeclaringMemberKey
+                (
+                    GetParentMember(propertyMap),
+                    BuildParentFullName(propertyMap)
+                );
+
+                if (ShouldBindPropertyMap(next))
                 {
-                    var propertyMap = typeMap.PropertyMaps.SingleOrDefault(item => item.DestinationName == binding.Member.Name);
-                    if (propertyMap == null)
-                        return list;
-
-                    var sourceMember = GetSourceMember(propertyMap);
-                    if (sourceMember == null)
-                        return list;
-
-                    Expression bindingExpression = ((MemberAssignment)binding).Expression;
-                    list.Add
+                    list.Add//adding bindings for property maps
                     (
                         DoBind
                         (
                             sourceMember,
-                            bindingExpression,
-                            this.Visit(bindingExpression)
+                            binding.Expression,
+                            this.Visit(binding.Expression)
                         )
                     );
+                }
+                else
+                {
+                    if (declaringMemberKey.DeclaringMemberInfo == null)
+                        throw new ArgumentNullException(nameof(declaringMemberKey.DeclaringMemberInfo));
 
-                    return list;
-                });
+                    if (!includedMembers.TryGetValue(declaringMemberKey, out List<MemberAssignmentInfo> assignments))
+                    {
+                        includedMembers.Add
+                        (
+                            declaringMemberKey,
+                            new List<MemberAssignmentInfo>
+                            {
+                                new MemberAssignmentInfo
+                                (
+                                    propertyMap,
+                                    binding
+                                )
+                            }
+                        );
+                    }
+                    else
+                    {
+                        assignments.Add(new MemberAssignmentInfo(propertyMap, binding));
+                    }
+                }
 
-                return Expression.MemberInit(Expression.New(newType), bindings);
-            }
+                return list;
 
-            return base.VisitMemberInit(node);
+                bool ShouldBindPropertyMap(MemberAssignmentInfo memberAssignmentInfo)
+                    => (memberBindingGroup.IsRootMemberAssignment && sourceMember.ReflectedType == memberBindingGroup.NewType)
+                    || (!memberBindingGroup.IsRootMemberAssignment && declaringMemberKey.Equals(memberBindingGroup.DeclaringMemberKey));
+            });
+
+            includedMembers.Select
+            (
+                kvp => new MemberBindingGroup
+                (
+                    declaringMemberKey: kvp.Key,
+                    isRootMemberAssignment: false,
+                    newType: kvp.Key.DeclaringMemberInfo.GetMemberType(),
+                    memberAssignmentInfos: includedMembers.Values.SelectMany(m => m).ToList()
+                )
+            )
+            .ToList()
+            .ForEach(group =>
+            {
+                if (ShouldBindChildReference(group))
+                    bindings.Add(Expression.Bind(group.DeclaringMemberKey.DeclaringMemberInfo, GetMemberInit(group)));
+            });
+
+            bool ShouldBindChildReference(MemberBindingGroup group)
+                => (memberBindingGroup.IsRootMemberAssignment
+                    && group.DeclaringMemberKey.DeclaringMemberInfo.ReflectedType == memberBindingGroup.NewType)
+                || (!memberBindingGroup.IsRootMemberAssignment
+                    && group.DeclaringMemberKey.DeclaringMemberInfo.ReflectedType == memberBindingGroup.NewType
+                    && group.DeclaringMemberKey.DeclaringMemberFullName.StartsWith(memberBindingGroup.DeclaringMemberKey.DeclaringMemberFullName));
+
+            return Expression.MemberInit(Expression.New(memberBindingGroup.NewType), bindings);
         }
 
         private MemberBinding DoBind(MemberInfo sourceMember, Expression initial, Expression mapped)
@@ -216,6 +300,39 @@ namespace AutoMapper.Extensions.ExpressionMapping
             => propertyMap.CustomMapExpression != null
                 ? propertyMap.CustomMapExpression.GetMemberExpression()?.Member
                 : propertyMap.SourceMember;
+
+        private MemberInfo GetParentMember(PropertyMap propertyMap)
+            => propertyMap.IncludedMember != null
+                            ? propertyMap.ProjectToCustomSource.GetMemberExpression().Member
+                            : GetSourceParentMember(propertyMap);
+
+        private MemberInfo GetSourceParentMember(PropertyMap propertyMap)
+        {
+            if (propertyMap.CustomMapExpression != null)
+                return propertyMap.CustomMapExpression.GetMemberExpression()?.Expression.GetMemberExpression()?.Member;
+
+            if (propertyMap.SourceMembers.Count > 1)
+                return new List<MemberInfo>(propertyMap.SourceMembers)[propertyMap.SourceMembers.Count - 2];
+
+            return null;
+        }
+
+        private string BuildParentFullName(PropertyMap propertyMap)
+        {
+            List<PropertyMapInfo> propertyMapInfos = new List<PropertyMapInfo>();
+            if (propertyMap.IncludedMember != null)
+                propertyMapInfos.Add(new PropertyMapInfo(propertyMap.ProjectToCustomSource, new List<MemberInfo>()));
+
+            propertyMapInfos.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, propertyMap.SourceMembers.ToList()));
+
+            List<string> fullNameArray = BuildFullName(propertyMapInfos)
+                .Split(new char[] { '.' })
+                .ToList();
+
+            fullNameArray.Remove(fullNameArray.Last());
+
+            return string.Join(".", fullNameArray);
+        }
 
         protected override Expression VisitBinary(BinaryExpression node)
         {
@@ -509,6 +626,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.expressionMapValueTypeMustMatchFormat, mappedPropertyType.Name, mappedPropertyDescription, sourceMemberType.Name, propertyMap.DestinationMember.Name));
                 }
 
+                if (propertyMap.ProjectToCustomSource != null)
+                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.ProjectToCustomSource, new List<MemberInfo>()));
+
                 propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, propertyMap.SourceMembers.ToList()));
             }
             else
@@ -519,6 +639,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.DestinationMember.Name);
                 if (propertyMap.CustomMapExpression == null && !propertyMap.SourceMembers.Any())//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, propertyName));
+
+                if (propertyMap.ProjectToCustomSource != null)
+                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.ProjectToCustomSource, new List<MemberInfo>()));
 
                 propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, propertyMap.SourceMembers.ToList()));
                 var childFullName = sourceFullName.Substring(sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) + 1);
