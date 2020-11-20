@@ -9,7 +9,7 @@ $NUGET_PACKAGE_PATH = ".\artifacts\$($Env:PROJECT_NAME).*.nupkg"
 Write-Host "Project Path ${PROJECT_PATH}"
 Write-Host "Package Path ${NUGET_PACKAGE_PATH}"
 
-if ($Env:REPO_OWNER -ne "AutoMapper") {
+if ([string]::IsNullOrEmpty($Env:DEPLOY_PACKAGE_API_KEY)) {
     Write-Host "${scriptName}: Only creates packages on AutoMapper repositories."
 } else {
     dotnet pack $PROJECT_PATH -c Release -o .\artifacts --no-build
