@@ -161,10 +161,36 @@ namespace AutoMapper.Extensions.ExpressionMapping
         protected override Expression VisitNew(NewExpression node)
         {
             if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
+            {
                 return Expression.New(newType);
+            }
+            else if (node.Arguments.Count > 0 && IsAnonymousType(node.Type))
+            {
+                ParameterInfo[] parameters = node.Type.GetConstructors()[0].GetParameters();
+                Dictionary<string, Expression> bindingExpressions = new Dictionary<string, Expression>();
+
+                for (int i = 0; i < parameters.Length; i++)
+                    bindingExpressions.Add(parameters[i].Name, this.Visit(node.Arguments[i]));
+
+                return GetMemberInitExpression(bindingExpressions, node.Type);
+            }
 
             return base.VisitNew(node);
         }
+
+        private static bool IsAnonymousType(Type type)
+            => type.Name.Contains("AnonymousType")
+            &&
+            (
+                Attribute.IsDefined
+                (
+                    type,
+                    typeof(System.Runtime.CompilerServices.CompilerGeneratedAttribute),
+                    false
+                )
+                ||
+                type.Assembly.IsDynamic
+            );
 
         protected override Expression VisitMemberInit(MemberInitExpression node)
         {
@@ -193,9 +219,36 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     )
                 );
             }
+            else if (IsAnonymousType(node.Type))
+            {
+                return GetMemberInitExpression
+                (
+                    node.Bindings
+                        .OfType<MemberAssignment>()
+                        .ToDictionary
+                        (
+                            binding => binding.Member.Name,
+                            binding => this.Visit(binding.Expression)
+                        ),
+                    node.Type
+                );
+            }
 
             return base.VisitMemberInit(node);
+        }
 
+        private MemberInitExpression GetMemberInitExpression(Dictionary<string, Expression> bindingExpressions, Type oldType)
+        {
+            Type newAnonymousType = AnonymousTypeFactory.CreateAnonymousType(bindingExpressions.ToDictionary(a => a.Key, a => a.Value.Type));
+            TypeMappings.AddTypeMapping(ConfigurationProvider, oldType, newAnonymousType);
+
+            return Expression.MemberInit
+            (
+                Expression.New(newAnonymousType),
+                bindingExpressions
+                    .ToDictionary(be => be.Key, be => newAnonymousType.GetMember(be.Key)[0])
+                    .Select(member => Expression.Bind(member.Value, bindingExpressions[member.Key]))
+            );
         }
 
         private MemberInitExpression GetMemberInit(MemberBindingGroup memberBindingGroup)
@@ -537,8 +590,10 @@ namespace AutoMapper.Extensions.ExpressionMapping
         protected void FindDestinationFullName(Type typeSource, Type typeDestination, string sourceFullName, List<PropertyMapInfo> propertyMapInfoList)
         {
             const string period = ".";
-            
-            if (typeSource == typeDestination)
+            bool BothTypesAreAnonymous()
+                => IsAnonymousType(typeSource) && IsAnonymousType(typeDestination);
+
+            if (typeSource == typeDestination || BothTypesAreAnonymous())
             {
                 var sourceFullNameArray = sourceFullName.Split(new[] { period[0] }, StringSplitOptions.RemoveEmptyEntries);
                 sourceFullNameArray.Aggregate(propertyMapInfoList, (list, next) =>
