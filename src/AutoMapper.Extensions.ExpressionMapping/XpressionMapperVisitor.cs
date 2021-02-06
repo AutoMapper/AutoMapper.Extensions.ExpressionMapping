@@ -30,6 +30,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected IMapper Mapper { get; }
 
+        private IConfigurationProvider anonymousTypesConfigurationProvider;
+        private Configuration.MapperConfigurationExpression anonymousTypesBaseMappings = new Configuration.MapperConfigurationExpression();
+
         protected override Expression VisitParameter(ParameterExpression node)
         {
             InfoDictionary.Add(node, TypeMappings);
@@ -172,7 +175,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 for (int i = 0; i < parameters.Length; i++)
                     bindingExpressions.Add(parameters[i].Name, this.Visit(node.Arguments[i]));
 
-                return GetMemberInitExpression(bindingExpressions, node.Type);
+                return GetAnonymousTypeMemberInitExpression(bindingExpressions, node.Type);
             }
 
             return base.VisitNew(node);
@@ -196,7 +199,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
             {
-                var typeMap = ConfigurationProvider.CheckIfMapExists(sourceType: newType, destinationType: node.Type);
+                var typeMap = ConfigurationProvider.CheckIfTypeMapExists(sourceType: newType, destinationType: node.Type);
                 //The destination becomes the source because to map a source expression to a destination expression,
                 //we need the expressions used to create the source from the destination
 
@@ -221,7 +224,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
             else if (IsAnonymousType(node.Type))
             {
-                return GetMemberInitExpression
+                return GetAnonymousTypeMemberInitExpression
                 (
                     node.Bindings
                         .OfType<MemberAssignment>()
@@ -237,11 +240,36 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return base.VisitMemberInit(node);
         }
 
-        private MemberInitExpression GetMemberInitExpression(Dictionary<string, Expression> bindingExpressions, Type oldType)
+        private void ConfigureAnonymousTypeMaps(Type oldType, Type newAnonymousType)
+        {
+            anonymousTypesBaseMappings.CreateMap(newAnonymousType, oldType);
+            Dictionary<Type, Type> memberTypeMaps = new Dictionary<Type, Type>();
+            newAnonymousType.GetMembers()
+                .OfType<PropertyInfo>()
+                .ToList()
+                .ForEach(member =>
+                {
+                    Type sourceType = member.GetMemberType();
+                    Type destMember = oldType.GetMember(member.Name)[0].GetMemberType();
+                    if (sourceType == destMember)
+                        return;
+
+                    if (!memberTypeMaps.ContainsKey(sourceType))
+                    {
+                        memberTypeMaps.Add(sourceType, destMember);
+                        anonymousTypesBaseMappings.CreateMap(sourceType, destMember);
+                    }
+                });
+
+            anonymousTypesConfigurationProvider = new MapperConfiguration(anonymousTypesBaseMappings);
+        }
+
+        private MemberInitExpression GetAnonymousTypeMemberInitExpression(Dictionary<string, Expression> bindingExpressions, Type oldType)
         {
             Type newAnonymousType = AnonymousTypeFactory.CreateAnonymousType(bindingExpressions.ToDictionary(a => a.Key, a => a.Value.Type));
             TypeMappings.AddTypeMapping(ConfigurationProvider, oldType, newAnonymousType);
 
+            ConfigureAnonymousTypeMaps(oldType, newAnonymousType);
             return Expression.MemberInit
             (
                 Expression.New(newAnonymousType),
@@ -593,7 +621,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             bool BothTypesAreAnonymous()
                 => IsAnonymousType(typeSource) && IsAnonymousType(typeDestination);
 
-            if (typeSource == typeDestination || BothTypesAreAnonymous())
+            if (typeSource == typeDestination)
             {
                 var sourceFullNameArray = sourceFullName.Split(new[] { period[0] }, StringSplitOptions.RemoveEmptyEntries);
                 sourceFullNameArray.Aggregate(propertyMapInfoList, (list, next) =>
@@ -644,7 +672,10 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 }
             }
 
-            var typeMap = ConfigurationProvider.CheckIfMapExists(sourceType: typeDestination, destinationType: typeSource);//The destination becomes the source because to map a source expression to a destination expression,
+            var typeMap = BothTypesAreAnonymous()
+                ? anonymousTypesConfigurationProvider.CheckIfTypeMapExists(sourceType: typeDestination, destinationType: typeSource)
+                : ConfigurationProvider.CheckIfTypeMapExists(sourceType: typeDestination, destinationType: typeSource);
+            //The destination becomes the source because to map a source expression to a destination expression,
             //we need the expressions used to create the source from the destination 
 
             PathMap pathMap = typeMap.FindPathMapByDestinationPath(destinationFullPath: sourceFullName);
@@ -657,8 +688,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             if (sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) < 0)
             {
-                var propertyMap = typeMap.GetPropertyMapByDestinationProperty(sourceFullName);
-                var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.DestinationMember.Name);
+                var propertyMap = typeMap.GetMemberMapByDestinationProperty(sourceFullName);
+                var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.GetDestinationName());
                 if (propertyMap.ValueResolverConfig != null)
                 {
                     throw new InvalidOperationException(Resource.customResolversNotSupported);
@@ -678,7 +709,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 {
                     //switch from IsValueType to IsLiteralType because we do not want to throw an exception for all structs
                     if ((mappedPropertyType.IsLiteralType() || sourceMemberType.IsLiteralType()) && sourceMemberType != mappedPropertyType)
-                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.expressionMapValueTypeMustMatchFormat, mappedPropertyType.Name, mappedPropertyDescription, sourceMemberType.Name, propertyMap.DestinationMember.Name));
+                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.expressionMapValueTypeMustMatchFormat, mappedPropertyType.Name, mappedPropertyDescription, sourceMemberType.Name, propertyMap.GetDestinationName()));
                 }
 
                 if (propertyMap.ProjectToCustomSource != null)
@@ -689,9 +720,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
             else
             {
                 var propertyName = sourceFullName.Substring(0, sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase));
-                var propertyMap = typeMap.GetPropertyMapByDestinationProperty(propertyName);
+                var propertyMap = typeMap.GetMemberMapByDestinationProperty(propertyName);
 
-                var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.DestinationMember.Name);
+                var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.GetDestinationName());
                 if (propertyMap.CustomMapExpression == null && !propertyMap.SourceMembers.Any())//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, propertyName));
 
