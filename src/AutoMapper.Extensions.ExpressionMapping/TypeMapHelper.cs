@@ -1,0 +1,51 @@
+﻿using System;
+using System.Linq;
+
+namespace AutoMapper.Extensions.ExpressionMapping
+{
+    internal static class TypeMapHelper
+    {
+        public static IMemberMap GetMemberMapByDestinationProperty(this TypeMap typeMap, string destinationPropertyName)
+        {
+            var propertyMap = typeMap.PropertyMaps.SingleOrDefault(item => item.DestinationName == destinationPropertyName);
+            if (propertyMap != null)
+                return propertyMap;
+
+            var memberMap = typeMap.MemberMaps.OfType<ConstructorParameterMap>().SingleOrDefault(mm => mm.Parameter.Name == destinationPropertyName);
+            if (memberMap != null)
+                return memberMap;
+
+            throw PropertyConfigurationException(typeMap, destinationPropertyName);
+        }
+
+        public static TypeMap CheckIfTypeMapExists(this IConfigurationProvider config, Type sourceType, Type destinationType)
+        {
+            var typeMap = config.ResolveTypeMap(sourceType, destinationType);
+            if (typeMap == null)
+            {
+                throw MissingMapException(sourceType, destinationType);
+            }
+            return typeMap;
+        }
+
+        public static string GetDestinationName(this IMemberMap memberMap)
+        {
+            if (memberMap is PropertyMap propertyMap)
+                return propertyMap.DestinationMember.Name;
+
+            if (memberMap is ConstructorParameterMap constructorMap)
+                return constructorMap.Parameter.Name;
+            
+            throw new ArgumentException(nameof(memberMap));
+        }
+
+        private static Exception PropertyConfigurationException(TypeMap typeMap, params string[] unmappedPropertyNames)
+            => new AutoMapperConfigurationException(new[] { new AutoMapperConfigurationException.TypeMapConfigErrors(typeMap, unmappedPropertyNames, true) });
+
+        private static Exception MissingMapException(TypePair types)
+            => MissingMapException(types.SourceType, types.DestinationType);
+
+        private static Exception MissingMapException(Type sourceType, Type destinationType)
+            => new InvalidOperationException($"Missing map from {sourceType} to {destinationType}. Create using CreateMap<{sourceType.Name}, {destinationType.Name}>.");
+    }
+}

@@ -656,6 +656,26 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Map_to_anonymous_type_when_init_member_is_not_a_literal_and_parameter_is_anonymous_type()
+        {
+            //Arrange
+            Expression<Func<IQueryable<UserModel>, IEnumerable<object>>> expression = q => q.OrderBy(s => s.Id).Select(u => new { UserId = u.Id, Account = u.AccountModel }).Where(a => a.Account.Bal != -1);
+
+            //Act
+            Expression<Func<IQueryable<User>, IEnumerable<object>>> expMapped = (Expression<Func<IQueryable<User>, IEnumerable<object>>>)mapper.MapExpression
+            (
+                expression,
+                typeof(Expression<Func<IQueryable<UserModel>, IEnumerable<object>>>),
+                typeof(Expression<Func<IQueryable<User>, IEnumerable<object>>>)
+            );
+
+            List<dynamic> users = expMapped.Compile().Invoke(Users).ToList();
+
+            Assert.True(users[0].UserId == 11);
+            Assert.True(users[0].Account.Balance == 150000);
+        }
+
+        [Fact]
         public void Map_to_anonymous_type_when_init_member_is_not_a_literal_with_navigation_property()
         {
             //Arrange
