@@ -11,7 +11,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             if (propertyMap != null)
                 return propertyMap;
 
-            var memberMap = typeMap.MemberMaps.OfType<ConstructorParameterMap>().SingleOrDefault(mm => mm.Parameter.Name == destinationPropertyName);
+            var memberMap = typeMap.MemberMaps.OfType<ConstructorParameterMap>().SingleOrDefault(mm => string.Compare(mm.Parameter.Name, destinationPropertyName, StringComparison.InvariantCultureIgnoreCase) == 0);
             if (memberMap != null)
                 return memberMap;
 

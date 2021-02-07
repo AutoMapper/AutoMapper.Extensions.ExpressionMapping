@@ -1,7 +1,6 @@
 ﻿using AutoMapper.Extensions.ExpressionMapping.Extensions;
 using AutoMapper.Extensions.ExpressionMapping.Structures;
 using AutoMapper.Internal;
-using AutoMapper.QueryableExtensions.Impl;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -31,7 +30,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         protected IMapper Mapper { get; }
 
         private IConfigurationProvider anonymousTypesConfigurationProvider;
-        private Configuration.MapperConfigurationExpression anonymousTypesBaseMappings = new Configuration.MapperConfigurationExpression();
+        private readonly Configuration.MapperConfigurationExpression anonymousTypesBaseMappings = new Configuration.MapperConfigurationExpression();
 
         protected override Expression VisitParameter(ParameterExpression node)
         {
@@ -249,8 +248,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 .ToList()
                 .ForEach(member =>
                 {
-                    Type sourceType = member.GetMemberType();
-                    Type destMember = oldType.GetMember(member.Name)[0].GetMemberType();
+                    Type sourceType = member.PropertyType;
+                    Type destMember = oldType.GetProperty(member.Name).PropertyType;
                     if (sourceType == destMember)
                         return;
 
