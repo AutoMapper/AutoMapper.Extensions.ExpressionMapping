@@ -273,7 +273,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             (
                 Expression.New(newAnonymousType),
                 bindingExpressions
-                    .ToDictionary(be => be.Key, be => newAnonymousType.GetMember(be.Key)[0])
+                    .ToDictionary(be => be.Key, be => newAnonymousType.GetProperty(be.Key))
                     .Select(member => Expression.Bind(member.Value, bindingExpressions[member.Key]))
             );
         }
@@ -620,6 +620,12 @@ namespace AutoMapper.Extensions.ExpressionMapping
             bool BothTypesAreAnonymous()
                 => IsAnonymousType(typeSource) && IsAnonymousType(typeDestination);
 
+            TypeMap GetTypeMap() => BothTypesAreAnonymous() 
+                ? anonymousTypesConfigurationProvider.CheckIfTypeMapExists(sourceType: typeDestination, destinationType: typeSource)
+                : ConfigurationProvider.CheckIfTypeMapExists(sourceType: typeDestination, destinationType: typeSource);
+            //The destination becomes the source because to map a source expression to a destination expression,
+            //we need the expressions used to create the source from the destination 
+
             if (typeSource == typeDestination)
             {
                 var sourceFullNameArray = sourceFullName.Split(new[] { period[0] }, StringSplitOptions.RemoveEmptyEntries);
@@ -671,11 +677,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 }
             }
 
-            var typeMap = BothTypesAreAnonymous()
-                ? anonymousTypesConfigurationProvider.CheckIfTypeMapExists(sourceType: typeDestination, destinationType: typeSource)
-                : ConfigurationProvider.CheckIfTypeMapExists(sourceType: typeDestination, destinationType: typeSource);
-            //The destination becomes the source because to map a source expression to a destination expression,
-            //we need the expressions used to create the source from the destination 
+            var typeMap = GetTypeMap();
 
             PathMap pathMap = typeMap.FindPathMapByDestinationPath(destinationFullPath: sourceFullName);
             if (pathMap != null)
