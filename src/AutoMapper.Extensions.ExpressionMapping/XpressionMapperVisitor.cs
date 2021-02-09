@@ -679,7 +679,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             var typeMap = GetTypeMap();
 
-            PathMap pathMap = typeMap.FindPathMapByDestinationPath(destinationFullPath: sourceFullName);
+            PathMap pathMap = typeMap.FindPathMapByDestinationFullPath(destinationFullPath: sourceFullName);
             if (pathMap != null)
             {
                 propertyMapInfoList.Add(new PropertyMapInfo(pathMap.CustomMapExpression, new List<MemberInfo>()));

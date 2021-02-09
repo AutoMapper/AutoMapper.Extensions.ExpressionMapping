@@ -39,6 +39,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
             throw new ArgumentException(nameof(memberMap));
         }
 
+        public static PathMap FindPathMapByDestinationFullPath(this TypeMap typeMap, string destinationFullPath) =>
+            typeMap.PathMaps.SingleOrDefault(item => string.Join(".", item.MemberPath.Members.Select(m => m.Name)) == destinationFullPath);
+
         private static Exception PropertyConfigurationException(TypeMap typeMap, params string[] unmappedPropertyNames)
             => new AutoMapperConfigurationException(new[] { new AutoMapperConfigurationException.TypeMapConfigErrors(typeMap, unmappedPropertyNames, true) });
 
