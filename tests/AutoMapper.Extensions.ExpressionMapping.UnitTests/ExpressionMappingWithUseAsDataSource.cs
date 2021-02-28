@@ -12,6 +12,34 @@
     public class ExpressionMappingWithUseAsDataSource
     {
         [Fact]
+        public void Can_Use_Same_Type_In_Select()
+        {
+            // Arrange
+            var mapper = CreateMapper();
+
+            var models = new List<Model>()
+            {
+                new Model { ABoolean = true },
+                new Model { ABoolean = false },
+                new Model { ABoolean = true },
+                new Model { ABoolean = false }
+            };
+
+            var queryable = models.AsQueryable();
+
+            // Act
+            var result = queryable
+                .UseAsDataSource(mapper)
+                .For<DTO>()
+                .Select(x => new DTO { Nested = x.Nested })
+                .ToList();
+
+            // Assert
+            result.ShouldNotBeNull();
+            result.Count.ShouldBe(4);
+        }
+
+        [Fact]
         public void When_Apply_Where_Clause_Over_Queryable_As_Data_Source()
         {
             // Arrange
@@ -105,7 +133,6 @@
         {
             public bool ABoolean { get; set; }
         }
-
 
         private class GenericModel<T>
         {
