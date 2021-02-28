@@ -22,10 +22,10 @@ namespace AutoMapper.Mappers
                                                  && typeof(LambdaExpression).IsAssignableFrom(context.DestinationType)
                                                  && context.DestinationType != typeof(LambdaExpression);
 
-        public Expression MapExpression(IConfigurationProvider configurationProvider, ProfileMap profileMap, IMemberMap memberMap, Expression sourceExpression, Expression destExpression, Expression contextExpression) => 
-            Call(null, 
-                MapMethodInfo.MakeGenericMethod(sourceExpression.Type, destExpression.Type), 
-                sourceExpression, 
+        public Expression MapExpression(IConfigurationProvider configurationProvider, ProfileMap profileMap, IMemberMap memberMap, Expression sourceExpression, Expression destExpression, Expression contextExpression) =>
+            Call(null,
+                MapMethodInfo.MakeGenericMethod(sourceExpression.Type, destExpression.Type),
+                sourceExpression,
                 contextExpression,
                 Constant(configurationProvider));
 
@@ -138,25 +138,25 @@ namespace AutoMapper.Mappers
                     newRight = Constant(expression.Value, t);
                 }
                 else if (right is UnaryExpression)
-                    newRight = ((UnaryExpression) right).Operand;
+                    newRight = ((UnaryExpression)right).Operand;
                 else
                     throw new AutoMapperMappingException(
                         "Mapping a BinaryExpression where one side is nullable and the other isn't");
             }
 
-            private static bool GoingFromNonNullableToNullable(Expression node, Expression newLeft) 
+            private static bool GoingFromNonNullableToNullable(Expression node, Expression newLeft)
                 => !node.Type.IsNullableType() && newLeft.Type.IsNullableType();
 
-            private static bool BothAreNullable(Expression node, Expression newLeft) 
+            private static bool BothAreNullable(Expression node, Expression newLeft)
                 => node.Type.IsNullableType() && newLeft.Type.IsNullableType();
 
-            private static bool BothAreNonNullable(Expression node, Expression newLeft) 
+            private static bool BothAreNonNullable(Expression node, Expression newLeft)
                 => !node.Type.IsNullableType() && !newLeft.Type.IsNullableType();
 
             protected override Expression VisitLambda<T>(Expression<T> node)
             {
-                return node.Parameters.Any(b => b.Type == _oldParam.Type) 
-                    ? VisitLambdaExpression(node) 
+                return node.Parameters.Any(b => b.Type == _oldParam.Type)
+                    ? VisitLambdaExpression(node)
                     : VisitAllParametersExpression(node);
             }
 
@@ -230,6 +230,18 @@ namespace AutoMapper.Mappers
                 }
             }
 
+            private class HasNewExpressionVisitor : ExpressionVisitor
+            {
+                public bool HasNewExpression { get; private set; }
+
+                protected override Expression VisitNew(NewExpression node)
+                {
+                    HasNewExpression = true;
+
+                    return base.VisitNew(node);
+                }
+            }
+
             private Expression GetConvertedSubMemberCall(MemberExpression node)
             {
                 var baseExpression = Visit(node.Expression);
@@ -250,17 +262,17 @@ namespace AutoMapper.Mappers
             private Type GetSourceType(PropertyMap propertyMap) =>
                 propertyMap.SourceType ??
                 throw new AutoMapperMappingException(
-                    "Could not determine source property type. Make sure the property is mapped.", 
-                    null, 
-                    new TypePair(null, propertyMap.DestinationType), 
-                    propertyMap.TypeMap, 
+                    "Could not determine source property type. Make sure the property is mapped.",
+                    null,
+                    new TypePair(null, propertyMap.DestinationType),
+                    propertyMap.TypeMap,
                     propertyMap);
 
             private PropertyMap FindPropertyMapOfExpression(MemberExpression expression)
             {
                 var propertyMap = PropertyMap(expression);
                 return propertyMap == null && expression.Expression is MemberExpression
-                    ? FindPropertyMapOfExpression((MemberExpression) expression.Expression)
+                    ? FindPropertyMapOfExpression((MemberExpression)expression.Expression)
                     : propertyMap;
             }
 
