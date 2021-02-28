@@ -46,10 +46,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
         public SourceInjectedQueryInspector Inspector { get; set; }
         internal Action<IEnumerable<object>> EnumerationHandler { get; set; }
 
-        public IQueryable CreateQuery(Expression expression) 
+        public IQueryable CreateQuery(Expression expression)
             => new SourceSourceInjectedQuery<TSource, TDestination>(this, expression, EnumerationHandler, _exceptionHandler);
 
-        public IQueryable<TElement> CreateQuery<TElement>(Expression expression) 
+        public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
             => new SourceSourceInjectedQuery<TSource, TElement>(this, expression, EnumerationHandler, _exceptionHandler);
 
         public object Execute(Expression expression)
@@ -87,7 +87,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
 
                 // case #1: query is a projection from complex Source to complex Destination
                 // example: users.UseAsDataSource().For<UserDto>().Where(x => x.Age > 20).ToList()
-                if (IsProjection<TDestination>(resultType))
+                if (IsProjection<TDestination>(resultType) && !DoesEndWithSelect(sourceExpression))
                 {
                     // in case of a projection, we need an IQueryable
                     var sourceResult = _dataSource.Provider.CreateQuery(sourceExpression);
@@ -124,12 +124,12 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                 // example: users.UseAsDataSource().For<UserDto>().FirstOrDefault(user => user.Age > 20)
                 else
                 {
-                    /* 
+                    /*
                         in case of an element result (so instead of IQueryable<TResult>, just TResult)
                         we still want to support parameters.
                         This is e.g. the case, when the developer writes "UseAsDataSource().For<TResult>().FirstOrDefault(x => ...)
-                        To still be able to support parameters, we need to create a query from it. 
-                        That said, we need to replace the "element" operator "FirstOrDefault" with a "Where" operator, then apply our "Select" 
+                        To still be able to support parameters, we need to create a query from it.
+                        That said, we need to replace the "element" operator "FirstOrDefault" with a "Where" operator, then apply our "Select"
                         to map from TSource to TResult and finally re-apply the "element" operator ("FirstOrDefault" in our case) so only
                         one element is returned by our "Execute<TResult>" method. Otherwise we'd get an InvalidCastException
 
@@ -157,7 +157,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                         /*  in case of primitive element operators (e.g. Any(), Sum()...)
                             we need to map the originating types (e.g. Entity to Dto) in this query
                             as the final value will be projected automatically
-                            
+
                             == example 1 ==
                             UseAsDataSource().For<Dto>().Any(entity => entity.Name == "thename")
                             ..in that case sourceResultType and destResultType would both be "Boolean" which is not mappable for AutoMapper
@@ -269,8 +269,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
             return !searcher.ContainsElementOperator;
         }
 
-        private static bool IsProjection(Type resultType) 
+        private static bool IsProjection(Type resultType)
             => resultType.IsEnumerableType() && !resultType.IsQueryableType() && resultType != typeof(string);
+
+        private bool DoesEndWithSelect(Expression sourceExpression)
+        {
+            return sourceExpression.NodeType == ExpressionType.Call && (sourceExpression as MethodCallExpression).Method.Name == "Select";
+        }
 
         private static Type CreateSourceResultType(Type destResultType)
         {
@@ -386,7 +391,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
     {
         private readonly MethodCallExpression _foundExpression;
         private static readonly MethodInfo QueryableWhereMethod = FindQueryableWhereMethod();
-
 
         private static MethodInfo FindQueryableWhereMethod()
         {
