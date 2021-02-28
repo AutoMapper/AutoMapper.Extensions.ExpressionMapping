@@ -30,8 +30,8 @@
             // Act
             var result = queryable
                 .UseAsDataSource(mapper)
-                .For<DTO>()
-                .Select(x => new DTO { Nested = x.Nested })
+                .For<ModelEntity>()
+                .Select(x => new ModelEntity { ABoolean = x.ABoolean })
                 .ToList();
 
             // Assert
@@ -103,6 +103,7 @@
         {
             var mapperConfig = new MapperConfiguration(cfg =>
             {
+                cfg.CreateMap<Model, ModelEntity>();
                 cfg.CreateMap<Model, DTO>()
                     .ForMember(d => d.Nested, opt => opt.MapFrom(s => s));
                 cfg.CreateMap<Model, DTO.DTONested>()
@@ -127,6 +128,11 @@
             }
 
             public DTONested Nested { get; set; }
+        }
+
+        private class ModelEntity
+        {
+            public bool ABoolean { get; set; }
         }
 
         private class Model
