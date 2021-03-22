@@ -1,5 +1,6 @@
 using AutoMapper.Internal;
 using AutoMapper.Mappers;
+using AutoMapper.QueryableExtensions.Impl;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -92,13 +93,22 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                     // in case of a projection, we need an IQueryable
                     var sourceResult = _dataSource.Provider.CreateQuery(sourceExpression);
                     Inspector.SourceResult(sourceExpression, sourceResult);
+                    
+                    var queryExpressions = _mapper.ConfigurationProvider.Internal().ProjectionBuilder.GetProjection
+                    (
+                        sourceResult.ElementType, 
+                        typeof(TDestination),
+                        _parameters,
+                        _membersToExpand.Select
+                        (
+                            m => new MemberPath
+                            (
+                                m.Distinct().ToArray()
+                            )
+                        ).ToArray()
+                    );
 
-                    var membersToExpand = _membersToExpand.SelectMany(m => m).Distinct().ToArray();
-
-                    var parameters = _parameters ?? new Dictionary<string, object>();
-                    var mapExpressions = _mapper.ConfigurationProvider.ExpressionBuilder.GetMapExpression(sourceResult.ElementType, typeof(TDestination), parameters, membersToExpand);
-
-                    destResult = (IQueryable<TDestination>)mapExpressions.Aggregate(sourceResult, Select);
+                    destResult = (IQueryable<TDestination>)GetMapExpressions(queryExpressions).Aggregate(sourceResult, Select);
                 }
                 // case #2: query is arbitrary ("manual") projection
                 // exaple: users.UseAsDataSource().For<UserDto>().Select(user => user.Age).ToList()
@@ -173,11 +183,21 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                             destResultType = typeof(TDestination);
                         }
 
-                        var membersToExpand = _membersToExpand.SelectMany(m => m).Distinct().ToArray();
-                        var lambdas = _mapper.ConfigurationProvider.ExpressionBuilder.GetMapExpression(sourceResultType, destResultType,
-                            _parameters, membersToExpand);
+                        var queryExpressions = _mapper.ConfigurationProvider.Internal().ProjectionBuilder.GetProjection
+                        (
+                            sourceResultType, 
+                            destResultType, 
+                            _parameters,
+                            _membersToExpand.Select
+                            (
+                                m => new MemberPath
+                                (
+                                    m.Distinct().ToArray()
+                                )
+                            ).ToArray()
+                        );
                         // add projection via "select" operator
-                        var expr = lambdas.Aggregate(sourceExpression, (source, lambda) => Select(source, lambda));
+                        var expr = GetMapExpressions(queryExpressions).Aggregate(sourceExpression, (source, lambda) => Select(source, lambda));
                         // in case an element operator without predicate expression was found (and thus not replaced)
                         var replacementMethod = replacer.ElementOperator;
                         // in case an element operator with predicate expression was replaced
@@ -221,6 +241,18 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                 _exceptionHandler(x);
                 throw;
             }
+        }
+
+        private LambdaExpression[] GetMapExpressions(QueryExpressions queryExpressions)
+        {
+            if (queryExpressions.LetClause != null && queryExpressions.Projection != null)
+                return new LambdaExpression[] { queryExpressions.LetClause, queryExpressions.Projection };
+            else if (queryExpressions.LetClause != null)
+                return new LambdaExpression[] { queryExpressions.LetClause };
+            else if (queryExpressions.Projection != null)
+                return new LambdaExpression[] { queryExpressions.Projection };
+
+            return new LambdaExpression[] { };
         }
 
         private static Expression Select(Expression source, LambdaExpression lambda)
@@ -283,7 +315,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
             // call beforevisitors
             expression = _beforeVisitors.Aggregate(expression, (current, before) => before.Visit(current));
 
-            var typeMap = _mapper.ConfigurationProvider.ResolveTypeMap(typeof(TDestination), typeof(TSource));
+            var typeMap = _mapper.ConfigurationProvider.Internal().ResolveTypeMap(typeof(TDestination), typeof(TSource));
             var visitor = new ExpressionMapper.MappingVisitor(_mapper.ConfigurationProvider, typeMap, _destQuery.Expression, _dataSource.Expression, null,
                 new[] { typeof(TSource) });
             var sourceExpression = visitor.Visit(expression);
@@ -296,7 +328,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
             }
 
             // apply null guards in case the feature is enabled
-            if (_mapper.ConfigurationProvider.EnableNullPropagationForQueryMapping)
+            if (_mapper.ConfigurationProvider.Internal().EnableNullPropagationForQueryMapping)
             {
                 var nullGuardVisitor = new NullsafeQueryRewriter();
                 sourceExpression = nullGuardVisitor.Visit(sourceExpression);

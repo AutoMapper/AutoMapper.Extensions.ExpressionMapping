@@ -5,29 +5,32 @@ using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper.Extensions.ExpressionMapping;
 using AutoMapper.Internal;
+using AutoMapper.Internal.Mappers;
 using static System.Linq.Expressions.Expression;
 
 namespace AutoMapper.Mappers
 {
     public class ExpressionMapper : IObjectMapper
     {
-        private static TDestination Map<TSource, TDestination>(TSource expression, ResolutionContext context, IConfigurationProvider configurationProvider)
+        private static TDestination Map<TSource, TDestination>(TSource expression, IConfigurationProvider configurationProvider)
             where TSource : LambdaExpression
             where TDestination : LambdaExpression => configurationProvider.CreateMapper().MapExpression<TDestination>(expression);
 
         private static readonly MethodInfo MapMethodInfo = typeof(ExpressionMapper).GetDeclaredMethod(nameof(Map));
 
-        public bool IsMatch(TypePair context) => typeof(LambdaExpression).IsAssignableFrom(context.SourceType)
+        public bool IsMatch(in TypePair context) => typeof(LambdaExpression).IsAssignableFrom(context.SourceType)
                                                  && context.SourceType != typeof(LambdaExpression)
                                                  && typeof(LambdaExpression).IsAssignableFrom(context.DestinationType)
                                                  && context.DestinationType != typeof(LambdaExpression);
 
-        public Expression MapExpression(IConfigurationProvider configurationProvider, ProfileMap profileMap, IMemberMap memberMap, Expression sourceExpression, Expression destExpression, Expression contextExpression) => 
-            Call(null, 
-                MapMethodInfo.MakeGenericMethod(sourceExpression.Type, destExpression.Type), 
-                sourceExpression, 
-                contextExpression,
-                Constant(configurationProvider));
+        public Expression MapExpression(IGlobalConfiguration configurationProvider, ProfileMap profileMap, MemberMap memberMap, Expression sourceExpression, Expression destExpression) 
+            => Call
+            (
+                null,
+                MapMethodInfo.MakeGenericMethod(sourceExpression.Type, destExpression.Type),
+                sourceExpression,
+                Constant(configurationProvider)
+            );
 
         internal class MappingVisitor : ExpressionVisitor
         {
@@ -174,7 +177,7 @@ namespace AutoMapper.Mappers
                     let sourceParamType = t.Type
                     from destParamType in _destSubTypes.Where(dt => dt != sourceParamType)
                     let a = destParamType.IsEnumerableType() ? destParamType.GetGenericElementType() : destParamType
-                    let typeMap = _configurationProvider.ResolveTypeMap(a, sourceParamType)
+                    let typeMap = _configurationProvider.Internal().ResolveTypeMap(a, sourceParamType)
                     where typeMap != null
                     let oldParam = t
                     let newParam = Parameter(a, oldParam.Name)
@@ -240,7 +243,7 @@ namespace AutoMapper.Mappers
                 var destType = propertyMap.DestinationType;
                 if (sourceType == destType)
                     return MakeMemberAccess(baseExpression, node.Member);
-                var typeMap = _configurationProvider.ResolveTypeMap(sourceType, destType);
+                var typeMap = _configurationProvider.Internal().ResolveTypeMap(sourceType, destType);
                 var subVisitor = new MappingVisitor(_configurationProvider, typeMap, node.Expression, baseExpression, this);
                 var newExpression = subVisitor.Visit(node);
                 _destSubTypes = _destSubTypes.Concat(subVisitor._destSubTypes).ToArray();
@@ -252,8 +255,6 @@ namespace AutoMapper.Mappers
                 throw new AutoMapperMappingException(
                     "Could not determine source property type. Make sure the property is mapped.", 
                     null, 
-                    new TypePair(null, propertyMap.DestinationType), 
-                    propertyMap.TypeMap, 
                     propertyMap);
 
             private PropertyMap FindPropertyMapOfExpression(MemberExpression expression)

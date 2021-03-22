@@ -38,30 +38,22 @@ namespace AutoMapper
         {
             return exp.Body.GetMembers().LastOrDefault()?.Expression == exp.Parameters.First();
         }
-
-        public static Expression ReplaceParameters(this LambdaExpression exp, params Expression[] replace)
-            => ExpressionFactory.ReplaceParameters(exp, replace);
-
-        public static Expression ConvertReplaceParameters(this LambdaExpression exp, params Expression[] replace)
-            => ExpressionFactory.ConvertReplaceParameters(exp, replace);
-
-        public static Expression Replace(this Expression exp, Expression old, Expression replace)
-            => ExpressionFactory.Replace(exp, old, replace);
-
-        public static LambdaExpression Concat(this LambdaExpression expr, LambdaExpression concat)
-            => ExpressionFactory.Concat(expr, concat);
-
-        public static Expression NullCheck(this Expression expression, Type destinationType)
-            => ExpressionFactory.NullCheck(expression, destinationType);
-
-        public static Expression IfNullElse(this Expression expression, Expression then, Expression @else = null)
-            => ExpressionFactory.IfNullElse(expression, then, @else);
     }
 
     internal static class ExpressionHelpers
     {
         public static MemberExpression MemberAccesses(string members, Expression obj) =>
             (MemberExpression)GetMemberPath(obj.Type, members).MemberAccesses(obj);
+
+        public static Expression ReplaceParameters(this LambdaExpression exp, params Expression[] replace)
+        {
+            var replaceExp = exp.Body;
+            for (var i = 0; i < Math.Min(replace.Length, exp.Parameters.Count); i++)
+                replaceExp = Replace(replaceExp, exp.Parameters[i], replace[i]);
+            return replaceExp;
+        }
+
+        public static Expression Replace(this Expression exp, Expression old, Expression replace) => new ReplaceExpressionVisitor(old, replace).Visit(exp);
 
         private static IEnumerable<MemberInfo> GetMemberPath(Type type, string fullMemberName)
         {

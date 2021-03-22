@@ -174,5 +174,22 @@ namespace AutoMapper
 
         public static bool IsEnumerableType(this Type type) =>
             type.IsGenericType && typeof(System.Collections.IEnumerable).IsAssignableFrom(type);
+
+        public static Type ReplaceItemType(this Type targetType, Type oldType, Type newType)
+        {
+            if (targetType == oldType)
+                return newType;
+
+            if (targetType.IsGenericType)
+            {
+                var genSubArgs = targetType.GetTypeInfo().GenericTypeArguments;
+                var newGenSubArgs = new Type[genSubArgs.Length];
+                for (var i = 0; i < genSubArgs.Length; i++)
+                    newGenSubArgs[i] = ReplaceItemType(genSubArgs[i], oldType, newType);
+                return targetType.GetGenericTypeDefinition().MakeGenericType(newGenSubArgs);
+            }
+
+            return targetType;
+        }
     }
 }

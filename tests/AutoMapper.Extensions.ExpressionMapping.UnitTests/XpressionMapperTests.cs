@@ -1576,10 +1576,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             CreateMap<ListParentExtension, ListParent>()
                 .ReverseMap();
+
             CreateMap<ListExtension, List<string>>()
+                    .ForMember(d => d.Count, opt => opt.MapFrom(s => s.Count))
+                    .ForMember("Item", op => op.Ignore());
+            CreateMap<List<string>, ListExtension>()
                 .ForMember(d => d.Count, opt => opt.MapFrom(s => s.Count))
-                .ReverseMap()
-                .ForMember(d => d.Count, opt => opt.MapFrom(s => s.Count));
+                .ForMember("Item", op => op.Ignore());
 
             CreateMap<Branch, BranchModel>();
 

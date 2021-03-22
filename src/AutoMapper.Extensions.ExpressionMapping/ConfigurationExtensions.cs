@@ -1,4 +1,5 @@
-﻿using AutoMapper.Mappers;
+﻿using AutoMapper.Internal;
+using AutoMapper.Mappers;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {
@@ -6,7 +7,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
     {
         public static IMapperConfigurationExpression AddExpressionMapping(this IMapperConfigurationExpression config)
         {
-            config.Mappers.Insert(0, new ExpressionMapper());
+            config.Internal().Mappers.Insert(0, new ExpressionMapper());
             return config;
         }
     }

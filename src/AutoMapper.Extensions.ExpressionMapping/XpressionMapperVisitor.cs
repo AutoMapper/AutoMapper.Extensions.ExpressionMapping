@@ -30,7 +30,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         protected IMapper Mapper { get; }
 
         private IConfigurationProvider anonymousTypesConfigurationProvider;
-        private readonly Configuration.MapperConfigurationExpression anonymousTypesBaseMappings = new Configuration.MapperConfigurationExpression();
+        private readonly MapperConfigurationExpression anonymousTypesBaseMappings = new MapperConfigurationExpression();
 
         protected override Expression VisitParameter(ParameterExpression node)
         {
@@ -382,8 +382,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 : propertyMap.SourceMember;
 
         private MemberInfo GetParentMember(PropertyMap propertyMap)
-            => propertyMap.IncludedMember != null
-                            ? propertyMap.ProjectToCustomSource.GetMemberExpression().Member
+            => propertyMap.IncludedMember?.ProjectToCustomSource != null
+                            ? propertyMap.IncludedMember.ProjectToCustomSource.GetMemberExpression().Member
                             : GetSourceParentMember(propertyMap);
 
         private MemberInfo GetSourceParentMember(PropertyMap propertyMap)
@@ -391,8 +391,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
             if (propertyMap.CustomMapExpression != null)
                 return propertyMap.CustomMapExpression.GetMemberExpression()?.Expression.GetMemberExpression()?.Member;
 
-            if (propertyMap.SourceMembers.Count > 1)
-                return new List<MemberInfo>(propertyMap.SourceMembers)[propertyMap.SourceMembers.Count - 2];
+            if (propertyMap.SourceMembers.Count() > 1)
+                return new List<MemberInfo>(propertyMap.SourceMembers)[propertyMap.SourceMembers.Count() - 2];
 
             return null;
         }
@@ -400,8 +400,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private string BuildParentFullName(PropertyMap propertyMap)
         {
             List<PropertyMapInfo> propertyMapInfos = new List<PropertyMapInfo>();
-            if (propertyMap.IncludedMember != null)
-                propertyMapInfos.Add(new PropertyMapInfo(propertyMap.ProjectToCustomSource, new List<MemberInfo>()));
+            if (propertyMap.IncludedMember?.ProjectToCustomSource != null)
+                propertyMapInfos.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, new List<MemberInfo>()));
 
             propertyMapInfos.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, propertyMap.SourceMembers.ToList()));
 
@@ -507,7 +507,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 if (node.Value == null)
                     return base.VisitConstant(Expression.Constant(null, newType));
 
-                if (ConfigurationProvider.ResolveTypeMap(node.Type, newType) != null)
+                if (ConfigurationProvider.Internal().ResolveTypeMap(node.Type, newType) != null)
                     return base.VisitConstant(Expression.Constant(Mapper.MapObject(node.Value, node.Type, newType), newType));
                 //Issue 3455 (Non-Generic Mapper.Map failing for structs in v10)
                 //return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
@@ -713,8 +713,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.expressionMapValueTypeMustMatchFormat, mappedPropertyType.Name, mappedPropertyDescription, sourceMemberType.Name, propertyMap.GetDestinationName()));
                 }
 
-                if (propertyMap.ProjectToCustomSource != null)
-                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.ProjectToCustomSource, new List<MemberInfo>()));
+                if (propertyMap.IncludedMember?.ProjectToCustomSource != null)
+                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, new List<MemberInfo>()));
 
                 propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, propertyMap.SourceMembers.ToList()));
             }
@@ -727,8 +727,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 if (propertyMap.CustomMapExpression == null && !propertyMap.SourceMembers.Any())//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, propertyName));
 
-                if (propertyMap.ProjectToCustomSource != null)
-                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.ProjectToCustomSource, new List<MemberInfo>()));
+                if (propertyMap.IncludedMember?.ProjectToCustomSource != null)
+                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, new List<MemberInfo>()));
 
                 propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, propertyMap.SourceMembers.ToList()));
                 var childFullName = sourceFullName.Substring(sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) + 1);
