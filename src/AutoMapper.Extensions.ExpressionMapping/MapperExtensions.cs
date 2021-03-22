@@ -125,7 +125,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
                     mappedBody = mappedBody.GetUnconvertedExpression();
 
-                    return ExpressionFactory.ToType(mappedBody, typeDestFunc.GetGenericArguments().Last());
+                    return ElementTypeHelper.ToType(mappedBody, typeDestFunc.GetGenericArguments().Last());
                 }
             }
         }
@@ -312,7 +312,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             //Stay with the existing design of using configured data to model maps to retrieve the type mappings.
             //This is needed for property map custom expressions.
-            AddTypeMaps(configurationProvider.ResolveTypeMap(sourceType: dest/*data*/, destinationType: source/*model*/));
+            AddTypeMaps(configurationProvider.Internal().ResolveTypeMap(sourceType: dest/*data*/, destinationType: source/*model*/));
 
             void AddTypeMaps(TypeMap typeMap)
             {
@@ -402,7 +402,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             //The destination becomes the source because to map a source expression to a destination expression,
             //we need the expressions used to create the source from the destination
-            var typeMap = ConfigurationProvider.ResolveTypeMap(sourceType: dest, destinationType: source);
+            var typeMap = ConfigurationProvider.Internal().ResolveTypeMap(sourceType: dest, destinationType: source);
 
             if (typeMap == null)
                 return;

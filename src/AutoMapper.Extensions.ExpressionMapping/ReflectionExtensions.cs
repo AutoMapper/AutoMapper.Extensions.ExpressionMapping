@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper.Internal;
 
-namespace AutoMapper
+namespace AutoMapper.Extensions.ExpressionMapping
 {
     using MemberPaths = IEnumerable<IEnumerable<MemberInfo>>;
 
