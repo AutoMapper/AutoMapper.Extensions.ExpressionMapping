@@ -116,7 +116,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             (
                 new PrependParentNameVisitor
                 (
-                    lastWithCustExpression.CustomExpression.Parameters[0].Type/*Parent type of current property*/,
+                    lastWithCustExpression.CustomExpression.Parameters[0]/*Parent parameter of current property*/,
                     BuildFullName(beforeCustExpression),
                     visitedParentExpr
                 )
