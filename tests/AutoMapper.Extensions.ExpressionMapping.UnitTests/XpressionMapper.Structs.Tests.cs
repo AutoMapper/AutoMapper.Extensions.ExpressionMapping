@@ -161,9 +161,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             var mappedfilter = mapper.MapExpression<Expression<Func<Garage, bool>>>(filter);
+            var mappedrhs = ((BinaryExpression)mappedfilter.Body).Right;
 
             //Assert
             Assert.NotNull(mappedfilter);
+            Assert.Equal(ExpressionType.MemberAccess, mappedrhs.NodeType);
         }
 
         [Fact]
