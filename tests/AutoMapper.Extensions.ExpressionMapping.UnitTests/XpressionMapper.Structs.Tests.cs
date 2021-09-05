@@ -167,6 +167,33 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Ignore_member_expressions_where_type_is_literal_and_node_type_is_constant()
+        {
+            // Arrange
+            var config = new MapperConfiguration(c =>
+            {
+                c.CreateMap<GarageModel, Garage>()
+                    .ReverseMap()
+                        .ForMember(d => d.Color, opt => opt.MapFrom(s => s.Truck.Color));
+                c.CreateMap<TruckModel, Truck>()
+                    .ReverseMap();
+            });
+
+            config.AssertConfigurationIsValid();
+            var mapper = config.CreateMapper();
+
+            GarageModel garage = new GarageModel { Color = "Blue", Truck = new TruckModel { Color = "Red", Year = 1999 } };
+            Expression<Func<GarageModel, bool>> filter = m => m.Color == garage.Color;
+
+            //Act
+            var mappedFilter = mapper.MapExpression<Expression<Func<Garage, bool>>>(filter);
+            var mappedrhs = ((BinaryExpression)mappedFilter.Body).Right;
+
+            //Assert
+            Assert.Equal(ExpressionType.MemberAccess, mappedrhs.NodeType);
+        }
+
+        [Fact]
         public void Can_map_local_variable_literal_in_filter()
         {
             // Arrange

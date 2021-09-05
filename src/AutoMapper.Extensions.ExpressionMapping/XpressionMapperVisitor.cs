@@ -57,6 +57,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 var baseExpression = node.GetBaseOfMemberExpression();
                 if (baseExpression?.NodeType == ExpressionType.Constant)
                 {
+                    if (node.Type.IsLiteralType())
+                        return node;
+
                     return this.Visit
                     (
                         Expression.Constant
