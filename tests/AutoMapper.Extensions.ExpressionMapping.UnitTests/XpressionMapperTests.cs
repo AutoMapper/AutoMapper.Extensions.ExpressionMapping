@@ -1009,6 +1009,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             Assert.NotNull(mappedExpression);
         }
+
+        [Fact]
+        public void Can_map_expression_with_multiple_destination_parameters_of_the_same_type()
+        {
+            Expression<Func<CheckDTO, bool>> dtoExpression = c => c.IsLatest;
+
+            Expression<Func<Check, bool>> mappedExpression = mapper.MapExpression<Expression<Func<Check, bool>>>(dtoExpression);
+
+            Assert.Equal
+            (//parameters ch and c are of the same type
+                "c => ((c.Finished == null) AndAlso Not(c.Part.History.Any(ch => (ch.Started > c.Started))))",
+                mappedExpression.ToString()
+            );
+        }
         #endregion Tests
 
         private static void SetupAutoMapper()
@@ -1479,10 +1493,33 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public TestEnum? NullableEnumValue { get; set; }
     }
 
+    public class Check
+    {
+        public DateTime? Finished { get; set; }
+        public Part Part { get; set; }
+        public DateTime Started { get; set; }
+    }
+
+    public class CheckDTO
+    {
+        public bool IsLatest { get; set; }
+        public Guid Part { get; set; }
+    }
+
+    public class Part
+    {
+        public List<Check> History { get; } = new List<Check>();
+        public Guid ID { get; } = Guid.NewGuid();
+    }
+
     public class OrganizationProfile : Profile
     {
         public OrganizationProfile()
         {
+            CreateMap<Check, CheckDTO>()
+                .ForMember(dest => dest.Part, c => c.MapFrom(src => src.Part.ID))
+                .ForMember(dest => dest.IsLatest, c => c.MapFrom(src => src.Finished == null && !src.Part.History.Any(ch => ch.Started > src.Started)));
+
             CreateMap<ChildModelClass, ChildDataClass>().ReverseMap();
             CreateMap<ModelClass, DataClass>().ReverseMap();
 
