@@ -119,7 +119,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             (
                 new PrependParentNameVisitor
                 (
-                    lastWithCustExpression.CustomExpression.Parameters[0].Type/*Parent type of current property*/,
+                    lastWithCustExpression.CustomExpression.Parameters[0]/*Parent parameter of current property*/,
                     BuildFullName(beforeCustExpression),
                     visitedParentExpr
                 )
@@ -341,7 +341,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return list;
 
                 bool ShouldBindPropertyMap(MemberAssignmentInfo memberAssignmentInfo)
-                    => (memberBindingGroup.IsRootMemberAssignment && sourceMember.ReflectedType == memberBindingGroup.NewType)
+                    => (memberBindingGroup.IsRootMemberAssignment && sourceMember.ReflectedType.IsAssignableFrom(memberBindingGroup.NewType))
                     || (!memberBindingGroup.IsRootMemberAssignment && declaringMemberKey.Equals(memberBindingGroup.DeclaringMemberKey));
             });
 
@@ -364,9 +364,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             bool ShouldBindChildReference(MemberBindingGroup group)
                 => (memberBindingGroup.IsRootMemberAssignment
-                    && group.DeclaringMemberKey.DeclaringMemberInfo.ReflectedType == memberBindingGroup.NewType)
+                    && group.DeclaringMemberKey.DeclaringMemberInfo.ReflectedType.IsAssignableFrom(memberBindingGroup.NewType))
                 || (!memberBindingGroup.IsRootMemberAssignment
-                    && group.DeclaringMemberKey.DeclaringMemberInfo.ReflectedType == memberBindingGroup.NewType
+                    && group.DeclaringMemberKey.DeclaringMemberInfo.ReflectedType.IsAssignableFrom(memberBindingGroup.NewType)
                     && group.DeclaringMemberKey.DeclaringMemberFullName.StartsWith(memberBindingGroup.DeclaringMemberKey.DeclaringMemberFullName));
 
             return Expression.MemberInit(Expression.New(memberBindingGroup.NewType), bindings);
