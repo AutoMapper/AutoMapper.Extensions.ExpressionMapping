@@ -123,19 +123,21 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
                     return GetParameterExpression(ue?.Operand);
                 case ExpressionType.TypeAs:
                     return ((UnaryExpression)expression).Operand.GetParameterExpression();
+                case ExpressionType.TypeIs:
+                    return ((TypeBinaryExpression)expression).Expression.GetParameterExpression();
                 case ExpressionType.MemberAccess:
                     return GetParameterExpression(((MemberExpression)expression).Expression);
                 case ExpressionType.Call:
                     var methodExpression = expression as MethodCallExpression;
-                    var memberExpression = methodExpression?.Object as MemberExpression;//Method is an instance method
+                    var parentExpression = methodExpression?.Object;//Method is an instance method
 
                     var isExtension = methodExpression != null && methodExpression.Method.IsDefined(typeof(ExtensionAttribute), true);
-                    if (isExtension && memberExpression == null && methodExpression.Arguments.Count > 0)
-                        memberExpression = methodExpression.Arguments[0] as MemberExpression;//Method is an extension method based on the type of methodExpression.Arguments[0] and methodExpression.Arguments[0] is a member expression.
+                    if (isExtension && parentExpression == null && methodExpression.Arguments.Count > 0)
+                        parentExpression = methodExpression.Arguments[0];//Method is an extension method based on the type of methodExpression.Arguments[0].
 
-                    return isExtension && memberExpression == null && methodExpression.Arguments.Count > 0
+                    return isExtension && parentExpression == null && methodExpression.Arguments.Count > 0
                         ? GetParameterExpression(methodExpression.Arguments[0])
-                        : (memberExpression == null ? null : GetParameterExpression(memberExpression.Expression));
+                        : GetParameterExpression(parentExpression);
             }
 
             return null;
