@@ -71,10 +71,10 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         node.Method.DeclaringType,
                         node.Method.Name,
                         node.Method.GetGenericArguments(),
-                        GetNewArgumentsForStaticMethod()
+                        GetNewArgumentsForExtensionMethod()
                     );
                 else
-                    return Expression.Call(node.Method, GetNewArgumentsForStaticMethod());
+                    return Expression.Call(node.Method, GetNewArgumentsForExtensionMethod());
             }
 
             //instance method
@@ -98,7 +98,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 );
             }
 
-            Expression[] GetNewArgumentsForStaticMethod()
+            Expression[] GetNewArgumentsForExtensionMethod()
             {
                 Expression[] arguments = node.Arguments.ToArray();
                 arguments[0] = GetNewParent();
