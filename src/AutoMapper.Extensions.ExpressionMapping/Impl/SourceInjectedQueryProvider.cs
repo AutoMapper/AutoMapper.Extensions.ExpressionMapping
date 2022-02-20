@@ -117,15 +117,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                 else if (IsProjection(resultType, sourceExpression))
                 {
                     var sourceResult = _dataSource.Provider.CreateQuery(sourceExpression);
-                    var enumerator = sourceResult.GetEnumerator();
                     var elementType = ElementTypeHelper.GetElementType(typeof(TResult));
                     var constructorInfo = typeof(List<>).MakeGenericType(elementType).GetDeclaredConstructor(new Type[0]);
                     if (constructorInfo != null)
                     {
                         var listInstance = (IList)constructorInfo.Invoke(null);
-                        while (enumerator.MoveNext())
+                        foreach (var element in sourceResult)
                         {
-                            listInstance.Add(enumerator.Current);
+                            listInstance.Add(element);
                         }
                         destResult = listInstance;
                     }
