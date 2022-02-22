@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -622,6 +623,23 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         //    //result.Any(s => s.DestValue > 6).ShouldBeTrue();
         //}
 
+        [Fact]
+        public void Should_dispose_enumerator_when_arbitrary_projection_is_enumerated()
+        {
+            // Arrange
+            var mapper = SetupAutoMapper();
+            var source = new NotSingleQueryingEnumerable<Detail>();
+            
+            // Act
+            source.AsQueryable()
+                .UseAsDataSource(mapper).For<DetailDto>()
+                .Select(m => m.Name)
+                .ToList();
+
+            // Assert
+            NotRelationalDataReader.Instance.ShouldBeNull();
+        }
+
         private static IMapper SetupAutoMapper()
         {
             var config = new MapperConfiguration(cfg =>
@@ -824,6 +842,96 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
     {
         public string Title { get; set; }
         public bool HasEditPermission { get; set; }
+    }
+
+    public class NotRelationalDataReader : IDisposable
+    {
+        public static NotRelationalDataReader Instance { get; set; }
+
+        public NotRelationalDataReader()
+        {
+            Instance = this;
+        }
+
+        public void Dispose()
+        {
+            Instance = null;
+        }
+    }
+
+    /// <remarks>
+    /// Based on <see href="https://github.com/dotnet/efcore/blob/08e5ebd/src/EFCore.Relational/Query/Internal/SingleQueryingEnumerable.cs">Microsoft.EntityFrameworkCore.Query.Internal.SingleQueryingEnumerable&lt;T&gt;</see>
+    /// for <see cref="Enumerator.MoveNext"/> and <see cref="Enumerator.Dispose"/>.
+    /// </remarks>
+    public class NotSingleQueryingEnumerable<T> : IQueryable<T>, IQueryProvider
+    {
+        public Type ElementType => throw new NotImplementedException();
+
+        public Expression Expression => Expression.Constant(this);
+
+        public IQueryProvider Provider => this;
+
+        public IQueryable CreateQuery(Expression expression)
+        {
+            return this;
+        }
+
+        public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object Execute(Expression expression)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TResult Execute<TResult>(Expression expression)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return new Enumerator();
+        }
+
+        private sealed class Enumerator : IEnumerator<T>
+        {
+            private NotRelationalDataReader _dataReader;
+
+            public T Current => throw new NotImplementedException();
+
+            object IEnumerator.Current => throw new NotImplementedException();
+
+            public void Dispose()
+            {
+                if (_dataReader is not null)
+                {
+                    _dataReader.Dispose();
+                    _dataReader = null;
+                }
+            }
+
+            public bool MoveNext()
+            {
+                if (_dataReader == null)
+                {
+                    _dataReader = new NotRelationalDataReader();
+                }
+                return false;
+            }
+
+            public void Reset()
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }
 
