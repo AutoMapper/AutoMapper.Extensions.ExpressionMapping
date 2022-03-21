@@ -101,21 +101,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                     destResult = (IQueryable<TDestination>)mapExpressions.Aggregate(sourceResult, Select);
                 }
                 // case #2: query is arbitrary ("manual") projection
-                // exaple: users.UseAsDataSource().For<UserDto>().Select(user => user.Age).ToList()
+                // example: users.UseAsDataSource().For<UserDto>().Select(user => user.Age).ToList()
                 // in case an arbitrary select-statement is enumerated, we do not need to map the expression at all
-                // and cann safely return it
+                // and can safely return it
                 else if (IsProjection(resultType, sourceExpression))
                 {
                     var sourceResult = _dataSource.Provider.CreateQuery(sourceExpression);
-                    var enumerator = sourceResult.GetEnumerator();
                     var elementType = ElementTypeHelper.GetElementType(typeof(TResult));
                     var constructorInfo = typeof(List<>).MakeGenericType(elementType).GetDeclaredConstructor(new Type[0]);
                     if (constructorInfo != null)
                     {
                         var listInstance = (IList)constructorInfo.Invoke(null);
-                        while (enumerator.MoveNext())
+                        foreach (var element in sourceResult)
                         {
-                            listInstance.Add(enumerator.Current);
+                            listInstance.Add(element);
                         }
                         destResult = listInstance;
                     }
