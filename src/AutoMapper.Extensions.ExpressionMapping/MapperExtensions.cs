@@ -412,7 +412,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             {
                 foreach (PropertyMap pm in maps)
                 {
-                    if (!pm.SourceMembers.Any())
+                    if (!pm.SourceMembers.Any() && pm.CustomMapExpression == null)
                         continue;
 
                     AddChildMappings
