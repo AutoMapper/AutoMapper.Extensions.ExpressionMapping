@@ -206,7 +206,7 @@ namespace AutoMapper.Mappers
                 if (constantVisitor.IsConstant)
                     return node;
 
-                SetSorceSubTypes(propertyMap);
+                SetSourceSubTypes(propertyMap);
 
                 var replacedExpression = Visit(node.Expression);
                 if (replacedExpression == node.Expression)
@@ -282,7 +282,7 @@ namespace AutoMapper.Mappers
                 return typeMap.PropertyMaps.FirstOrDefault(pm => pm.DestinationName == destinationProperty.Name);
             }
 
-            private void SetSorceSubTypes(PropertyMap propertyMap)
+            private void SetSourceSubTypes(PropertyMap propertyMap)
             {
                 if (propertyMap.SourceMember is PropertyInfo info)
                     _destSubTypes = info.PropertyType.GetTypeInfo().GenericTypeArguments.Concat(new[] { info.PropertyType }).ToList();
