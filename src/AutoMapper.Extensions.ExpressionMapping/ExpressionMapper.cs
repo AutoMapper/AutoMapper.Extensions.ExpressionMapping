@@ -95,7 +95,7 @@ namespace AutoMapper.Mappers
                 var newLeft = Visit(node.Left);
                 var newRight = Visit(node.Right);
 
-                // check if the non-string expression is a null constent
+                // check if the non-string expression is a null constant
                 // as this would lead to a "null.ToString()" and thus an error when executing the expression
                 if (newLeft.Type != newRight.Type && newRight.Type == typeof(string) && !IsNullConstant(newLeft))
                     newLeft = Call(newLeft, typeof(object).GetDeclaredMethod("ToString"));
