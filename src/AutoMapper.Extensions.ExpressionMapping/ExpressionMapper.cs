@@ -95,7 +95,7 @@ namespace AutoMapper.Mappers
                 var newLeft = Visit(node.Left);
                 var newRight = Visit(node.Right);
 
-                // check if the non-string expression is a null constent
+                // check if the non-string expression is a null constant
                 // as this would lead to a "null.ToString()" and thus an error when executing the expression
                 if (newLeft.Type != newRight.Type && newRight.Type == typeof(string) && !IsNullConstant(newLeft))
                     newLeft = Call(newLeft, typeof(object).GetDeclaredMethod("ToString"));
@@ -206,7 +206,7 @@ namespace AutoMapper.Mappers
                 if (constantVisitor.IsConstant)
                     return node;
 
-                SetSorceSubTypes(propertyMap);
+                SetSourceSubTypes(propertyMap);
 
                 var replacedExpression = Visit(node.Expression);
                 if (replacedExpression == node.Expression)
@@ -282,7 +282,7 @@ namespace AutoMapper.Mappers
                 return typeMap.PropertyMaps.FirstOrDefault(pm => pm.DestinationName == destinationProperty.Name);
             }
 
-            private void SetSorceSubTypes(PropertyMap propertyMap)
+            private void SetSourceSubTypes(PropertyMap propertyMap)
             {
                 if (propertyMap.SourceMember is PropertyInfo info)
                     _destSubTypes = info.PropertyType.GetTypeInfo().GenericTypeArguments.Concat(new[] { info.PropertyType }).ToList();
