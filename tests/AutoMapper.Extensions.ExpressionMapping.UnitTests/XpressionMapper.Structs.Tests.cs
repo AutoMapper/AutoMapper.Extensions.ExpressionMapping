@@ -508,6 +508,16 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public static bool operator <=(Instant self, Instant other) => self.SecondsSinceUnixEpoch <= other.SecondsSinceUnixEpoch;
         public static bool operator !=(Instant self, Instant other) => self.SecondsSinceUnixEpoch != other.SecondsSinceUnixEpoch;
         public static bool operator ==(Instant self, Instant other) => self.SecondsSinceUnixEpoch == other.SecondsSinceUnixEpoch;
+
+        public override bool Equals(object obj)
+        {
+            return obj is Instant instant && instant.SecondsSinceUnixEpoch == SecondsSinceUnixEpoch;
+        }
+
+        public override int GetHashCode()
+        {
+            return SecondsSinceUnixEpoch.GetHashCode();
+        }
     }
 
     static class Extensions
