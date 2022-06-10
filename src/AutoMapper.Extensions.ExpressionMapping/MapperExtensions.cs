@@ -265,12 +265,29 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         private static void AddUnderlyingTypes(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type sourceType, Type destType)
         {
-            typeMappings.DoAddTypeMappings
-            (
-                configurationProvider,
-                !sourceType.HasUnderlyingType() ? new List<Type>() : ElementTypeHelper.GetElementTypes(sourceType).ToList(),
-                !destType.HasUnderlyingType() ? new List<Type>() : ElementTypeHelper.GetElementTypes(destType).ToList()
-            );
+            if (sourceType.IsNullableType() || destType.IsNullableType())
+            {
+                Type underlyingSourceType = Nullable.GetUnderlyingType(sourceType) ?? sourceType;
+                Type underlyingDestType = Nullable.GetUnderlyingType(destType) ?? destType;
+                if (configurationProvider.CheckIfTypeMapExists(underlyingSourceType, underlyingDestType) != null)
+                {
+                    typeMappings.AddTypeMapping
+                    (
+                        configurationProvider,
+                        underlyingSourceType,
+                        underlyingDestType
+                    );
+                }
+            }
+            else
+            {
+                typeMappings.DoAddTypeMappings
+                (
+                    configurationProvider,
+                    !sourceType.HasUnderlyingType() ? new List<Type>() : ElementTypeHelper.GetElementTypes(sourceType).ToList(),
+                    !destType.HasUnderlyingType() ? new List<Type>() : ElementTypeHelper.GetElementTypes(destType).ToList()
+                );
+            }
         }
 
         /// <summary>
