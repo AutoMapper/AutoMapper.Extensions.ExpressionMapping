@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
 using Xunit;
 
 namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
@@ -243,6 +242,37 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Assert
             Assert.NotNull(expMapped);
         }
+
+        [Fact]
+        public void Can_map_struct_with_asymmetric_nullability()
+        {
+            // Arrange
+            var config = new MapperConfiguration(c =>
+            {
+                c.CreateMap<Instant, DateTimeOffset?>()
+                    .ForMember(d => d.HasValue, c => c.MapFrom(_ => true))
+                    .ConvertUsing(i => DateTimeOffset.FromUnixTimeSeconds(i.SecondsSinceUnixEpoch));
+                c.CreateMap<DateTimeOffset?, Instant>().ConvertUsing(d => d.HasValue ? new Instant { SecondsSinceUnixEpoch = d.Value.ToUnixTimeSeconds() } : default);
+                c.CreateMap<DateTimeOffset, Instant>().ConvertUsing(d => new Instant { SecondsSinceUnixEpoch = d.ToUnixTimeSeconds() });
+
+                c.CreateMap<ItemWithInstant, ItemWithDateTimeOffset>();
+                c.CreateMap<ItemWithDateTimeOffset, ItemWithInstant>();
+            });
+
+            config.AssertConfigurationIsValid();
+            var mapper = config.CreateMapper();
+            DateTimeOffset firstReleaseDate = DateTimeOffset.FromUnixTimeSeconds(0);
+            DateTimeOffset lastReleaseDate = DateTimeOffset.FromUnixTimeSeconds(10);
+            Expression<Func<ItemWithDateTimeOffset, bool>> exp = x => x.Date.HasValue && (x.Date >= firstReleaseDate && x.Date <= lastReleaseDate);
+
+            //Act
+            Expression<Func<ItemWithInstant, bool>> expMapped = mapper.MapExpression<Expression<Func<ItemWithInstant, bool>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+            Assert.True(expMapped.Compile()(new ItemWithInstant { Date = new Instant { SecondsSinceUnixEpoch = 7 } }));
+            Assert.False(expMapped.Compile()(new ItemWithInstant { Date = new Instant { SecondsSinceUnixEpoch = 12 } }));
+        }
     }
 
     public struct Source
@@ -458,6 +488,26 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     public struct ItemWithDateLiteral
     {
         public DateTime Date { get; set; }
+    }
+
+    public struct ItemWithDateTimeOffset
+    {
+        public DateTimeOffset? Date { get; set; }
+    }
+
+    public struct ItemWithInstant
+    {
+        public Instant Date { get; set; }
+    }
+
+    public struct Instant
+    {
+        public long SecondsSinceUnixEpoch { get; set; }
+
+        public static bool operator >=(Instant self, Instant other) => self.SecondsSinceUnixEpoch >= other.SecondsSinceUnixEpoch;
+        public static bool operator <=(Instant self, Instant other) => self.SecondsSinceUnixEpoch <= other.SecondsSinceUnixEpoch;
+        public static bool operator !=(Instant self, Instant other) => self.SecondsSinceUnixEpoch != other.SecondsSinceUnixEpoch;
+        public static bool operator ==(Instant self, Instant other) => self.SecondsSinceUnixEpoch == other.SecondsSinceUnixEpoch;
     }
 
     static class Extensions

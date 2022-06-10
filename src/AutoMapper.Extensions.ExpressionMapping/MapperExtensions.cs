@@ -269,7 +269,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             {
                 Type underlyingSourceType = Nullable.GetUnderlyingType(sourceType) ?? sourceType;
                 Type underlyingDestType = Nullable.GetUnderlyingType(destType) ?? destType;
-                if (configurationProvider.CheckIfTypeMapExists(underlyingSourceType, underlyingDestType) != null)
+                if (configurationProvider.Internal().ResolveTypeMap(underlyingSourceType, underlyingDestType) != null)
                 {
                     typeMappings.AddTypeMapping
                     (
