@@ -3,13 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 
 namespace AutoMapper
 {
-#if NET45
-    using System.Reflection.Emit;
-#endif
 
     internal static class TypeExtensions
     {
@@ -127,14 +123,23 @@ namespace AutoMapper
             if (type.IsNullableType())
                 type = Nullable.GetUnderlyingType(type);
 
-            return LiteralTypes.Contains(type);
+            return LiteralTypes.Contains(type) || NonNetStandardLiteralTypes.Contains(type.FullName);
         }
 
         private static HashSet<Type> LiteralTypes => new HashSet<Type>(_literalTypes);
 
+        private static readonly HashSet<string> NonNetStandardLiteralTypes = new()
+        {
+            "System.DateOnly",
+            "Microsoft.OData.Edm.Date",
+            "System.TimeOnly",
+            "Microsoft.OData.Edm.TimeOfDay"
+        };
+
         private static Type[] _literalTypes => new Type[] {
                 typeof(bool),
                 typeof(DateTime),
+                typeof(DateTimeOffset),
                 typeof(TimeSpan),
                 typeof(Guid),
                 typeof(decimal),
