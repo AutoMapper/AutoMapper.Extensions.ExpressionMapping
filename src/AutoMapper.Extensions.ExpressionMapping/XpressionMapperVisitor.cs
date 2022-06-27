@@ -95,11 +95,17 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         mappedParentExpression
                     );
 
+                    if (node.Type.IsLiteralType())
+                        fromCustomExpression = fromCustomExpression.ConvertTypeIfNecessary(node.Type);
+
                     this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, fromCustomExpression.Type);
                     return fromCustomExpression;
                 }
 
-                var memberExpression = GetMemberExpressionFromMemberMaps(BuildFullName(propertyMapInfoList), mappedParentExpression);
+                Expression memberExpression = GetMemberExpressionFromMemberMaps(BuildFullName(propertyMapInfoList), mappedParentExpression);
+                if (node.Type.IsLiteralType())
+                    memberExpression = memberExpression.ConvertTypeIfNecessary(node.Type);
+
                 this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, memberExpression.Type);
 
                 return memberExpression;
@@ -619,6 +625,23 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected void FindDestinationFullName(Type typeSource, Type typeDestination, string sourceFullName, List<PropertyMapInfo> propertyMapInfoList)
         {
+            if (typeSource.IsLiteralType()
+                && typeDestination.IsLiteralType()
+                && typeSource != typeDestination)
+            {
+                throw new InvalidOperationException
+                (
+                    string.Format
+                    (
+                        CultureInfo.CurrentCulture,
+                        Properties.Resources.makeParentTypesMatchForMembersOfLiteralsFormat,
+                        typeSource,
+                        typeDestination,
+                        sourceFullName
+                    )
+                );
+            }
+
             const string period = ".";
             bool BothTypesAreAnonymous()
                 => IsAnonymousType(typeSource) && IsAnonymousType(typeDestination);
@@ -696,25 +719,11 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.GetDestinationName());
                 if (propertyMap.ValueResolverConfig != null)
                 {
-                    throw new InvalidOperationException(Resource.customResolversNotSupported);
+                    throw new InvalidOperationException(Properties.Resources.customResolversNotSupported);
                 }
 
                 if (propertyMap.CustomMapExpression == null && !propertyMap.SourceMembers.Any())
-                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, sourceFullName));
-
-                CompareSourceAndDestLiterals
-                (
-                    propertyMap.CustomMapExpression != null ? propertyMap.CustomMapExpression.ReturnType : propertyMap.SourceMember.GetMemberType(),
-                    propertyMap.CustomMapExpression != null ? propertyMap.CustomMapExpression.ToString() : propertyMap.SourceMember.Name,
-                    sourceMemberInfo.GetMemberType()
-                );
-
-                void CompareSourceAndDestLiterals(Type mappedPropertyType, string mappedPropertyDescription, Type sourceMemberType)
-                {
-                    //switch from IsValueType to IsLiteralType because we do not want to throw an exception for all structs
-                    if ((mappedPropertyType.IsLiteralType() || sourceMemberType.IsLiteralType()) && sourceMemberType != mappedPropertyType)
-                        throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.expressionMapValueTypeMustMatchFormat, mappedPropertyType.Name, mappedPropertyDescription, sourceMemberType.Name, propertyMap.GetDestinationName()));
-                }
+                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Properties.Resources.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, sourceFullName));
 
                 if (propertyMap.IncludedMember?.ProjectToCustomSource != null)
                     propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, new List<MemberInfo>()));
@@ -728,7 +737,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
                 var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.GetDestinationName());
                 if (propertyMap.CustomMapExpression == null && !propertyMap.SourceMembers.Any())//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
-                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, propertyName));
+                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Properties.Resources.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, propertyName));
 
                 if (propertyMap.IncludedMember?.ProjectToCustomSource != null)
                     propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, new List<MemberInfo>()));

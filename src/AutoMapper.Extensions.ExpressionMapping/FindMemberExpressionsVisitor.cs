@@ -30,7 +30,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     if (string.IsNullOrEmpty(result) || next.Contains(result))
                         result = next;
                     else throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                        Resource.includeExpressionTooComplex,
+                        Properties.Resources.includeExpressionTooComplex,
                         string.Concat(_newParentExpression.Type.Name, period, result),
                         string.Concat(_newParentExpression.Type.Name, period, next)));
 
@@ -50,7 +50,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 if (node.Expression.NodeType == ExpressionType.MemberAccess && node.Type.IsLiteralType())
                     _memberExpressions.Add((MemberExpression)node.Expression);
                 else if (node.Expression.NodeType == ExpressionType.Parameter && node.Type.IsLiteralType())
-                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Resource.mappedMemberIsChildOfTheParameterFormat, node.GetPropertyFullName(), node.Type.FullName, sType.FullName));
+                    throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Properties.Resources.mappedMemberIsChildOfTheParameterFormat, node.GetPropertyFullName(), node.Type.FullName, sType.FullName));
                 else
                     _memberExpressions.Add(node);
             }

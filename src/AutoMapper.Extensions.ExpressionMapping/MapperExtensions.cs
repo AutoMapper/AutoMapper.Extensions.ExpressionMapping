@@ -109,7 +109,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             TDestDelegate GetLambda(Dictionary<Type, Type> typeMappings, XpressionMapperVisitor visitor, Expression mappedBody)
             {
                 if (mappedBody == null)
-                    throw new InvalidOperationException(Resource.cantRemapExpression);
+                    throw new InvalidOperationException(Properties.Resources.cantRemapExpression);
 
                 return (TDestDelegate)Lambda
                 (
@@ -255,7 +255,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <returns></returns>
         public static Dictionary<Type, Type> AddTypeMapping<TSource, TDest>(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider)
             => typeMappings == null
-                ? throw new ArgumentException(Resource.typeMappingsDictionaryIsNull)
+                ? throw new ArgumentException(Properties.Resources.typeMappingsDictionaryIsNull)
                 : typeMappings.AddTypeMapping(configurationProvider, typeof(TSource), typeof(TDest));
 
         private static bool HasUnderlyingType(this Type type)
@@ -284,7 +284,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         public static Dictionary<Type, Type> AddTypeMapping(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type sourceType, Type destType)
         {
             if (typeMappings == null)
-                throw new ArgumentException(Resource.typeMappingsDictionaryIsNull);
+                throw new ArgumentException(Properties.Resources.typeMappingsDictionaryIsNull);
 
             if (sourceType.GetTypeInfo().IsGenericType && sourceType.GetGenericTypeDefinition() == typeof(Expression<>))
             {
@@ -357,7 +357,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private static Dictionary<Type, Type> AddTypeMappingsFromDelegates(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type sourceType, Type destType)
         {
             if (typeMappings == null)
-                throw new ArgumentException(Resource.typeMappingsDictionaryIsNull);
+                throw new ArgumentException(Properties.Resources.typeMappingsDictionaryIsNull);
 
             typeMappings.DoAddTypeMappingsFromDelegates
             (
@@ -372,7 +372,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private static void DoAddTypeMappingsFromDelegates(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, List<Type> sourceArguments, List<Type> destArguments)
         {
             if (sourceArguments.Count != destArguments.Count)
-                throw new ArgumentException(Resource.invalidArgumentCount);
+                throw new ArgumentException(Properties.Resources.invalidArgumentCount);
 
             for (int i = 0; i < sourceArguments.Count; i++)
             {
