@@ -8,9 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace AutoMapper.Extensions.ExpressionMapping {
+namespace AutoMapper.Extensions.ExpressionMapping.Properties {
     using System;
-    using System.Reflection;
     
     
     /// <summary>
@@ -20,17 +19,17 @@ namespace AutoMapper.Extensions.ExpressionMapping {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resource {
+    internal class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resource() {
+        internal Resources() {
         }
         
         /// <summary>
@@ -40,7 +39,7 @@ namespace AutoMapper.Extensions.ExpressionMapping {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AutoMapper.Extensions.ExpressionMapping.Resource", typeof(Resource).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("AutoMapper.Extensions.ExpressionMapping.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -89,7 +88,7 @@ namespace AutoMapper.Extensions.ExpressionMapping {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The source and destination types must be the same for expression mapping between value types. Source Type: {0}, Source Description: {1}, Destination Type: {2}, Destination Property: {3}..
+        ///   Looks up a localized string similar to The source and destination types must be the same for expression mapping between literal types. Source Type: {0}, Source Description: {1}, Destination Type: {2}, Destination Property: {3}..
         /// </summary>
         internal static string expressionMapValueTypeMustMatchFormat {
             get {
@@ -121,6 +120,15 @@ namespace AutoMapper.Extensions.ExpressionMapping {
         internal static string invalidExpErr {
             get {
                 return ResourceManager.GetString("invalidExpErr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For members of literal types, use IMappingExpression.ForMember() to make the parent property types an exact match. Parent Source Type: {0}, Parent Destination Type: {1}, Full Member Name &quot;{2}&quot;..
+        /// </summary>
+        internal static string makeParentTypesMatchForMembersOfLiteralsFormat {
+            get {
+                return ResourceManager.GetString("makeParentTypesMatchForMembersOfLiteralsFormat", resourceCulture);
             }
         }
         
