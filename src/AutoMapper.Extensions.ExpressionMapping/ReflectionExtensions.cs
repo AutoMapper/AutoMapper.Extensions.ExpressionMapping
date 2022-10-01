@@ -11,9 +11,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
     internal static class ReflectionExtensions
     {
-        public static object GetDefaultValue(this ParameterInfo parameter)
-            => ReflectionHelper.GetDefaultValue(parameter);
-
         public static object MapMember(this ResolutionContext context, MemberInfo member, object value, object destination = null)
             => ReflectionHelper.MapMember(context, member, value, destination);
 
