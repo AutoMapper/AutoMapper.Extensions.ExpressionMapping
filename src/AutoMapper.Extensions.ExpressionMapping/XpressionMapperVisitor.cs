@@ -388,7 +388,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private MemberInfo GetSourceMember(PropertyMap propertyMap)
             => propertyMap.CustomMapExpression != null
                 ? propertyMap.CustomMapExpression.GetMemberExpression()?.Member
-                : propertyMap.SourceMember;
+                : propertyMap.SourceMembers.Last();
 
         private MemberInfo GetParentMember(PropertyMap propertyMap)
             => propertyMap.IncludedMember?.ProjectToCustomSource != null
@@ -717,10 +717,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
             {
                 var propertyMap = typeMap.GetMemberMapByDestinationProperty(sourceFullName);
                 var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.GetDestinationName());
-                if (propertyMap.ValueResolverConfig != null)
-                {
-                    throw new InvalidOperationException(Properties.Resources.customResolversNotSupported);
-                }
 
                 if (propertyMap.CustomMapExpression == null && !propertyMap.SourceMembers.Any())
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Properties.Resources.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, sourceFullName));
@@ -746,7 +742,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 var childFullName = sourceFullName.Substring(sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) + 1);
 
                 FindDestinationFullName(sourceMemberInfo.GetMemberType(), propertyMap.CustomMapExpression == null
-                    ? propertyMap.SourceMember.GetMemberType()
+                    ? propertyMap.SourceMembers.Last().GetMemberType()
                     : propertyMap.CustomMapExpression.ReturnType, childFullName, propertyMapInfoList);
             }
         }

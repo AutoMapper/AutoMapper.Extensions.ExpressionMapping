@@ -396,7 +396,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private static Type GetSourceMemberType(this PropertyMap propertyMap)
             => propertyMap.CustomMapExpression != null
                 ? propertyMap.CustomMapExpression.ReturnType
-                : propertyMap.SourceMember.GetMemberType();
+                : propertyMap.SourceMembers.Last().GetMemberType();
 
         private static void FindChildPropertyTypeMaps(this Dictionary<Type, Type> typeMappings, IConfigurationProvider ConfigurationProvider, Type source, Type dest)
         {
