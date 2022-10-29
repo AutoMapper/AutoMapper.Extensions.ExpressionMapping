@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using AutoMapper.Internal;
 using AutoMapper.Extensions.ExpressionMapping.Extensions;
 using AutoMapper.Extensions.ExpressionMapping.Structures;
 
@@ -18,6 +16,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitLambda<T>(Expression<T> node)
         {
+            if (!node.Body.Type.IsLiteralType())
+                return base.VisitLambda(node);
+
             var ex = this.Visit(node.Body);
 
             var mapped = Expression.Lambda(ex, node.GetDestinationParameterExpressions(this.InfoDictionary, this.TypeMappings));
@@ -27,6 +28,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitMember(MemberExpression node)
         {
+            if (!node.Type.IsLiteralType())
+                return base.VisitMember(node);
+
             var parameterExpression = node.GetParameterExpression();
             if (parameterExpression == null)
                 return base.VisitMember(node);

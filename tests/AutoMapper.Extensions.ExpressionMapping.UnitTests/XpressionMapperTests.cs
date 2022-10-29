@@ -147,6 +147,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Assert.True(cars.Count == 4);
         }
 
+        private static bool IncludeTest<T, TProperty>(IQueryable<T> model, Expression<Func<T, TProperty>> navigationPropertyPath)
+        {
+            return !model.Equals(navigationPropertyPath);
+        }
+
+        [Fact]
+        public void Map_includes_with_include_method_call()
+        {
+            Expression<Func<IQueryable<PurchaseOrderDTO>, bool>> selection = s => IncludeTest(s, s => s.ValidLines);
+            var expression = mapper.MapExpressionAsInclude<Expression<Func<IQueryable<PurchaseOrder>, bool>>>(selection);
+
+            Assert.True(expression.Compile()(new List<PurchaseOrder>() { new PurchaseOrder() }.AsQueryable()));
+        }
+
         [Fact]
         public void Map_object_type_change()
         {
@@ -625,8 +639,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Act
             Expression<Func<IQueryable<User>, IEnumerable<object>>> expMapped = (Expression<Func<IQueryable<User>, IEnumerable<object>>>)mapper.MapExpression
             (
-                grouped, 
-                typeof(Expression<Func<IQueryable<UserModel>, IEnumerable<object>>>), 
+                grouped,
+                typeof(Expression<Func<IQueryable<UserModel>, IEnumerable<object>>>),
                 typeof(Expression<Func<IQueryable<User>, IEnumerable<object>>>)
             );
 
@@ -1019,7 +1033,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             Assert.Equal
             (//parameters ch and c are of the same type
-                "c => ((c.Finished == null) AndAlso Not(c.Part.History.Any(ch => (ch.Started > c.Started))))", 
+                "c => ((c.Finished == null) AndAlso Not(c.Part.History.Any(ch => (ch.Started > c.Started))))",
                 mappedExpression.ToString()
             );
         }
@@ -1094,7 +1108,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                             new Thing { Bar = "Bar4", Car = new Car { Color = "White", Year = 2015 } }
                         },
                         Type = "Business",
-                        Users = new User[] 
+                        Users = new User[]
                         {
                             new User
                             {
@@ -1265,6 +1279,16 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         bool IsActive { get; set; }
     }
 
+    public class PurchaseOrder
+    {
+        public IList<OrderLine> Lines { get; set; }
+    }
+
+    public class PurchaseOrderDTO
+    {
+        public IEnumerable<OrderLineDTO> ValidLines { get; set; }
+    }
+
     public class OrderLine
     {
         public int Id { get; set; }
@@ -1415,7 +1439,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public string Name { get; set; }
     }
 
-    class ListParentExtension 
+    class ListParentExtension
     {
         public ListExtension List { get; set; }
     }
@@ -1587,6 +1611,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             CreateMap<Item, ItemDto>()
                 .ForMember(dest => dest.CreateDate, opts => opts.MapFrom(x => x.Date));
+
+            CreateMap<PurchaseOrder, PurchaseOrderDTO>()
+                .ForMember(d => d.ValidLines, opt => opt.MapFrom(s => s.Lines.Where(l => l.Quantity > 0)));
 
             CreateMap<OrderLine, ItemDTO>()
                 .ForMember(dto => dto.Name, conf => conf.MapFrom(src => src.ItemName));
