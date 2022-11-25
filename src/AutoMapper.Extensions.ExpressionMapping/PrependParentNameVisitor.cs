@@ -18,6 +18,18 @@ namespace AutoMapper.Extensions.ExpressionMapping
         public string ParentFullName { get; }
         public Expression NewParameter { get; }
 
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            if (object.ReferenceEquals(CurrentParameter, node))
+            {
+                return string.IsNullOrEmpty(ParentFullName)
+                        ? NewParameter
+                        : ExpressionHelpers.MemberAccesses(ParentFullName, NewParameter);
+            }
+
+            return base.VisitParameter(node);
+        }
+
         protected override Expression VisitTypeBinary(TypeBinaryExpression node)
         {
             if (!(node.Expression is ParameterExpression))
