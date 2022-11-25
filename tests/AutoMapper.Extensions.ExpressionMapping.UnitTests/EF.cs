@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
+﻿namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 {
     internal class EF
     {
-        internal static object Property<T>(object p, string v)
+        internal static T Property<T>(object p, string v)
         {
-            throw new NotImplementedException();
+            return default;
         }
     }
 }

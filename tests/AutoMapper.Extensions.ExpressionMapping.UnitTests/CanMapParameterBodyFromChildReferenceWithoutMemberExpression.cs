@@ -33,7 +33,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var mappedExpression = mapper.MapExpression<Expression<Func<TestProduct, bool>>>(expr);
 
             //Assert
-            Assert.Equal("x => (Convert(Property(x.Category, \"BrandId\"), Int32) == 2)", mappedExpression.ToString());
+            Assert.Equal("x => (Property(x.Category, \"BrandId\") == 2)", mappedExpression.ToString());
         }
 
         public class TestCategory
