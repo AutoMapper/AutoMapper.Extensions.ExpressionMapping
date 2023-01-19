@@ -19,14 +19,8 @@ jobs:
     - name: Add AutoMapper Myget Source
       run: dotnet nuget add source https://www.myget.org/F/automapperdev/api/v3/index.json -n automappermyget
 
-    - name: Restore
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test --configuration Release --verbosity normal
 
     - name: Pack and push
       env:
