@@ -14,14 +14,8 @@ jobs:
       with:
         fetch-depth: 0
 
-    - name: Restore
-      run: dotnet restore
-
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-
     - name: Test
-      run: dotnet test --no-restore --verbosity normal
+      run: dotnet test --configuration Release --verbosity normal
 
     - name: Pack and push
       env:
