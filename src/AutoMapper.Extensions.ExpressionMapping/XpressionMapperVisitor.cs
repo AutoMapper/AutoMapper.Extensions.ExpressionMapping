@@ -511,12 +511,13 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
+            Type newType = this.TypeMappings.ReplaceType(node.Type);
+            if (newType != node.Type)
             {
                 if (node.Value == null)
                     return base.VisitConstant(Expression.Constant(null, newType));
 
-                if (ConfigurationProvider.Internal().ResolveTypeMap(node.Type, newType) != null)
+                if (ConfigurationProvider.CanMapConstant(node.Type, newType))
                     return base.VisitConstant(Expression.Constant(Mapper.MapObject(node.Value, node.Type, newType), newType));
                 //Issue 3455 (Non-Generic Mapper.Map failing for structs in v10)
                 //return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
@@ -553,7 +554,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             MethodCallExpression GetInstanceExpression(Expression instance)
                 => node.Method.IsGenericMethod
                     ? Expression.Call(instance, node.Method.Name, typeArgsForNewMethod.ToArray(), listOfArgumentsForNewMethod.ToArray())
-                    : Expression.Call(instance, node.Method, listOfArgumentsForNewMethod.ToArray());
+                    : Expression.Call(instance, instance.Type.GetMethod(node.Method.Name, listOfArgumentsForNewMethod.Select(a => a.Type).ToArray()), listOfArgumentsForNewMethod.ToArray());
 
             MethodCallExpression GetStaticExpression()
                 => node.Method.IsGenericMethod

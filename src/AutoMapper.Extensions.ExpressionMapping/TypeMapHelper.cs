@@ -6,6 +6,50 @@ namespace AutoMapper.Extensions.ExpressionMapping
 {
     internal static class TypeMapHelper
     {
+        public static bool CanMapConstant(this IConfigurationProvider config, Type sourceType, Type destType)
+        {
+            if (sourceType == destType)
+                return false;
+
+            if (BothTypesAreDictionary())
+            {
+                Type[] sourceGenericTypes = sourceType.GetGenericArguments();
+                Type[] destGenericTypes = destType.GetGenericArguments();
+                if (sourceGenericTypes.SequenceEqual(destGenericTypes))
+                    return false;
+                else if (sourceGenericTypes[0] == destGenericTypes[0])
+                    return config.CanMapConstant(sourceGenericTypes[1], destGenericTypes[1]);
+                else if (sourceGenericTypes[1] == destGenericTypes[1])
+                    return config.CanMapConstant(sourceGenericTypes[0], destGenericTypes[0]);
+                else
+                    return config.CanMapConstant(sourceGenericTypes[0], destGenericTypes[0]) && config.CanMapConstant(sourceGenericTypes[1], destGenericTypes[1]);
+            }
+            else if (BothTypesAreEnumerable())
+                return config.CanMapConstant(sourceType.GetGenericArguments()[0], destType.GetGenericArguments()[0]);
+            else
+                return config.Internal().ResolveTypeMap(sourceType, destType) != null;
+
+            bool BothTypesAreEnumerable()
+            {
+                Type enumerableType = typeof(System.Collections.IEnumerable);
+                return sourceType.IsGenericType
+                    && destType.IsGenericType
+                    && enumerableType.IsAssignableFrom(sourceType)
+                    && enumerableType.IsAssignableFrom(destType);
+            }
+
+            bool BothTypesAreDictionary()
+            {
+                Type dictionaryType = typeof(System.Collections.IDictionary);
+                return sourceType.IsGenericType
+                    && destType.IsGenericType
+                    && dictionaryType.IsAssignableFrom(sourceType)
+                    && dictionaryType.IsAssignableFrom(destType)
+                    && sourceType.GetGenericArguments().Length == 2
+                    && destType.GetGenericArguments().Length == 2;
+            }
+        }
+
         public static MemberMap GetMemberMapByDestinationProperty(this TypeMap typeMap, string destinationPropertyName)
         {
             var propertyMap = typeMap.PropertyMaps.SingleOrDefault(item => item.DestinationName == destinationPropertyName);
