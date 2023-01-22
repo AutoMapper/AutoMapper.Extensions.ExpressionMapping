@@ -9,6 +9,37 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     public class CanMapExpressionWithListConstants
     {
         [Fact]
+        public void Map_expression_with_constant_array()
+        {
+            //Arrange
+            var config = new MapperConfiguration
+            (
+                cfg =>
+                {
+                    cfg.CreateMap<EntityModel, Entity>();
+                    cfg.CreateMap<Entity, EntityModel>();
+                }
+            );
+            config.AssertConfigurationIsValid();
+            var mapper = config.CreateMapper();
+            List<EntityModel> source1 = new() {
+                new EntityModel { SimpleEnum = SimpleEnumModel.Value3 }
+            };
+            List<EntityModel> source2 = new() {
+                new EntityModel { SimpleEnum = SimpleEnumModel.Value1 }
+            };
+            Entity[] entities = new Entity[]  { new Entity { SimpleEnum = SimpleEnum.Value1 }, new Entity { SimpleEnum = SimpleEnum.Value2 } };
+            Expression<Func<Entity, bool>> filter = e => entities.Any(en => e.SimpleEnum == en.SimpleEnum);
+
+            //act
+            Expression<Func<EntityModel, bool>> mappedFilter = mapper.MapExpression<Expression<Func<EntityModel, bool>>>(filter);
+
+            //assert
+            Assert.False(source1.AsQueryable().Any(mappedFilter));
+            Assert.True(source2.AsQueryable().Any(mappedFilter));
+        }
+
+        [Fact]
         public void Map_expression_with_constant_list_using_generic_list_dot_contains()
         {
             //Arrange

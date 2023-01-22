@@ -24,6 +24,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 else
                     return config.CanMapConstant(sourceGenericTypes[0], destGenericTypes[0]) && config.CanMapConstant(sourceGenericTypes[1], destGenericTypes[1]);
             }
+            else if (sourceType.IsArray && destType.IsArray)
+                return config.CanMapConstant(sourceType.GetElementType(), destType.GetElementType());
             else if (BothTypesAreEnumerable())
                 return config.CanMapConstant(sourceType.GetGenericArguments()[0], destType.GetGenericArguments()[0]);
             else

@@ -335,22 +335,39 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <returns></returns>
         public static Type ReplaceType(this Dictionary<Type, Type> typeMappings, Type sourceType)
         {
-            if (!sourceType.IsGenericType)
+            if (sourceType.IsArray)
             {
-                return typeMappings.TryGetValue(sourceType, out Type destType) ? destType : sourceType;
+                if (typeMappings.TryGetValue(sourceType, out Type destType))
+                    return destType;
+
+                if (typeMappings.TryGetValue(sourceType.GetElementType(), out Type destElementType))
+                {
+                    int rank = sourceType.GetArrayRank();
+                    return rank == 1 
+                        ? destElementType.MakeArrayType()
+                        : destElementType.MakeArrayType(rank);
+                }
+
+                return sourceType;
             }
-            else
+            else if (sourceType.IsGenericType)
             {
                 if (typeMappings.TryGetValue(sourceType, out Type destType))
                     return destType;
                 else
+                {
                     return sourceType.GetGenericTypeDefinition().MakeGenericType
                     (
                         sourceType
                         .GetGenericArguments()
-                        .Select(type => typeMappings.ReplaceType(type))
+                        .Select(typeMappings.ReplaceType)
                         .ToArray()
                     );
+                }
+            }
+            else
+            {
+                return typeMappings.TryGetValue(sourceType, out Type destType) ? destType : sourceType;
             }
         }
 
