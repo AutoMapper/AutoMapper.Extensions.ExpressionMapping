@@ -48,7 +48,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 cfg =>
                 {
                     cfg.CreateMap<EntityModel, Entity>();
-                    cfg.CreateMap<SimpleEnum, SimpleEnumModel>();
                 }
             );
             config.AssertConfigurationIsValid();
@@ -79,7 +78,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 cfg =>
                 {
                     cfg.CreateMap<EntityModel, Entity>();
-                    cfg.CreateMap<SimpleEnum, SimpleEnumModel>();
                 }
             );
             config.AssertConfigurationIsValid();
@@ -110,7 +108,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 cfg =>
                 {
                     cfg.CreateMap<EntityModel, Entity>();
-                    cfg.CreateMap<SimpleEnum, SimpleEnumModel>();
                 }
             );
             config.AssertConfigurationIsValid();
@@ -142,7 +139,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 {
                     cfg.CreateMap<EntityModel, Entity>();
                     cfg.CreateMap<Entity, EntityModel>();
-                    cfg.CreateMap<SimpleEnum, SimpleEnumModel>();
                 }
             );
             config.AssertConfigurationIsValid();

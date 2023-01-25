@@ -28,8 +28,13 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return config.CanMapConstant(sourceType.GetElementType(), destType.GetElementType());
             else if (BothTypesAreEnumerable())
                 return config.CanMapConstant(sourceType.GetGenericArguments()[0], destType.GetGenericArguments()[0]);
+            else if (BothTypesAreEnums())
+                return true;
             else
                 return config.Internal().ResolveTypeMap(sourceType, destType) != null;
+
+            bool BothTypesAreEnums()
+                => sourceType.IsEnum && destType.IsEnum;
 
             bool BothTypesAreEnumerable()
             {
