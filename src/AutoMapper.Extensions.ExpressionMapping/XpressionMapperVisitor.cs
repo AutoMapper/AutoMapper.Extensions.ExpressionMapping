@@ -431,6 +431,17 @@ namespace AutoMapper.Extensions.ExpressionMapping
             {
                 if (newLeft != node.Left || newRight != node.Right || conversion != node.Conversion)
                 {
+                    if(node.Left.Type.IsEnum && node.Right.Type.IsEnum)
+                    {
+                        if (newLeft.Type.IsEnum && !newRight.Type.IsEnum)
+                        {
+                            newLeft = Expression.Convert(newLeft, newRight.Type);
+                        }
+                        else if (!newLeft.Type.IsEnum && newRight.Type.IsEnum)
+                        {
+                            newRight = Expression.Convert(newRight, newLeft.Type);
+                        }
+                    }
                     if (node.NodeType == ExpressionType.Coalesce && node.Conversion != null)
                         return Expression.Coalesce(newLeft, newRight, conversion as LambdaExpression);
                     else
