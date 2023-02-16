@@ -431,17 +431,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
             {
                 if (newLeft != node.Left || newRight != node.Right || conversion != node.Conversion)
                 {
-                    if(node.Left.Type.IsEnum && node.Right.Type.IsEnum)
-                    {
-                        if (newLeft.Type.IsEnum && !newRight.Type.IsEnum)
-                        {
-                            newLeft = Expression.Convert(newLeft, newRight.Type);
-                        }
-                        else if (!newLeft.Type.IsEnum && newRight.Type.IsEnum)
-                        {
-                            newRight = Expression.Convert(newRight, newLeft.Type);
-                        }
-                    }
                     if (node.NodeType == ExpressionType.Coalesce && node.Conversion != null)
                         return Expression.Coalesce(newLeft, newRight, conversion as LambdaExpression);
                     else
@@ -530,10 +519,16 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
                 if (ConfigurationProvider.CanMapConstant(node.Type, newType))
                     return base.VisitConstant(Expression.Constant(Mapper.MapObject(node.Value, node.Type, newType), newType));
+
+                else if (BothEnumOrLiteral())
+                    return node.ConvertTypeIfNecessary(newType);
                 //Issue 3455 (Non-Generic Mapper.Map failing for structs in v10)
                 //return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
             }
             return base.VisitConstant(node);
+
+            bool BothEnumOrLiteral()
+                    => (node.Type.IsLiteralType() || node.Type.IsEnumType()) && (newType.IsLiteralType() || newType.IsEnumType());
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
