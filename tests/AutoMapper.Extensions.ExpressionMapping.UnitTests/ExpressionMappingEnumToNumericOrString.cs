@@ -130,34 +130,15 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                     config.CreateMap<SimpleEnumUInt, string>().ConvertUsing(e => e.ToString());
                     config.CreateMap<SimpleEnumLong, string>().ConvertUsing(e => e.ToString());
                     config.CreateMap<SimpleEnumULong, string>().ConvertUsing(e => e.ToString());
+
+                    config.CreateMap<ComplexEntity, ComplexEntityDto>()
+.ForMember(dest => dest.intToEnum, config => config.MapFrom(src => src.intToEnum))
+.ForMember(dest => dest.enumToEnum, config => config.MapFrom(src => src.enumToEnum))
+.ForMember(dest => dest.enumToInt, config => config.MapFrom(src => src.enumToInt))
+.ForMember(dest => dest.intToInt, config => config.MapFrom(src => src.intToInt))
+.ReverseMap();
                 });
             }
-        }
-
-        [Fact]
-        public void BinaryExpressionOfEnumsToInt()
-        {
-            Expression<Func<Entity<int>, bool>> mappedExpression;
-            {
-                var param = Expression.Parameter(typeof(EntityDto<SimpleEnumInt>), "x");
-                var property = Expression.Property(param, nameof(EntityDto<SimpleEnumInt>.Value));
-                var constant = Expression.Constant(SimpleEnumInt.Value2, typeof(SimpleEnumInt));
-                var binaryExpression = Expression.Equal(property, constant);
-                var lambdaExpression = Expression.Lambda(binaryExpression, param);
-                mappedExpression = Mapper.Map<Expression<Func<Entity<int>, bool>>>(lambdaExpression);
-            }
-
-            Expression<Func<Entity<int>, bool>> translatedExpression = translatedExpression = x => x.Value == 2;
-
-            var mappedExpressionDelegate = mappedExpression.Compile();
-            var translatedExpressionDelegate = translatedExpression.Compile();
-
-            var entity = new Entity<int> { Value = (int)SimpleEnumInt.Value2 };
-            var mappedResult = mappedExpressionDelegate(entity);
-            var translatedResult = translatedExpressionDelegate(entity);
-
-            Assert.True(translatedResult);
-            Assert.Equal(mappedResult, translatedResult);
         }
 
         [Theory]
@@ -217,72 +198,72 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Assert.Equal(result, correctResult);
         }
 
-  
-
-        [Theory]
-        [InlineData(SimpleEnumSByte.Value2, (sbyte)1)]
-        [InlineData(SimpleEnumByte.Value2, (byte)1)]
-        [InlineData(SimpleEnumShort.Value2, (short)1)]
-        [InlineData(SimpleEnumUShort.Value2, (ushort)1)]
-        [InlineData(SimpleEnumInt.Value2, 1)]
-        [InlineData(SimpleEnumUInt.Value2, 1U)]
-        [InlineData(SimpleEnumLong.Value2, 1L)]
-        [InlineData(SimpleEnumULong.Value2, 1UL)]
-        public void BinaryExpressionEqualsFalse<TEnum, TNumeric>(TEnum twoAsEnum, TNumeric oneAsNumeric)
-    where TEnum : Enum
+        private class ComplexEntity
         {
-            Expression<Func<Entity<TNumeric>, bool>> mappedExpression;
-            {
-                var param = Expression.Parameter(typeof(EntityDto<TEnum>), "x");
-                var property = Expression.Property(param, nameof(EntityDto<TEnum>.Value));
-                var constantExp = Expression.Constant(twoAsEnum, typeof(TEnum));
-                var binaryExpression = Expression.Equal(property, constantExp);
-                var lambdaExpression = Expression.Lambda(binaryExpression, param);
-                mappedExpression = Mapper.Map<Expression<Func<Entity<TNumeric>, bool>>>(lambdaExpression);
-            }
-            var mappedExpressionDelegate = mappedExpression.Compile();
-            var entity = new Entity<TNumeric> { Value = oneAsNumeric };
-            var result = mappedExpressionDelegate(entity);
-
-            Assert.False(result);
+            public int intToEnum { get; set; }
+            public SimpleEnumInt enumToInt { get; set; }
+            public SimpleEnumInt enumToEnum { get; set; }
+            public int intToInt { get; set; }
         }
 
-        [Theory]
-        [InlineData(SimpleEnumSByte.Value2)]
-        [InlineData(SimpleEnumByte.Value2)]
-        [InlineData(SimpleEnumShort.Value2)]
-        [InlineData(SimpleEnumUShort.Value2)]
-        [InlineData(SimpleEnumInt.Value2)]
-        [InlineData(SimpleEnumUInt.Value2)]
-        [InlineData(SimpleEnumLong.Value2)]
-        [InlineData(SimpleEnumULong.Value2)]
-        public void BinaryExpressionEqualsWithString<TEnum>(TEnum twoAsEnum)
-    where TEnum : Enum
+        private class ComplexEntityDto
         {
+            public SimpleEnumInt intToEnum { get; set; }
+            public int enumToInt { get; set; }
 
-            var constant = typeof(TEnum).GetEnumValues().GetValue(1);
-            Expression<Func<Entity<string>, bool>> mappedExpression;
+            public SimpleEnumInt enumToEnum { get; set; }
+            public int intToInt { get; set; }
+        }
+
+        [Fact]
+        public void BinaryExpressionPartialTranslation()
+        {
+            Expression<Func<ComplexEntityDto, bool>> mappedExpression;
             {
-                var param = Expression.Parameter(typeof(EntityDto<TEnum>), "x");
-                var property = Expression.Property(param, nameof(EntityDto<TEnum>.Value));
-                var constantExp = Expression.Constant(constant);
-                var binaryExpression = Expression.Equal(property, constantExp);
-                var lambdaExpression = Expression.Lambda(binaryExpression, param);
-                mappedExpression = Mapper.Map<Expression<Func<Entity<string>, bool>>>(lambdaExpression);
+                var param = Expression.Parameter(typeof(ComplexEntity), "x");
+                var property1 = Expression.Property(param, nameof(ComplexEntity.intToEnum));
+                var property2 = Expression.Property(param, nameof(ComplexEntity.intToInt));
+                var property5 = Expression.Property(param, nameof(ComplexEntity.enumToEnum));
+                var property6 = Expression.Property(param, nameof(ComplexEntity.enumToInt));
+
+                var constant1 = Expression.Constant(2, typeof(int));
+                var constant2 = Expression.Constant(1, typeof(int));
+                var constant5 = Expression.Constant(SimpleEnumInt.Value3, typeof(SimpleEnumInt));
+                var constant6 = Expression.Constant(SimpleEnumInt.Value2, typeof(SimpleEnumInt));
+
+                Expression[] equals = new Expression[]{
+                    Expression.Equal(property1, constant1),
+                    Expression.Equal(property2, constant2),
+                    Expression.Equal(property5, constant5),
+                    Expression.Equal(property6, constant6),
+                };
+
+                Expression andExpression = equals[0];
+                for (int i = 1; i < equals.Length; i++)
+                {
+                    andExpression = Expression.And(andExpression, equals[i]);
+                }
+                var lambdaExpression = Expression.Lambda(andExpression, param);
+                mappedExpression = Mapper.Map<Expression<Func<ComplexEntityDto, bool>>>(lambdaExpression);
             }
 
+            Expression<Func<ComplexEntityDto, bool>> translatedExpression =
+                translatedExpression = x =>
+                x.intToEnum == SimpleEnumInt.Value2
+                && x.intToInt == (int)SimpleEnumInt.Value1
+                && x.enumToEnum == SimpleEnumInt.Value3
+                && x.enumToInt == (int)SimpleEnumInt.Value2
+                ;
+
             var mappedExpressionDelegate = mappedExpression.Compile();
+            var translatedExpressionDelegate = translatedExpression.Compile();
 
-            var entity = new Entity<string> { Value =  constant.ToString()};
-            var result = mappedExpressionDelegate(entity);
+            var entity = new ComplexEntityDto { intToEnum = SimpleEnumInt.Value2, intToInt = 1, enumToEnum = SimpleEnumInt.Value3, enumToInt = 2 };
+            var mappedResult = mappedExpressionDelegate(entity);
+            var translatedResult = translatedExpressionDelegate(entity);
 
-            Assert.True(result);
-
-            var notEqualConstant = typeof(TEnum).GetEnumValues().GetValue(2);
-            entity = new Entity<string> { Value = notEqualConstant.ToString() };
-            result = mappedExpressionDelegate(entity);
-
-            Assert.False(result);
+            Assert.True(translatedResult);
+            Assert.Equal(mappedResult, translatedResult);
         }
     }
 }
