@@ -95,7 +95,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         mappedParentExpression
                     );
 
-                    if (node.Type.IsLiteralType())
+                    if (ShouldConvertMemberExpression(node.Type, fromCustomExpression.Type))
                         fromCustomExpression = fromCustomExpression.ConvertTypeIfNecessary(node.Type);
 
                     this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, fromCustomExpression.Type);
@@ -103,7 +103,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 }
 
                 Expression memberExpression = GetMemberExpressionFromMemberMaps(BuildFullName(propertyMapInfoList), mappedParentExpression);
-                if (node.Type.IsLiteralType())
+                if (ShouldConvertMemberExpression(node.Type, memberExpression.Type))
                     memberExpression = memberExpression.ConvertTypeIfNecessary(node.Type);
 
                 this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, memberExpression.Type);
@@ -138,6 +138,23 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         ? lastWithCustExpression.CustomExpression.Body.MemberAccesses(afterCustExpression)
                         : lastWithCustExpression.CustomExpression.Body
                 );
+        }
+
+        private bool ShouldConvertMemberExpression(Type initialType, Type mappedType)
+        {
+            if (initialType.IsLiteralType())
+                return true;
+
+            if (!initialType.IsEnumType())
+                return false;
+
+            if (initialType.IsNullableType())
+                initialType = Nullable.GetUnderlyingType(initialType);
+
+            if (mappedType.IsNullableType())
+                initialType = Nullable.GetUnderlyingType(mappedType);
+
+            return mappedType == Enum.GetUnderlyingType(initialType);
         }
 
         protected Expression GetMemberExpressionFromCustomExpression(List<PropertyMapInfo> propertyMapInfoList, PropertyMapInfo lastWithCustExpression, Expression mappedParentExpr) 
@@ -519,16 +536,10 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
                 if (ConfigurationProvider.CanMapConstant(node.Type, newType))
                     return base.VisitConstant(Expression.Constant(Mapper.MapObject(node.Value, node.Type, newType), newType));
-
-                else if (BothEnumOrLiteral())
-                    return node.ConvertTypeIfNecessary(newType);
                 //Issue 3455 (Non-Generic Mapper.Map failing for structs in v10)
                 //return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
             }
             return base.VisitConstant(node);
-
-            bool BothEnumOrLiteral()
-                    => (node.Type.IsLiteralType() || node.Type.IsEnumType()) && (newType.IsLiteralType() || newType.IsEnumType());
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
