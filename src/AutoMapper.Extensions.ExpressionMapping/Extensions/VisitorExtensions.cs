@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using AutoMapper.Extensions.ExpressionMapping.Structures;
+using AutoMapper.Internal;
 
 namespace AutoMapper.Extensions.ExpressionMapping.Extensions
 {
@@ -202,5 +203,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             type == null || !type.GetTypeInfo().IsGenericType
             ? new List<Type>()
             : type.GetGenericArguments().ToList();
+
+        public static bool IsEnumType(this Type type)
+        {
+            if (type.IsNullableType())
+                type = Nullable.GetUnderlyingType(type);
+            
+            return type.IsEnum();
+        }
     }
 }

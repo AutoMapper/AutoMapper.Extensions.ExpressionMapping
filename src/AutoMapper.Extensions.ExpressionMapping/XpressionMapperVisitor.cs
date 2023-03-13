@@ -95,7 +95,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         mappedParentExpression
                     );
 
-                    if (node.Type.IsLiteralType())
+                    if (ShouldConvertMemberExpression(node.Type, fromCustomExpression.Type))
                         fromCustomExpression = fromCustomExpression.ConvertTypeIfNecessary(node.Type);
 
                     this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, fromCustomExpression.Type);
@@ -103,7 +103,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 }
 
                 Expression memberExpression = GetMemberExpressionFromMemberMaps(BuildFullName(propertyMapInfoList), mappedParentExpression);
-                if (node.Type.IsLiteralType())
+                if (ShouldConvertMemberExpression(node.Type, memberExpression.Type))
                     memberExpression = memberExpression.ConvertTypeIfNecessary(node.Type);
 
                 this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, memberExpression.Type);
@@ -138,6 +138,23 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         ? lastWithCustExpression.CustomExpression.Body.MemberAccesses(afterCustExpression)
                         : lastWithCustExpression.CustomExpression.Body
                 );
+        }
+
+        private bool ShouldConvertMemberExpression(Type initialType, Type mappedType)
+        {
+            if (initialType.IsLiteralType())
+                return true;
+
+            if (!initialType.IsEnumType())
+                return false;
+
+            if (initialType.IsNullableType())
+                initialType = Nullable.GetUnderlyingType(initialType);
+
+            if (mappedType.IsNullableType())
+                initialType = Nullable.GetUnderlyingType(mappedType);
+
+            return mappedType == Enum.GetUnderlyingType(initialType);
         }
 
         protected Expression GetMemberExpressionFromCustomExpression(List<PropertyMapInfo> propertyMapInfoList, PropertyMapInfo lastWithCustExpression, Expression mappedParentExpr) 
