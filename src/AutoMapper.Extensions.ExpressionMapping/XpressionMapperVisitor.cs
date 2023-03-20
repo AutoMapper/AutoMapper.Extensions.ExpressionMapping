@@ -152,7 +152,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 initialType = Nullable.GetUnderlyingType(initialType);
 
             if (mappedType.IsNullableType())
-                initialType = Nullable.GetUnderlyingType(mappedType);
+                mappedType = Nullable.GetUnderlyingType(mappedType);
 
             return mappedType == Enum.GetUnderlyingType(initialType);
         }

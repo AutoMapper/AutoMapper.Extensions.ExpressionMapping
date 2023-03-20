@@ -88,6 +88,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                     config.CreateMap<Entity<int>, EntityDto<SimpleEnumInt>>()
                     .ForMember(dest => dest.Value, config => config.MapFrom(src => src.Value))
                     .ReverseMap();
+                     config.CreateMap<Entity<int?>, EntityDto<SimpleEnumInt>>()
+                    .ForMember(dest => dest.Value, config => config.MapFrom(src => src.Value))
+                    .ReverseMap();
                     config.CreateMap<Entity<uint>, EntityDto<SimpleEnumUInt>>()
                     .ForMember(dest => dest.Value, config => config.MapFrom(src => src.Value))
                     .ReverseMap();
@@ -196,6 +199,29 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var result = mappedExpressionDelegate(entity);
 
             Assert.Equal(result, correctResult);
+        }
+
+        [Fact]
+        public void BinaryExpressionEqualsWithNullable()
+        {
+            SimpleEnumInt enumConstant = SimpleEnumInt.Value2;
+            int? numericConstant = 2;
+            Expression<Func<Entity<int?>, bool>> mappedExpression;
+            {
+                var param = Expression.Parameter(typeof(EntityDto<SimpleEnumInt>), "x");
+                var property = Expression.Property(param, nameof(EntityDto<SimpleEnumInt>.Value));
+                var constantExp = Expression.Constant(enumConstant, typeof(SimpleEnumInt));
+                var binaryExpression = Expression.Equal(property, constantExp);
+                var lambdaExpression = Expression.Lambda(binaryExpression, param);
+                mappedExpression = Mapper.Map<Expression<Func<Entity<int?>, bool>>>(lambdaExpression);
+            }
+
+            var mappedExpressionDelegate = mappedExpression.Compile();
+
+            var entity = new Entity<int?> { Value = numericConstant };
+            var result = mappedExpressionDelegate(entity);
+
+            Assert.True(result);
         }
 
         private class ComplexEntity
