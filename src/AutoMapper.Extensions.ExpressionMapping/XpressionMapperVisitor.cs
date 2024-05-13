@@ -569,9 +569,19 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     : GetInstanceExpression(this.Visit(node.Object));
 
             MethodCallExpression GetInstanceExpression(Expression instance)
-                => node.Method.IsGenericMethod
-                    ? Expression.Call(instance, node.Method.Name, typeArgsForNewMethod.ToArray(), listOfArgumentsForNewMethod.ToArray())
-                    : Expression.Call(instance, instance.Type.GetMethod(node.Method.Name, listOfArgumentsForNewMethod.Select(a => a.Type).ToArray()), listOfArgumentsForNewMethod.ToArray());
+            {
+                return node.Method.IsGenericMethod
+                            ? Expression.Call(instance, node.Method.Name, typeArgsForNewMethod.ToArray(), listOfArgumentsForNewMethod.ToArray())
+                            : Expression.Call(instance, GetMethodInfoForNonGeneric(), listOfArgumentsForNewMethod.ToArray());
+
+                MethodInfo GetMethodInfoForNonGeneric()
+                {
+                    MethodInfo methodInfo = instance.Type.GetMethod(node.Method.Name, listOfArgumentsForNewMethod.Select(a => a.Type).ToArray());
+                    if (methodInfo.DeclaringType != instance.Type)
+                        methodInfo = methodInfo.DeclaringType.GetMethod(node.Method.Name, listOfArgumentsForNewMethod.Select(a => a.Type).ToArray());
+                    return methodInfo;
+                }
+            }
 
             MethodCallExpression GetStaticExpression()
                 => node.Method.IsGenericMethod
