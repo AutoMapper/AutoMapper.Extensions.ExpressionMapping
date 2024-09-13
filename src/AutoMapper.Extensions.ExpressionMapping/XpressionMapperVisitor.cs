@@ -538,6 +538,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     return base.VisitConstant(Expression.Constant(Mapper.MapObject(node.Value, node.Type, newType), newType));
                 //Issue 3455 (Non-Generic Mapper.Map failing for structs in v10)
                 //return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
+
+                if (typeof(Expression).IsAssignableFrom(node.Type))
+                    return Expression.Constant(this.Visit((Expression)node.Value), newType);
             }
             return base.VisitConstant(node);
         }
