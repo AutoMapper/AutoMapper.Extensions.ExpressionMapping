@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Summary>Expression mapping (OData) extensions for AutoMapper</Summary>
     <Description>Expression mapping (OData) extensions for AutoMapper</Description>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyOriginatorKeyFile>..\..\AutoMapper.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
@@ -28,12 +28,12 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="[13.0.0,14.0.0)" />
-    <PackageReference Include="MinVer" Version="2.3.0">
+    <PackageReference Include="AutoMapper" Version="[14.0.0,15.0.0)" />
+    <PackageReference Include="MinVer" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
