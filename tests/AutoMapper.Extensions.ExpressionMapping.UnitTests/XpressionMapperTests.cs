@@ -374,7 +374,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                         inner.ShouldNotBeNull();
 
                         var error = inner.Errors.ShouldHaveSingleItem();
-                        error.ShouldNotBeNull();
+                        error.ShouldNotBe(default);
 
                         error.TypeMap.ShouldNotBeNull();
                         error.TypeMap.DestinationType.ShouldBe(typeof(Thing));
