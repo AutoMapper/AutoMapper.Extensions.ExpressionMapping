@@ -12,7 +12,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_parameter_body_from_child_reference_without_member_expression()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<TestCategory, TestProductDTO>()
                    .ForMember(p => p.Brand, c => c.MapFrom(p => EF.Property<int>(p, "BrandId"))); ;
@@ -42,7 +42,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
         public class TestProduct
         {
-            public TestCategory? Category { get; set; }
+            public TestCategory Category { get; set; }
         }
 
         public class TestProductDTO

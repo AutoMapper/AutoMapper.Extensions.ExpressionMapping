@@ -79,7 +79,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         private static IMapper GetMapper()
         {
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<Product, ProductModel>();
             });
@@ -89,7 +89,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         private static IMapper GetMapperWithCustomExpressions()
         {
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<Product, ProductModel>()
                     .ForMember(d => d.DateTime, o => o.MapFrom(s => s.DateTime.Value))

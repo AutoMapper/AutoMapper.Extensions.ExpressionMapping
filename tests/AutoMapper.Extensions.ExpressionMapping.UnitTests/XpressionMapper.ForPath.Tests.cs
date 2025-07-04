@@ -150,7 +150,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         private void SetupAutoMapper()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.AddMaps(typeof(ForPathCustomerProfile));

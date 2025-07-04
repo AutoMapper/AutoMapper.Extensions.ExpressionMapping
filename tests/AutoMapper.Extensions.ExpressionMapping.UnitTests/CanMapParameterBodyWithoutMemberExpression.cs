@@ -12,7 +12,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_parameter_body_without_member_expression()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<TestProduct, TestProductDTO>()
                   .ForMember(p => p.Brand, c => c.MapFrom(p => EF.Property<int>(p, "BrandId")));

@@ -12,7 +12,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_expression_wchich_includes_local_constant()
         {
             //Arrange
-            var config = new MapperConfiguration
+            var config = ConfigurationHelper.GetMapperConfiguration
             (
                 cfg =>
                 {

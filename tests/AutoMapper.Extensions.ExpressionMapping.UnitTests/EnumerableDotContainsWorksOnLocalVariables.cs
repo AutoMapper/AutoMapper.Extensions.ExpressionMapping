@@ -12,7 +12,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Issue87()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
 

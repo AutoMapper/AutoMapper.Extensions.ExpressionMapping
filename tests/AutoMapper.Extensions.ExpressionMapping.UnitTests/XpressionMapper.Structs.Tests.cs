@@ -14,7 +14,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_value_types_constants_with_instance_methods()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<GarageModel, Garage>()
                     .ReverseMap()
@@ -44,7 +44,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_convert_return_type()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<GarageModel, Garage>()
                     .ReverseMap()
@@ -74,7 +74,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Replace_operator_when_operands_change()
         {
             // Arrange
-            var config = new MapperConfiguration(cfg => {
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg => {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<Source, Dest>().ReverseMap();
             });
@@ -94,7 +94,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_local_variable_in_filter()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<GarageModel, Garage>()
                     .ReverseMap()
@@ -119,7 +119,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_child_property_of_local_variable_in_filter()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<GarageModel, Garage>()
                     .ReverseMap()
@@ -144,7 +144,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_listeral_child_property_of_local_variable_in_filter()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<GarageModel, Garage>()
                     .ReverseMap()
@@ -170,7 +170,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Ignore_member_expressions_where_type_is_literal_and_node_type_is_constant()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<GarageModel, Garage>()
                     .ReverseMap()
@@ -197,7 +197,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_local_variable_literal_in_filter()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<ItemWithDateLiteral, ItemWithDateLiteralDto>()
                 .ForMember(dest => dest.CreateDate, opts => opts.MapFrom(x => x.Date));
@@ -223,7 +223,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_local_variable_nullable_in_filter()
         {
             // Arrange
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<ItemWithDateLiteral, ItemWithDateLiteralDto>()
                 .ForMember(dest => dest.CreateDate, opts => opts.MapFrom(x => x.Date));

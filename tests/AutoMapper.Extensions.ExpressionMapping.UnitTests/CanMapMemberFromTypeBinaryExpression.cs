@@ -12,7 +12,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_using_type_binary_expression_to_test_the_parameter_expression()
         {
             //arrange
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
 
@@ -41,7 +41,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_using_type_binary_expression_to_test_a_member_expression()
         {
             //arrange
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
 
@@ -77,7 +77,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_using_instance_method_call_to_test_the_parameter_expression()
         {
             //arrange
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
 
@@ -101,7 +101,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_using_static_method_call_to_test_the_parameter_expression()
         {
             //arrange
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
 
@@ -129,7 +129,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_using_static_generic_method_call_to_test_the_parameter_expression()
         {
             //arrange
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
 

@@ -17,7 +17,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             get
             {
-                var config = new MapperConfiguration(cfg =>
+                var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
                 {
                     cfg.AddExpressionMapping();
                     cfg.AddProfile(typeof(DerivedTypeProfile));

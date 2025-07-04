@@ -198,7 +198,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         private static IMapper GetModelToDataMapper()
         {
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<ProductModel, Product>();
             });
@@ -208,7 +208,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         private static IMapper GetDataToModelMapper()
         {
-            var config = new MapperConfiguration(c =>
+            var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<Product, ProductModel>();
             });

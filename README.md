@@ -9,7 +9,7 @@ To use, configure using the configuration helper method:
 var mapper = new Mapper(new MapperConfiguration(cfg => {
     cfg.AddExpressionMapping();
 	// Rest of your configuration
-}));
+}, loggerFactory));
 
 // or if using the MS Ext DI:
 

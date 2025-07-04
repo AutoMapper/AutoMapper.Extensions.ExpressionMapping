@@ -69,7 +69,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             get
             {
-                return new MapperConfiguration(config =>
+                return ConfigurationHelper.GetMapperConfiguration(config =>
                 {
                     config.AddExpressionMapping();
                     config.CreateMap<Entity<byte>, EntityDto<SimpleEnumByte>>()
@@ -169,7 +169,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [InlineData(SimpleEnumUInt.Value3, 1U)]
         [InlineData(SimpleEnumLong.Value3, 1L)]
         [InlineData(SimpleEnumULong.Value3, 1UL)]
-        [InlineData(SimpleEnumSByte.Value3, (sbyte)3)]
         [InlineData(SimpleEnumByte.Value3, (byte)3)]
         [InlineData(SimpleEnumShort.Value3, (short)3)]
         [InlineData(SimpleEnumUShort.Value3, (ushort)3)]

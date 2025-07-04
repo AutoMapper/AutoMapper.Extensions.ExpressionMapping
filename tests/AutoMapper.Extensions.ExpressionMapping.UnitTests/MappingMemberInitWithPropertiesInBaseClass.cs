@@ -175,7 +175,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         MapperConfiguration GetConfigurationWiithoutIncludeMembers()
-            => new MapperConfiguration(cfg =>
+            => ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
 
@@ -191,7 +191,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             });
 
         MapperConfiguration GetConfigurationWiithIncludeMembers()
-            => new MapperConfiguration(cfg =>
+            => ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
 

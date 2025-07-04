@@ -53,7 +53,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Can_map_unary_expression_converting_enum_to_int()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<SourceEnum, DestEnum>();
@@ -77,7 +77,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Can_map_single_properties()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<Source, Dest>();
@@ -100,7 +100,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Can_map_flattened_properties()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<Source, Dest>();
@@ -123,7 +123,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Can_map_custom_mapped_properties()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<Source, Dest>().ForMember(d => d.Bar, opt => opt.MapFrom(src => src.Foo));
@@ -146,7 +146,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Throw_AutoMapperMappingException_if_expression_types_dont_match()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<Source, Dest>();
@@ -160,7 +160,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Can_map_with_different_destination_types()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<Source, Dest>().ForMember(d => d.Bar, opt => opt.MapFrom(src => src.Foo));

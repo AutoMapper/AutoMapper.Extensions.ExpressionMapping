@@ -44,7 +44,7 @@
             
         }
 
-        protected override MapperConfiguration Configuration { get; } = new MapperConfiguration(cfg =>
+        protected override MapperConfiguration Configuration { get; } = ConfigurationHelper.GetMapperConfiguration(cfg =>
         {
 
             cfg.CreateMap<Source, Dest>()
@@ -145,7 +145,7 @@
 
         }
 
-        protected override MapperConfiguration Configuration { get; } = new MapperConfiguration(cfg =>
+        protected override MapperConfiguration Configuration { get; } = ConfigurationHelper.GetMapperConfiguration(cfg =>
         {
             cfg.CreateMap<Source, Dest>()
                 .ForMember(m => m.Child1, opt => opt.ExplicitExpansion())

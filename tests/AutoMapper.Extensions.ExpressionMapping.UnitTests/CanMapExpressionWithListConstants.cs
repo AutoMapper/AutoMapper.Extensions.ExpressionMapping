@@ -12,7 +12,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_expression_with_constant_array()
         {
             //Arrange
-            var config = new MapperConfiguration
+            var config = ConfigurationHelper.GetMapperConfiguration
             (
                 cfg =>
                 {
@@ -43,7 +43,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_expression_with_constant_list_using_generic_list_dot_contains()
         {
             //Arrange
-            var config = new MapperConfiguration
+            var config = ConfigurationHelper.GetMapperConfiguration
             (
                 cfg =>
                 {
@@ -73,7 +73,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_expression_with_constant_list_using_generic_enumerable_dot_contains()
         {
             //Arrange
-            var config = new MapperConfiguration
+            var config = ConfigurationHelper.GetMapperConfiguration
             (
                 cfg =>
                 {
@@ -103,7 +103,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_expression_with_constant_dictionary()
         {
             //Arrange
-            var config = new MapperConfiguration
+            var config = ConfigurationHelper.GetMapperConfiguration
             (
                 cfg =>
                 {
@@ -133,7 +133,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_expression_with_constant_dictionary_mapping_both_Key_and_value()
         {
             //Arrange
-            var config = new MapperConfiguration
+            var config = ConfigurationHelper.GetMapperConfiguration
             (
                 cfg =>
                 {

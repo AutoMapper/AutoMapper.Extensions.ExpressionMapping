@@ -35,7 +35,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             public string[] Strings { get; set; }
         }
 
-        protected override MapperConfiguration Configuration { get; } = new MapperConfiguration(cfg =>
+        protected override MapperConfiguration Configuration { get; } = ConfigurationHelper.GetMapperConfiguration(cfg =>
         {
             cfg.CreateMap<Destination, Source>()
                 .ForMember(s => s.SrcValue, opt => opt.MapFrom(d => d.DestValue))
@@ -480,7 +480,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             int value = 0;
 
             Expression<Func<SourceWithParams, int>> sourceMember = src => value + 5;
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<SourceWithParams, DestWithParams>()
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg => cfg.CreateMap<SourceWithParams, DestWithParams>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(sourceMember)));
             var mapper = new Mapper(config);
 
@@ -505,7 +505,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             int value = 0;
 
             Expression<Func<SourceWithParams, int>> sourceMember = src => value + 5;
-            var config = new MapperConfiguration(cfg => cfg.CreateMap<SourceWithParams, DestWithParams>()
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg => cfg.CreateMap<SourceWithParams, DestWithParams>()
                 .ForMember(dest => dest.Value, opt => opt.MapFrom(sourceMember)));
             var mapper = new Mapper(config);
 
@@ -560,7 +560,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             // so that we can declare a parameter (userId) that is independent of mapping and query definition.
             // that way, in the query, we have a parameter which needs to be replaced.
             // (in SourceInjectedQueryProvider.ConvertDestinationExpressionToSourceExpression)
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 // parameter defined in mapping part
                 long userId = default(long);
@@ -611,7 +611,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         //[Fact(Skip="Conventions not available like this.")]
         //public void Shoud_work_with_conventions()
         //{
-        //    //var mapper = new MapperConfiguration(cfg => cfg.AddConditionalObjectMapper()
+        //    //var mapper = ConfigurationHelper.GetMapperConfiguration(cfg => cfg.AddConditionalObjectMapper()
         //    //    .Where((s, d) => s.Name == d.Name + "Model" || s.Name + "Model" == d.Name)).CreateMapper();
 
 
@@ -642,7 +642,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
 
         private static IMapper SetupAutoMapper()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.CreateMap<User, UserModel>()
                 .ForMember(d => d.Id, opt => opt.MapFrom(s => s.UserId))
