@@ -327,7 +327,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_expression_should_throws_exception_when_mapping_is_missed()
         {
             // Arrange
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<Car, CarModel>();
@@ -352,7 +352,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_expression_should_throws_exception_when_mapping_for_property_is_missed()
         {
             // Arrange    
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.CreateMap<ThingModel, Thing>();
@@ -1041,7 +1041,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         private static void SetupAutoMapper()
         {
-            var config = new MapperConfiguration(cfg =>
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
                 cfg.AddMaps(typeof(OrganizationProfile));

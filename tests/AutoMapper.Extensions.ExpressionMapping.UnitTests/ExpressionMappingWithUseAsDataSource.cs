@@ -73,7 +73,7 @@
 
         private static IMapper CreateMapper()
         {
-            var mapperConfig = new MapperConfiguration(cfg =>
+            var mapperConfig = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.CreateMap<Model, DTO>()
                     .ForMember(d => d.Nested, opt => opt.MapFrom(s => s));

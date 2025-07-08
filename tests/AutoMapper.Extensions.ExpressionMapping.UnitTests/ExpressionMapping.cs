@@ -23,7 +23,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             public Expression<Func<ExpressionMapping.Parent, bool>> Expression { get; set; }
         }
 
-        protected override MapperConfiguration Configuration { get; } = new MapperConfiguration(cfg =>
+        protected override MapperConfiguration Configuration { get; } = ConfigurationHelper.GetMapperConfiguration(cfg =>
         {
             cfg.AddExpressionMapping();
             cfg.CreateMap<SourceExpressionHolder, DestExpressionHolder>().ReverseMap();
@@ -109,7 +109,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         private Expression<Func<ParentDTO, bool>> _predicateExpression;
         private Parent _valid;
 
-        protected override MapperConfiguration Configuration { get; } = new MapperConfiguration(cfg =>
+        protected override MapperConfiguration Configuration { get; } = ConfigurationHelper.GetMapperConfiguration(cfg =>
         {
             cfg.AddExpressionMapping();
             cfg.CreateMap<GrandParent, GrandParentDTO>().ReverseMap();
@@ -319,7 +319,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             public string Code { get; set; }
         }
 
-        protected override MapperConfiguration Configuration { get; } = new MapperConfiguration(config => config.CreateMap<TestModel, TestData>());
+        protected override MapperConfiguration Configuration { get; } = ConfigurationHelper.GetMapperConfiguration(config => config.CreateMap<TestModel, TestData>());
 
         public void Should_map_with_closures()
         {

@@ -32,6 +32,11 @@ namespace AutoMapper.Mappers
                 Constant(configurationProvider)
             );
 
+        public TypePair? GetAssociatedTypes(TypePair initialTypes)
+        {
+            return null;
+        }
+
         internal class MappingVisitor : ExpressionVisitor
         {
             private IList<Type> _destSubTypes = new Type[0];

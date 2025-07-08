@@ -45,7 +45,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         MapperConfiguration GetConfiguration()
-            => new
+            => ConfigurationHelper.GetMapperConfiguration
             (
                 cfg =>
                 {

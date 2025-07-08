@@ -12,7 +12,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void MethodInfoShouldRetainDeclaringTypeInMappedExpression()
         {
             //Arrange
-            var config = new MapperConfiguration
+            var config = ConfigurationHelper.GetMapperConfiguration
             (
                 cfg =>
                 {

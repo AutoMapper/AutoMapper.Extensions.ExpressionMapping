@@ -286,7 +286,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     }
                 });
 
-            anonymousTypesConfigurationProvider = new MapperConfiguration(anonymousTypesBaseMappings);
+            anonymousTypesConfigurationProvider = ConfigurationHelper.GetMapperConfiguration(anonymousTypesBaseMappings);
         }
 
         private MemberInitExpression GetAnonymousTypeMemberInitExpression(Dictionary<string, Expression> bindingExpressions, Type oldType)
