@@ -30,11 +30,19 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //assert
             Assert.Single(list);
+#if NET8_0_OR_GREATER
             Assert.Equal
             (
                 "x => (Convert(IIF((x Is Triangle), Triangle, IIF((x Is Circle), Circle, Unknown)), Int32) == 2)",
                 whereMapped.ToString()
             );
+#else
+            Assert.Equal
+            (
+                "x => (Convert(IIF((x Is Triangle), Triangle, IIF((x Is Circle), Circle, Unknown))) == 2)",
+                whereMapped.ToString()
+            );
+#endif
         }
 
         [Fact]
@@ -66,11 +74,19 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //assert
             Assert.Single(list);
+#if NET8_0_OR_GREATER
             Assert.Equal
             (
                 "x => (Convert(IIF((x.Shape Is Triangle), Triangle, IIF((x.Shape Is Circle), Circle, Unknown)), Int32) == 2)",
                 whereMapped.ToString()
             );
+#else
+            Assert.Equal
+            (
+                "x => (Convert(IIF((x.Shape Is Triangle), Triangle, IIF((x.Shape Is Circle), Circle, Unknown))) == 2)",
+                whereMapped.ToString()
+            );
+#endif
         }
 
         [Fact]

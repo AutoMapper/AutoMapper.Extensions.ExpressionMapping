@@ -38,12 +38,12 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         public record Entity
         {
-            public int Id { get; init; }
+            public int Id { get; set; }
         }
 
         public record EntityModel
         {
-            public int Id { get; init; }
+            public int Id { get; set; }
         }
     }
 }

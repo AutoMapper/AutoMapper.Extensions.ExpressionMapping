@@ -12,10 +12,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [InlineData(nameof(ProductModel.DateTime), typeof(DateTime?))]
         [InlineData(nameof(ProductModel.DateTimeOffset), typeof(DateTimeOffset?))]
         [InlineData(nameof(ProductModel.Date), typeof(Date?))]
+#if NET8_0_OR_GREATER
         [InlineData(nameof(ProductModel.DateOnly), typeof(DateOnly?))]
+#endif
         [InlineData(nameof(ProductModel.TimeSpan), typeof(TimeSpan?))]
         [InlineData(nameof(ProductModel.TimeOfDay), typeof(TimeOfDay?))]
+#if NET8_0_OR_GREATER
         [InlineData(nameof(ProductModel.TimeOnly), typeof(TimeOnly?))]
+#endif
         [InlineData(nameof(ProductModel.Guid), typeof(Guid?))]
         [InlineData(nameof(ProductModel.Decimal), typeof(decimal?))]
         [InlineData(nameof(ProductModel.Byte), typeof(byte?))]
@@ -52,10 +56,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [InlineData(nameof(Product.DateTime), typeof(DateTime))]
         [InlineData(nameof(Product.DateTimeOffset), typeof(DateTimeOffset))]
         [InlineData(nameof(Product.Date), typeof(Date))]
+#if NET8_0_OR_GREATER
         [InlineData(nameof(Product.DateOnly), typeof(DateOnly))]
+#endif
         [InlineData(nameof(Product.TimeSpan), typeof(TimeSpan))]
         [InlineData(nameof(Product.TimeOfDay), typeof(TimeOfDay))]
+#if NET8_0_OR_GREATER
         [InlineData(nameof(Product.TimeOnly), typeof(TimeOnly))]
+#endif
         [InlineData(nameof(Product.Guid), typeof(Guid))]
         [InlineData(nameof(Product.Decimal), typeof(decimal))]
         [InlineData(nameof(Product.Byte), typeof(byte))]
@@ -93,10 +101,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             public DateTimeOffset? DateTimeOffset { get; set; }
             public DateTime? DateTime { get; set; }
             public Date? Date { get; set; }
+#if NET8_0_OR_GREATER
             public DateOnly? DateOnly { get; set; }
+#endif
             public TimeSpan? TimeSpan { get; set; }
             public TimeOfDay? TimeOfDay { get; set; }
+#if NET8_0_OR_GREATER
             public TimeOnly? TimeOnly { get; set; }
+#endif
             public Guid? Guid { get; set; }
             public decimal? Decimal { get; set; }
             public byte? Byte { get; set; }
@@ -118,10 +130,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             public DateTimeOffset DateTimeOffset { get; set; }
             public DateTime DateTime { get; set; }
             public Date Date { get; set; }
+#if NET8_0_OR_GREATER
             public DateOnly DateOnly { get; set; }
+#endif
             public TimeSpan TimeSpan { get; set; }
             public TimeOfDay TimeOfDay { get; set; }
+#if NET8_0_OR_GREATER
             public TimeOnly TimeOnly { get; set; }
+#endif
             public Guid Guid { get; set; }
             public decimal Decimal { get; set; }
             public byte Byte { get; set; }
