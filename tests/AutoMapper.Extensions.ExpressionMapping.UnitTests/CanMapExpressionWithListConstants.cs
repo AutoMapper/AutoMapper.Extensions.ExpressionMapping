@@ -169,8 +169,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         public record Entity
         {
-            public int Id { get; init; }
-            public SimpleEnum SimpleEnum { get; init; }
+            public int Id { get; set; }
+            public SimpleEnum SimpleEnum { get; set; }
         }
 
         public enum SimpleEnumModel
@@ -182,8 +182,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         public record EntityModel
         {
-            public int Id { get; init; }
-            public SimpleEnumModel SimpleEnum { get; init; }
+            public int Id { get; set; }
+            public SimpleEnumModel SimpleEnum { get; set; }
         }
     }
 }
