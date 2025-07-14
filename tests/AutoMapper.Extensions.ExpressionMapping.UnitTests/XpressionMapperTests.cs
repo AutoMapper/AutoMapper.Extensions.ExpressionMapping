@@ -885,6 +885,19 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void Map_SetPropertyCalls()
+        {
+            //Arrange
+            Expression<Func<SetPropertyCalls<AccountModel>, SetPropertyCalls<AccountModel>>> exp = s => s.SetProperty(p => p.Description, "newName");
+
+            //Act
+            Expression<Func<SetPropertyCalls<Account>, SetPropertyCalls<Account>>> expMapped = mapper.MapExpression<Expression<Func<SetPropertyCalls<Account>, SetPropertyCalls<Account>>>>(exp);
+
+            //Assert
+            Assert.NotNull(expMapped);
+        }
+
+        [Fact]
         public void Map_accountModel_to_account_with_left_null_checks_against_string_type()
         {
             //Arrange

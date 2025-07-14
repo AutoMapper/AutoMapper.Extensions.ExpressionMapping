@@ -260,17 +260,29 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         private static bool HasUnderlyingType(this Type type)
         {
-            return (type.IsGenericType() && typeof(System.Collections.IEnumerable).IsAssignableFrom(type)) || type.IsArray;
+            return (type.IsGenericType() && type.GetGenericArguments().Length > 0) || type.IsArray;
         }
 
         private static void AddUnderlyingTypes(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type sourceType, Type destType)
         {
-            typeMappings.DoAddTypeMappings
-            (
-                configurationProvider,
-                !sourceType.HasUnderlyingType() ? new List<Type>() : ElementTypeHelper.GetElementTypes(sourceType).ToList(),
-                !destType.HasUnderlyingType() ? new List<Type>() : ElementTypeHelper.GetElementTypes(destType).ToList()
-            );
+            if ((sourceType.IsGenericType() && typeof(System.Collections.IEnumerable).IsAssignableFrom(sourceType)) || sourceType.IsArray)
+            {
+                typeMappings.DoAddTypeMappings
+                (
+                    configurationProvider,
+                    !sourceType.HasUnderlyingType() ? new List<Type>() : ElementTypeHelper.GetElementTypes(sourceType).ToList(),
+                    !destType.HasUnderlyingType() ? new List<Type>() : ElementTypeHelper.GetElementTypes(destType).ToList()
+                );
+            }
+            else if (sourceType.IsGenericType() && destType.IsGenericType())
+            {
+                typeMappings.DoAddTypeMappings
+                (
+                    configurationProvider,
+                    !sourceType.HasUnderlyingType() ? new List<Type>() : sourceType.GetGenericArguments().ToList(),
+                    !destType.HasUnderlyingType() ? new List<Type>() : destType.GetGenericArguments().ToList()
+                );
+            }
         }
 
         /// <summary>
