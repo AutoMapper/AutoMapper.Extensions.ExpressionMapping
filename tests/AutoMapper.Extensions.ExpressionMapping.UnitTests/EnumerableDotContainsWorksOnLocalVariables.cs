@@ -17,7 +17,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 cfg.AddExpressionMapping();
 
                 cfg.CreateMap<Source, SourceDto>()
-                    .ForMember(o => o.Items, config => config.MapFrom(p => p.Items.Select(s => s.Name)));
+                    .ForMember(o => o.Items, config => config.MapFrom(p => p.Items.Select(s => s.Name).ToArray()));
             });
 
             var mapper = config.CreateMapper();
