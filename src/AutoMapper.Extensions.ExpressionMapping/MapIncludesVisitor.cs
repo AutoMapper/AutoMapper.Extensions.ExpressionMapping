@@ -7,6 +7,7 @@ using AutoMapper.Extensions.ExpressionMapping.Structures;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {
+    [Obsolete("This class is not intended for public use and may be removed in future versions.")]
     public class MapIncludesVisitor : XpressionMapperVisitor
     {
         public MapIncludesVisitor(IMapper mapper, IConfigurationProvider configurationProvider, Dictionary<Type, Type> typeMappings)

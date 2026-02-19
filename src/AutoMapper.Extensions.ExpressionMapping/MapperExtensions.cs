@@ -39,6 +39,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private static MethodInfo GetMapExpressionMethod(this string methodName)
             => typeof(MapperExtensions).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
 
+        [Obsolete("This method is obsolete. Use IMapper.Map(object source, Type sourceType, Type destinationType) instead.")]
         public static object MapObject(this IMapper mapper, object obj, Type sourceType, Type destType) 
             => "_MapObject".GetMapObjectMethod().MakeGenericMethod
             (
@@ -153,6 +154,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <param name="mapper"></param>
         /// <param name="expression"></param>
         /// <returns></returns>
+        [Obsolete("Use ProjectTo with expansions instead of IMapper.MapExpressionAsInclude.")]
         public static TDestDelegate MapExpressionAsInclude<TDestDelegate>(this IMapper mapper, LambdaExpression expression)
             where TDestDelegate : LambdaExpression
         {
@@ -175,6 +177,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <param name="mapper"></param>
         /// <param name="expression"></param>
         /// <returns></returns>
+        [Obsolete("Use ProjectTo with expansions instead of IMapper.MapExpressionAsInclude.")]
         public static TDestDelegate MapExpressionAsInclude<TSourceDelegate, TDestDelegate>(this IMapper mapper, TSourceDelegate expression)
             where TSourceDelegate : LambdaExpression
             where TDestDelegate : LambdaExpression
@@ -212,6 +215,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <param name="mapper"></param>
         /// <param name="collection"></param>
         /// <returns></returns>
+        [Obsolete("Use ProjectTo with expansions instead of IMapper.MapIncludesList.")]
         public static ICollection<TDestDelegate> MapIncludesList<TSourceDelegate, TDestDelegate>(this IMapper mapper, ICollection<TSourceDelegate> collection)
             where TSourceDelegate : LambdaExpression
             where TDestDelegate : LambdaExpression
@@ -224,6 +228,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <param name="mapper"></param>
         /// <param name="collection"></param>
         /// <returns></returns>
+        [Obsolete("Use ProjectTo with expansions instead of IMapper.MapIncludesList.")]
         public static ICollection<TDestDelegate> MapIncludesList<TDestDelegate>(this IMapper mapper, IEnumerable<LambdaExpression> collection)
             where TDestDelegate : LambdaExpression
             => collection?.Select(mapper.MapExpressionAsInclude<TDestDelegate>).ToList();
@@ -235,6 +240,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <param name="infoDictionary"></param>
         /// <param name="typeMappings"></param>
         /// <returns></returns>
+        [Obsolete("This method will be moved to a public class meant for internal use.")]
         public static List<ParameterExpression> GetDestinationParameterExpressions(this LambdaExpression expression, MapperInfoDictionary infoDictionary, Dictionary<Type, Type> typeMappings)
         {
             foreach (var p in expression.Parameters.Where(p => !infoDictionary.ContainsKey(p)))
@@ -253,6 +259,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <param name="typeMappings"></param>
         /// <param name="configurationProvider"></param>
         /// <returns></returns>
+        [Obsolete("This method is not being used and will be removed.")]
         public static Dictionary<Type, Type> AddTypeMapping<TSource, TDest>(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider)
             => typeMappings == null
                 ? throw new ArgumentException(Properties.Resources.typeMappingsDictionaryIsNull)
@@ -293,6 +300,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <param name="sourceType"></param>
         /// <param name="destType"></param>
         /// <returns></returns>
+        [Obsolete("This method will be moved to a public class meant for internal use.")]
         public static Dictionary<Type, Type> AddTypeMapping(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider, Type sourceType, Type destType)
         {
             if (typeMappings == null)
@@ -345,6 +353,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <param name="typeMappings"></param>
         /// <param name="sourceType"></param>
         /// <returns></returns>
+        [Obsolete("This method will be moved to a public class meant for internal use.")]
         public static Type ReplaceType(this Dictionary<Type, Type> typeMappings, Type sourceType)
         {
             if (sourceType.IsArray)

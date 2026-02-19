@@ -5,6 +5,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Structures
 {
     public class MapperInfo
     {
+        [Obsolete("Use MapperInfo(ParameterExpression newParameter, Type sourceType, Type destType).")]
         public MapperInfo()
         {
 
