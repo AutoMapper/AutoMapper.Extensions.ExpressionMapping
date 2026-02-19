@@ -71,53 +71,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Assert.True(items.Count == 1);
         }
 
-        [Fact]
-        public void Maps_top_level_string_member_as_include()
-        {
-            //Arrange
-            Expression<Func<Order, object>> selection = s => s.CustomerHolder.Customer.Name;
-
-            //Act
-            Expression<Func<OrderDto, object>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<OrderDto, object>>>(selection);
-            List<object> orders = Orders.Select(selectionMapped).ToList();
-
-            //Assert
-            Assert.True(orders.Count == 2);
-        }
-
-        [Fact]
-        public void Maps_top_level_value_type_as_include()
-        {
-            //Arrange
-            Expression<Func<Order, object>> selection = s => s.CustomerHolder.Customer.Total;
-
-            //Act
-            Expression<Func<OrderDto, object>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<OrderDto, object>>>(selection);
-            List<object> orders = Orders.Select(selectionMapped).ToList();
-
-            //Assert
-            Assert.True(orders.Count == 2);
-        }
-
-        [Fact]
-        public void Throws_exception_when_mapped_value_type_is_a_child_of_the_parameter()
-        {
-            //Arrange
-            Expression<Func<Order, object>> selection = s => s.CustomerHolder.Customer.Age;
-
-            //Assert
-            Assert.Throws<InvalidOperationException>(() => mapper.MapExpressionAsInclude<Expression<Func<OrderDto, object>>>(selection));
-        }
-
-        [Fact]
-        public void Throws_exception_when_mapped_string_is_a_child_of_the_parameter()
-        {
-            //Arrange
-            Expression<Func<Order, object>> selection = s => s.CustomerHolder.Customer.Address;
-
-            //Assert
-            Assert.Throws<InvalidOperationException>(() => mapper.MapExpressionAsInclude<Expression<Func<OrderDto, object>>>(selection));
-        }
         #endregion Tests
 
         private void SetupQueryableCollection()

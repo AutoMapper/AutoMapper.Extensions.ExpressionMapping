@@ -12,37 +12,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
     internal static class VisitorExtensions
     {
         /// <summary>
-        /// Returns true if the expression is a direct or descendant member expression of the parameter.
-        /// </summary>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        public static bool IsMemberExpression(this Expression expression)
-        {
-            if (expression.NodeType == ExpressionType.MemberAccess)
-            {
-                var memberExpression = (MemberExpression)expression;
-                return IsMemberOrParameterExpression(memberExpression.Expression);
-            }
-
-            return false;
-        }
-
-        private static bool IsMemberOrParameterExpression(Expression expression)
-        {
-            //the node represents parameter of the expression
-            switch (expression.NodeType)
-            {
-                case ExpressionType.Parameter:
-                    return true;
-                case ExpressionType.MemberAccess:
-                    var memberExpression = (MemberExpression)expression;
-                    return IsMemberOrParameterExpression(memberExpression.Expression);
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Returns the fully qualified name of the member starting with the immediate child member of the parameter
         /// </summary>
         /// <param name="expression"></param>
@@ -70,15 +39,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
 
         public static Expression GetUnconvertedExpression(this Expression expression)
         {
-            switch (expression.NodeType)
+            return expression.NodeType switch
             {
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                case ExpressionType.TypeAs:
-                    return ((UnaryExpression)expression).Operand.GetUnconvertedExpression();
-                default:
-                    return expression;
-            }
+                ExpressionType.Convert or ExpressionType.ConvertChecked or ExpressionType.TypeAs => ((UnaryExpression)expression).Operand.GetUnconvertedExpression(),
+                _ => expression,
+            };
         }
 
         public static Expression ConvertTypeIfNecessary(this Expression expression, Type memberType)
@@ -136,9 +101,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
                     if (isExtension && parentExpression == null && methodExpression.Arguments.Count > 0)
                         parentExpression = methodExpression.Arguments[0];//Method is an extension method based on the type of methodExpression.Arguments[0].
 
-                    return isExtension && parentExpression == null && methodExpression.Arguments.Count > 0
-                        ? GetParameterExpression(methodExpression.Arguments[0])
-                        : GetParameterExpression(parentExpression);
+                    return GetParameterExpression(parentExpression);
             }
 
             return null;
@@ -177,33 +140,19 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
         {
             if (expr.Body.NodeType == ExpressionType.Parameter)
                 return string.Empty;
-
-            MemberExpression me;
-            switch (expr.Body.NodeType)
+            MemberExpression me = expr.Body.NodeType switch
             {
-                case ExpressionType.Convert:
-                case ExpressionType.ConvertChecked:
-                case ExpressionType.TypeAs:
-                    me = expr.Body.GetUnconvertedExpression() as MemberExpression;
-                    break;
-                default:
-                    me = expr.Body as MemberExpression;
-                    break;
-            }
-
+                ExpressionType.Convert or ExpressionType.ConvertChecked or ExpressionType.TypeAs => expr.Body.GetUnconvertedExpression() as MemberExpression,
+                _ => expr.Body as MemberExpression,
+            };
             return me.GetPropertyFullName();
         }
 
         /// <summary>
-        /// Returns the underlying type typeof(T) when the type implements IEnumerable.
+        /// Determines whether the specified type is an enumeration type.
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
-        public static List<Type> GetUnderlyingGenericTypes(this Type type) => 
-            type == null || !type.GetTypeInfo().IsGenericType
-            ? new List<Type>()
-            : type.GetGenericArguments().ToList();
-
+        /// <param name="type">The type to evaluate. This can be a nullable type, in which case the underlying type is checked.</param>
+        /// <returns>true if the specified type is an enumeration; otherwise, false.</returns>
         public static bool IsEnumType(this Type type)
         {
             if (type.IsNullableType())

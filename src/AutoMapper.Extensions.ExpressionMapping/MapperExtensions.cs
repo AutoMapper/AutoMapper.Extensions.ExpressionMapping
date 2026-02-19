@@ -39,20 +39,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private static MethodInfo GetMapExpressionMethod(this string methodName)
             => typeof(MapperExtensions).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
 
-        [Obsolete("This method is obsolete. Use IMapper.Map(object source, Type sourceType, Type destinationType) instead.")]
-        public static object MapObject(this IMapper mapper, object obj, Type sourceType, Type destType) 
-            => "_MapObject".GetMapObjectMethod().MakeGenericMethod
-            (
-                sourceType,
-                destType
-            ).Invoke(null, new object[] { mapper, obj });
-
-        private static TDest _MapObject<TSource, TDest>(IMapper mapper, TSource source) 
-            => mapper.Map<TSource, TDest>(source);
-
-        private static MethodInfo GetMapObjectMethod(this string methodName)
-           => typeof(MapperExtensions).GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Static);
-
         /// <summary>
         /// Maps an expression given a dictionary of types where the source type is the key and the destination type is the value.
         /// </summary>
@@ -60,49 +46,32 @@ namespace AutoMapper.Extensions.ExpressionMapping
         /// <param name="mapper"></param>
         /// <param name="expression"></param>
         /// <returns></returns>
-        public static TDestDelegate MapExpression<TDestDelegate>(this IMapper mapper, LambdaExpression expression)
+        public static TDestDelegate MapExpression<TDestDelegate>(this IMapper mapper,
+            LambdaExpression expression)
             where TDestDelegate : LambdaExpression
         {
             if (expression == null)
                 return default;
 
-            return mapper.MapExpression<TDestDelegate>
-            (
-                expression, 
-                (config, mappings) => new XpressionMapperVisitor(mapper, config, mappings),
-                (desType) => IsFuncType(desType)
-            );
-        }
-
-        private static TDestDelegate MapExpression<TDestDelegate>(this IMapper mapper, 
-            LambdaExpression expression, 
-            Func<IConfigurationProvider, Dictionary<Type, Type>, XpressionMapperVisitor> getVisitor, 
-            Func<Type, bool> shouldConvertMappedBodyToDestType)
-            where TDestDelegate : LambdaExpression
-        {
             return MapExpression<TDestDelegate>
             (
-                mapper.ConfigurationProvider,
+                mapper,
                 expression,
                 expression.GetType().GetGenericArguments()[0],
-                typeof(TDestDelegate).GetGenericArguments()[0],
-                getVisitor,
-                shouldConvertMappedBodyToDestType
+                typeof(TDestDelegate).GetGenericArguments()[0]
             );
         }
 
-        private static TDestDelegate MapExpression<TDestDelegate>(IConfigurationProvider configurationProvider,
+        private static TDestDelegate MapExpression<TDestDelegate>(IMapper mapper,
             LambdaExpression expression,
             Type typeSourceFunc,
-            Type typeDestFunc,
-            Func<IConfigurationProvider, Dictionary<Type, Type>, XpressionMapperVisitor> getVisitor,
-            Func<Type, bool> shouldConvertMappedBodyToDestType)
+            Type typeDestFunc)
             where TDestDelegate : LambdaExpression
         {
-            return CreateVisitor(new Dictionary<Type, Type>().AddTypeMappingsFromDelegates(configurationProvider, typeSourceFunc, typeDestFunc));
+            return CreateVisitor(new Dictionary<Type, Type>().AddTypeMappingsFromDelegates(mapper.ConfigurationProvider, typeSourceFunc, typeDestFunc));
 
             TDestDelegate CreateVisitor(Dictionary<Type, Type> typeMappings)
-                => MapBody(typeMappings, getVisitor(configurationProvider, typeMappings));
+                => MapBody(typeMappings, new XpressionMapperVisitor(mapper, typeMappings));
 
             TDestDelegate MapBody(Dictionary<Type, Type> typeMappings, XpressionMapperVisitor visitor)
                 => GetLambda(typeMappings, visitor, visitor.Visit(expression.Body));
@@ -115,24 +84,12 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 return (TDestDelegate)Lambda
                 (
                     typeDestFunc,
-                    ConvertBody(),
+                    mappedBody,
                     expression.GetDestinationParameterExpressions(visitor.InfoDictionary, typeMappings)
                 );
-
-                Expression ConvertBody()
-                {
-                    if (!shouldConvertMappedBodyToDestType(typeDestFunc))
-                        return mappedBody;
-
-                    mappedBody = mappedBody.GetUnconvertedExpression();
-
-                    return ElementTypeHelper.ToType(mappedBody, typeDestFunc.GetGenericArguments().Last());
-                }
             }
         }
 
-        private static bool IsFuncType(this Type type)
-            => type.FullName.StartsWith("System.Func");
 
         /// <summary>
         /// Maps an expression given a dictionary of types where the source type is the key and the destination type is the value.
@@ -146,42 +103,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
             where TSourceDelegate : LambdaExpression
             where TDestDelegate : LambdaExpression
             => mapper.MapExpression<TDestDelegate>(expression);
-
-        /// <summary>
-        /// Maps an expression to be used as an "Include" given a dictionary of types where the source type is the key and the destination type is the value.
-        /// </summary>
-        /// <typeparam name="TDestDelegate"></typeparam>
-        /// <param name="mapper"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        [Obsolete("Use ProjectTo with expansions instead of IMapper.MapExpressionAsInclude.")]
-        public static TDestDelegate MapExpressionAsInclude<TDestDelegate>(this IMapper mapper, LambdaExpression expression)
-            where TDestDelegate : LambdaExpression
-        {
-            if (expression == null)
-                return default;
-
-            return mapper.MapExpression<TDestDelegate>
-            (
-                expression,
-                (config, mappings) => new MapIncludesVisitor(mapper, config, mappings),
-                desType => false
-            );
-        }
-
-        /// <summary>
-        /// Maps an expression to be used as an "Include" given a dictionary of types where the source type is the key and the destination type is the value.
-        /// </summary>
-        /// <typeparam name="TSourceDelegate"></typeparam>
-        /// <typeparam name="TDestDelegate"></typeparam>
-        /// <param name="mapper"></param>
-        /// <param name="expression"></param>
-        /// <returns></returns>
-        [Obsolete("Use ProjectTo with expansions instead of IMapper.MapExpressionAsInclude.")]
-        public static TDestDelegate MapExpressionAsInclude<TSourceDelegate, TDestDelegate>(this IMapper mapper, TSourceDelegate expression)
-            where TSourceDelegate : LambdaExpression
-            where TDestDelegate : LambdaExpression
-            => mapper.MapExpressionAsInclude<TDestDelegate>(expression);
 
         /// <summary>
         /// Maps a collection of expressions given a dictionary of types where the source type is the key and the destination type is the value.
@@ -208,32 +129,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
             => collection?.Select(mapper.MapExpression<TDestDelegate>).ToList();
 
         /// <summary>
-        /// Maps a collection of expressions to be used as a "Includes" given a dictionary of types where the source type is the key and the destination type is the value.
-        /// </summary>
-        /// <typeparam name="TSourceDelegate"></typeparam>
-        /// <typeparam name="TDestDelegate"></typeparam>
-        /// <param name="mapper"></param>
-        /// <param name="collection"></param>
-        /// <returns></returns>
-        [Obsolete("Use ProjectTo with expansions instead of IMapper.MapIncludesList.")]
-        public static ICollection<TDestDelegate> MapIncludesList<TSourceDelegate, TDestDelegate>(this IMapper mapper, ICollection<TSourceDelegate> collection)
-            where TSourceDelegate : LambdaExpression
-            where TDestDelegate : LambdaExpression
-            => collection?.Select(mapper.MapExpressionAsInclude<TSourceDelegate, TDestDelegate>).ToList();
-
-        /// <summary>
-        /// Maps a collection of expressions to be used as a "Includes" given a dictionary of types where the source type is the key and the destination type is the value.
-        /// </summary>
-        /// <typeparam name="TDestDelegate"></typeparam>
-        /// <param name="mapper"></param>
-        /// <param name="collection"></param>
-        /// <returns></returns>
-        [Obsolete("Use ProjectTo with expansions instead of IMapper.MapIncludesList.")]
-        public static ICollection<TDestDelegate> MapIncludesList<TDestDelegate>(this IMapper mapper, IEnumerable<LambdaExpression> collection)
-            where TDestDelegate : LambdaExpression
-            => collection?.Select(mapper.MapExpressionAsInclude<TDestDelegate>).ToList();
-
-        /// <summary>
         /// Takes a list of parameters from the source lamda expression and returns a list of parameters for the destination lambda expression.
         /// </summary>
         /// <param name="expression"></param>
@@ -250,20 +145,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             return expression.Parameters.Select(p => infoDictionary[p].NewParameter).ToList();
         }
-
-        /// <summary>
-        /// Adds a new source and destination key-value pair to a dictionary of type mappings based on the generic arguments.
-        /// </summary>
-        /// <typeparam name="TSource"></typeparam>
-        /// <typeparam name="TDest"></typeparam>
-        /// <param name="typeMappings"></param>
-        /// <param name="configurationProvider"></param>
-        /// <returns></returns>
-        [Obsolete("This method is not being used and will be removed.")]
-        public static Dictionary<Type, Type> AddTypeMapping<TSource, TDest>(this Dictionary<Type, Type> typeMappings, IConfigurationProvider configurationProvider)
-            => typeMappings == null
-                ? throw new ArgumentException(Properties.Resources.typeMappingsDictionaryIsNull)
-                : typeMappings.AddTypeMapping(configurationProvider, typeof(TSource), typeof(TDest));
 
         private static bool HasUnderlyingType(this Type type)
         {

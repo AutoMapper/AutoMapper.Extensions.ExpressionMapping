@@ -13,15 +13,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
 {
     public class XpressionMapperVisitor : ExpressionVisitor
     {
-        [Obsolete("This constructor is obsolete. Use XpressionMapperVisitor(IMapper mapper, Dictionary<Type, Type> typeMappings).")]
-        public XpressionMapperVisitor(IMapper mapper, IConfigurationProvider configurationProvider, Dictionary<Type, Type> typeMappings)
-        {
-            Mapper = mapper;
-            TypeMappings = typeMappings;
-            InfoDictionary = new MapperInfoDictionary(new ParameterExpressionEqualityComparer());
-            ConfigurationProvider = configurationProvider;
-        }
-
         public XpressionMapperVisitor(IMapper mapper, Dictionary<Type, Type> typeMappings)
         {
             Mapper = mapper;
@@ -544,7 +535,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     return base.VisitConstant(Expression.Constant(null, newType));
 
                 if (ConfigurationProvider.CanMapConstant(node.Type, newType))
-                    return base.VisitConstant(Expression.Constant(Mapper.MapObject(node.Value, node.Type, newType), newType));
+                    return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
                 //Issue 3455 (Non-Generic Mapper.Map failing for structs in v10)
                 //return base.VisitConstant(Expression.Constant(Mapper.Map(node.Value, node.Type, newType), newType));
 
