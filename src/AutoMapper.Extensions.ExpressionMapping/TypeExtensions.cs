@@ -52,17 +52,7 @@ namespace AutoMapper
             return LiteralTypes.Contains(type) || NonNetStandardLiteralTypes.Contains(type.FullName);
         }
 
-        private static HashSet<Type> LiteralTypes => new HashSet<Type>(_literalTypes);
-
-        private static readonly HashSet<string> NonNetStandardLiteralTypes = new()
-        {
-            "System.DateOnly",
-            "Microsoft.OData.Edm.Date",
-            "System.TimeOnly",
-            "Microsoft.OData.Edm.TimeOfDay"
-        };
-
-        private static Type[] _literalTypes => new Type[] {
+        private static HashSet<Type> LiteralTypes => [
                 typeof(bool),
                 typeof(DateTime),
                 typeof(DateTimeOffset),
@@ -81,7 +71,15 @@ namespace AutoMapper
                 typeof(uint),
                 typeof(ulong),
                 typeof(string)
-            };
+            ];
+
+        private static readonly HashSet<string> NonNetStandardLiteralTypes =
+        [
+            "System.DateOnly",
+            "Microsoft.OData.Edm.Date",
+            "System.TimeOnly",
+            "Microsoft.OData.Edm.TimeOfDay"
+        ];
 
         public static bool IsQueryableType(this Type type)
            => typeof(IQueryable).IsAssignableFrom(type);

@@ -13,24 +13,25 @@ namespace AutoMapper.Extensions.ExpressionMapping
 {
     public class XpressionMapperVisitor : ExpressionVisitor
     {
-        public XpressionMapperVisitor(IMapper mapper, Dictionary<Type, Type> typeMappings)
+        public XpressionMapperVisitor(IMapper mapper, ITypeMappingsManager typeMappingsManager)
         {
             Mapper = mapper;
-            TypeMappings = typeMappings;
-            InfoDictionary = new MapperInfoDictionary(new ParameterExpressionEqualityComparer());
+            TypeMappingsManager = typeMappingsManager;
             ConfigurationProvider = mapper.ConfigurationProvider;
         }
 
-        public MapperInfoDictionary InfoDictionary { get; }
+        private MapperInfoDictionary InfoDictionary { get { return TypeMappingsManager.InfoDictionary; } }
 
-        public Dictionary<Type, Type> TypeMappings { get; }
+        private Dictionary<Type, Type> TypeMappings { get { return TypeMappingsManager.TypeMappings; } }
 
-        protected IConfigurationProvider ConfigurationProvider { get; }
+        private IConfigurationProvider ConfigurationProvider { get; }
 
-        protected IMapper Mapper { get; }
+        private IMapper Mapper { get; }
 
         private IConfigurationProvider anonymousTypesConfigurationProvider;
         private readonly MapperConfigurationExpression anonymousTypesBaseMappings = new MapperConfigurationExpression();
+
+        private ITypeMappingsManager TypeMappingsManager { get; }
 
         protected override Expression VisitParameter(ParameterExpression node)
         {
@@ -98,7 +99,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     if (ShouldConvertMemberExpression(node.Type, fromCustomExpression.Type))
                         fromCustomExpression = fromCustomExpression.ConvertTypeIfNecessary(node.Type);
 
-                    this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, fromCustomExpression.Type);
+                    this.TypeMappingsManager.AddTypeMapping(node.Type, fromCustomExpression.Type);
                     return fromCustomExpression;
                 }
 
@@ -106,7 +107,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 if (ShouldConvertMemberExpression(node.Type, memberExpression.Type))
                     memberExpression = memberExpression.ConvertTypeIfNecessary(node.Type);
 
-                this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, memberExpression.Type);
+                this.TypeMappingsManager.AddTypeMapping(node.Type, memberExpression.Type);
 
                 return memberExpression;
             }
@@ -181,8 +182,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             var ex = this.Visit(node.Body);
 
-            var mapped = Expression.Lambda(this.TypeMappings.ReplaceType(node.Type), ex, node.GetDestinationParameterExpressions(this.InfoDictionary, this.TypeMappings));
-            this.TypeMappings.AddTypeMapping(ConfigurationProvider, node.Type, mapped.Type);
+            var mapped = Expression.Lambda(this.TypeMappingsManager.ReplaceType(node.Type), ex, this.TypeMappingsManager.GetDestinationParameterExpressions(node));
+            this.TypeMappingsManager.AddTypeMapping(node.Type, mapped.Type);
             return mapped;
         }
 
@@ -292,7 +293,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private MemberInitExpression GetAnonymousTypeMemberInitExpression(Dictionary<string, Expression> bindingExpressions, Type oldType)
         {
             Type newAnonymousType = AnonymousTypeFactory.CreateAnonymousType(bindingExpressions.ToDictionary(a => a.Key, a => a.Value.Type));
-            TypeMappings.AddTypeMapping(ConfigurationProvider, oldType, newAnonymousType);
+            this.TypeMappingsManager.AddTypeMapping(oldType, newAnonymousType);
 
             ConfigureAnonymousTypeMaps(oldType, newAnonymousType);
             return Expression.MemberInit
@@ -398,7 +399,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private MemberBinding DoBind(MemberInfo sourceMember, Expression initial, Expression mapped)
         {
             mapped = mapped.ConvertTypeIfNecessary(sourceMember.GetMemberType());
-            this.TypeMappings.AddTypeMapping(ConfigurationProvider, initial.Type, mapped.Type);
+            this.TypeMappingsManager.AddTypeMapping(initial.Type, mapped.Type);
             return Expression.Bind(sourceMember, mapped);
         }
 
@@ -528,7 +529,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitConstant(ConstantExpression node)
         {
-            Type newType = this.TypeMappings.ReplaceType(node.Type);
+            Type newType = this.TypeMappingsManager.ReplaceType(node.Type);
             if (newType != node.Type)
             {
                 if (node.Value == null)
@@ -554,7 +555,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             var listOfArgumentsForNewMethod = node.Arguments.Aggregate(new List<Expression>(), (lst, next) =>
             {
                 var mappedNext = this.Visit(next);
-                TypeMappings.AddTypeMapping(ConfigurationProvider, next.Type, mappedNext.Type);
+                this.TypeMappingsManager.AddTypeMapping(next.Type, mappedNext.Type);
 
                 lst.Add(mappedNext);
                 return lst;
@@ -562,7 +563,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             //type args are the generic type args e.g. T1 and T2 MethodName<T1, T2>(method arguments);
             var typeArgsForNewMethod = node.Method.IsGenericMethod
-                ? node.Method.GetGenericArguments().Select(type => this.TypeMappings.ReplaceType(type)).ToList()//not converting the type it is not in the typeMappings dictionary
+                ? node.Method.GetGenericArguments().Select(type => this.TypeMappingsManager.ReplaceType(type)).ToList()//not converting the type it is not in the typeMappings dictionary
                 : null;
 
             ConvertTypesIfNecessary(node.Method.GetParameters(), listOfArgumentsForNewMethod, node.Method);
@@ -713,7 +714,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     var sourceType = typeSource.GetFieldOrProperty(sourceFullName).GetMemberType();
                     var destType = typeDestination.GetFieldOrProperty(sourceFullName).GetMemberType();
 
-                    TypeMappings.AddTypeMapping(ConfigurationProvider, sourceType, destType);
+                    this.TypeMappingsManager.AddTypeMapping(sourceType, destType);
 
                     return;
                 }
@@ -725,8 +726,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
                     var sourceType = typeSource.GetFieldOrProperty(propertyName).GetMemberType();
                     var destType = typeDestination.GetFieldOrProperty(propertyName).GetMemberType();
-                    
-                    TypeMappings.AddTypeMapping(ConfigurationProvider, sourceType, destType);
+
+                    this.TypeMappingsManager.AddTypeMapping(sourceType, destType);
 
                     var childFullName = sourceFullName.Substring(sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) + 1);
                     FindDestinationFullName(sourceType, destType, childFullName, propertyMapInfoList);
