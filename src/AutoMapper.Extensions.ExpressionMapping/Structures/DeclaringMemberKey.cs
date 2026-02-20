@@ -3,31 +3,24 @@ using System.Reflection;
 
 namespace AutoMapper.Extensions.ExpressionMapping.Structures
 {
-    internal class DeclaringMemberKey : IEquatable<DeclaringMemberKey>
+    internal class DeclaringMemberKey(MemberInfo declaringMemberInfo, string declaringMemberFullName) : IEquatable<DeclaringMemberKey>
     {
-        public DeclaringMemberKey(MemberInfo declaringMemberInfo, string declaringMemberFullName)
-        {
-            DeclaringMemberInfo = declaringMemberInfo;
-            DeclaringMemberFullName = declaringMemberFullName;
-        }
-
-        public MemberInfo DeclaringMemberInfo { get; set; }
-        public string DeclaringMemberFullName { get; set; }
+        public MemberInfo DeclaringMemberInfo { get; set; } = declaringMemberInfo;
+        public string DeclaringMemberFullName { get; set; } = declaringMemberFullName;
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
 
-            DeclaringMemberKey key = obj as DeclaringMemberKey;
-            if (key == null) return false;
+            if (obj is not DeclaringMemberKey key) return false;
 
             return Equals(key);
         }
 
         public bool Equals(DeclaringMemberKey other)
         {
-            if (ReferenceEquals(null, other)) return false;
+            if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
 
             return this.DeclaringMemberInfo.Equals(other.DeclaringMemberInfo)

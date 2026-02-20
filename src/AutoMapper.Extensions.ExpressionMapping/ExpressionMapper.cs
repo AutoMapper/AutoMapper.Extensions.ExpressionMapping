@@ -1,14 +1,14 @@
-﻿using System;
+﻿using AutoMapper.Internal;
+using AutoMapper.Internal.Mappers;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using AutoMapper.Extensions.ExpressionMapping;
-using AutoMapper.Internal;
-using AutoMapper.Internal.Mappers;
 using static System.Linq.Expressions.Expression;
 
-namespace AutoMapper.Mappers
+namespace AutoMapper.Extensions.ExpressionMapping
 {
     public class ExpressionMapper : IObjectMapper
     {
@@ -23,7 +23,7 @@ namespace AutoMapper.Mappers
                                                  && typeof(LambdaExpression).IsAssignableFrom(context.DestinationType)
                                                  && context.DestinationType != typeof(LambdaExpression);
 
-        public Expression MapExpression(IGlobalConfiguration configurationProvider, ProfileMap profileMap, MemberMap memberMap, Expression sourceExpression, Expression destExpression) 
+        public Expression MapExpression(IGlobalConfiguration configurationProvider, ProfileMap profileMap, MemberMap memberMap, Expression sourceExpression, Expression destExpression)
             => Call
             (
                 null,
@@ -37,9 +37,10 @@ namespace AutoMapper.Mappers
             return null;
         }
 
+        [ExcludeFromCodeCoverage]
         internal class MappingVisitor : ExpressionVisitor
         {
-            private IList<Type> _destSubTypes = new Type[0];
+            private IList<Type> _destSubTypes = [];
 
             private readonly IConfigurationProvider _configurationProvider;
             private readonly TypeMap _typeMap;
@@ -81,7 +82,7 @@ namespace AutoMapper.Mappers
                 return Call(convertedMethodCall, convertedArguments);
             }
 
-            private static Type GetConvertingTypeIfExists(IList<Expression> args, Type t, IList<Expression> arguments)
+            private static Type GetConvertingTypeIfExists(System.Collections.ObjectModel.ReadOnlyCollection<Expression> args, Type t, IList<Expression> arguments)
             {
                 var matchingArgument = args.Where(a => !a.Type.IsGenericType()).FirstOrDefault(a => a.Type == t);
                 if (matchingArgument != null)
@@ -109,7 +110,7 @@ namespace AutoMapper.Mappers
                 CheckNullableToNonNullableChanges(node.Left, node.Right, ref newLeft, ref newRight);
                 CheckNullableToNonNullableChanges(node.Right, node.Left, ref newRight, ref newLeft);
                 return MakeBinary(node.NodeType, newLeft, newRight);
-                bool IsNullConstant(Expression expression) => expression is ConstantExpression constant && constant.Value == null;
+                static bool IsNullConstant(Expression expression) => expression is ConstantExpression constant && constant.Value == null;
             }
 
             private static void CheckNullableToNonNullableChanges(Expression left, Expression right, ref Expression newLeft, ref Expression newRight)
@@ -145,30 +146,30 @@ namespace AutoMapper.Mappers
                         : right.Type;
                     newRight = Constant(expression.Value, t);
                 }
-                else if (right is UnaryExpression)
-                    newRight = ((UnaryExpression) right).Operand;
+                else if (right is UnaryExpression unaryExpression)
+                    newRight = unaryExpression.Operand;
                 else
                     throw new AutoMapperMappingException(
                         "Mapping a BinaryExpression where one side is nullable and the other isn't");
             }
 
-            private static bool GoingFromNonNullableToNullable(Expression node, Expression newLeft) 
+            private static bool GoingFromNonNullableToNullable(Expression node, Expression newLeft)
                 => !node.Type.IsNullableType() && newLeft.Type.IsNullableType();
 
-            private static bool BothAreNullable(Expression node, Expression newLeft) 
+            private static bool BothAreNullable(Expression node, Expression newLeft)
                 => node.Type.IsNullableType() && newLeft.Type.IsNullableType();
 
-            private static bool BothAreNonNullable(Expression node, Expression newLeft) 
+            private static bool BothAreNonNullable(Expression node, Expression newLeft)
                 => !node.Type.IsNullableType() && !newLeft.Type.IsNullableType();
 
             protected override Expression VisitLambda<T>(Expression<T> node)
             {
-                return node.Parameters.Any(b => b.Type == _oldParam.Type) 
-                    ? VisitLambdaExpression(node) 
+                return node.Parameters.Any(b => b.Type == _oldParam.Type)
+                    ? VisitLambdaExpression(node)
                     : VisitAllParametersExpression(node);
             }
 
-            private Expression VisitLambdaExpression<T>(Expression<T> expression)
+            private LambdaExpression VisitLambdaExpression<T>(Expression<T> expression)
             {
                 var convertedBody = Visit(expression.Body);
                 var convertedArguments = expression.Parameters.Select(e => Visit(e) as ParameterExpression).ToList();
@@ -226,6 +227,7 @@ namespace AutoMapper.Mappers
                     .Aggregate(replacedExpression, getExpression);
             }
 
+            [ExcludeFromCodeCoverage]
             private class IsConstantExpressionVisitor : ExpressionVisitor
             {
                 public bool IsConstant { get; private set; }
@@ -251,22 +253,22 @@ namespace AutoMapper.Mappers
                 var typeMap = _configurationProvider.Internal().ResolveTypeMap(sourceType, destType);
                 var subVisitor = new MappingVisitor(_configurationProvider, typeMap, node.Expression, baseExpression, this);
                 var newExpression = subVisitor.Visit(node);
-                _destSubTypes = _destSubTypes.Concat(subVisitor._destSubTypes).ToArray();
+                _destSubTypes = [.. _destSubTypes, .. subVisitor._destSubTypes];
                 return newExpression;
             }
 
-            private Type GetSourceType(PropertyMap propertyMap) =>
+            private static Type GetSourceType(PropertyMap propertyMap) =>
                 propertyMap.SourceType ??
                 throw new AutoMapperMappingException(
-                    "Could not determine source property type. Make sure the property is mapped.", 
-                    null, 
+                    "Could not determine source property type. Make sure the property is mapped.",
+                    null,
                     propertyMap);
 
             private PropertyMap FindPropertyMapOfExpression(MemberExpression expression)
             {
                 var propertyMap = PropertyMap(expression);
-                return propertyMap == null && expression.Expression is MemberExpression
-                    ? FindPropertyMapOfExpression((MemberExpression) expression.Expression)
+                return propertyMap == null && expression.Expression is MemberExpression memberExpression
+                    ? FindPropertyMapOfExpression(memberExpression)
                     : propertyMap;
             }
 
@@ -277,9 +279,9 @@ namespace AutoMapper.Mappers
                         ? null
                         : (!node.Member.DeclaringType.IsAssignableFrom(_typeMap.DestinationType)
                             ? null
-                            : GetExistingPropertyMapFor(node.Member, _typeMap)));
+                            : MappingVisitor.GetExistingPropertyMapFor(node.Member, _typeMap)));
 
-            private PropertyMap GetExistingPropertyMapFor(MemberInfo destinationProperty, TypeMap typeMap)
+            private static PropertyMap GetExistingPropertyMapFor(MemberInfo destinationProperty, TypeMap typeMap)
             {
                 if (!destinationProperty.DeclaringType.IsAssignableFrom(typeMap.DestinationType))
                     return null;
@@ -290,7 +292,7 @@ namespace AutoMapper.Mappers
             private void SetSourceSubTypes(PropertyMap propertyMap)
             {
                 if (propertyMap.SourceMember is PropertyInfo info)
-                    _destSubTypes = info.PropertyType.GetTypeInfo().GenericTypeArguments.Concat(new[] { info.PropertyType }).ToList();
+                    _destSubTypes = [.. info.PropertyType.GetTypeInfo().GenericTypeArguments, info.PropertyType];
                 else if (propertyMap.SourceMember is FieldInfo fInfo)
                     _destSubTypes = fInfo.FieldType.GetTypeInfo().GenericTypeArguments;
             }

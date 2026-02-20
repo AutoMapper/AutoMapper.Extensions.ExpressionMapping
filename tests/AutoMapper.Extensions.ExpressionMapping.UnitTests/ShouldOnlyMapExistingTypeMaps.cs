@@ -47,9 +47,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             var mapper = config.CreateMapper();
 
+#pragma warning disable IDE0029 // Use coalesce expression
             Expression<Func<SourceDto, bool>> expression1 =
                 src => ((src != null ? src : null) != null) && src.Items.Any(x => x == "item1");
- 
+#pragma warning restore IDE0029 // Use coalesce expression
+
             var mapped1 = mapper.MapExpression<Expression<Func<Source, bool>>>(expression1);
 
             Assert.NotNull(mapped1);

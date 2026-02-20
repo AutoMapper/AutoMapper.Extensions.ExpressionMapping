@@ -72,11 +72,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         public static TypeMap CheckIfTypeMapExists(this IConfigurationProvider config, Type sourceType, Type destinationType)
         {
-            var typeMap = config.Internal().ResolveTypeMap(sourceType, destinationType);
-            if (typeMap == null)
-            {
-                throw MissingMapException(sourceType, destinationType);
-            }
+            var typeMap = config.Internal().ResolveTypeMap(sourceType, destinationType) ?? throw MissingMapException(sourceType, destinationType);
             return typeMap;
         }
 
@@ -88,16 +84,16 @@ namespace AutoMapper.Extensions.ExpressionMapping
             if (memberMap is ConstructorParameterMap constructorMap)
                 return constructorMap.Parameter.Name;
             
-            throw new ArgumentException(nameof(memberMap));
+            throw new ArgumentException("Invalid member map type.", nameof(memberMap));
         }
 
         public static PathMap FindPathMapByDestinationFullPath(this TypeMap typeMap, string destinationFullPath) =>
             typeMap.PathMaps.SingleOrDefault(item => string.Join(".", item.MemberPath.Members.Select(m => m.Name)) == destinationFullPath);
 
-        private static Exception PropertyConfigurationException(TypeMap typeMap, params string[] unmappedPropertyNames)
-            => new AutoMapperConfigurationException(new[] { new AutoMapperConfigurationException.TypeMapConfigErrors(typeMap, unmappedPropertyNames, true) });
+        private static AutoMapperConfigurationException PropertyConfigurationException(TypeMap typeMap, params string[] unmappedPropertyNames)
+            => new([new AutoMapperConfigurationException.TypeMapConfigErrors(typeMap, unmappedPropertyNames, true)]);
 
-        private static Exception MissingMapException(Type sourceType, Type destinationType)
-            => new InvalidOperationException($"Missing map from {sourceType} to {destinationType}. Create using CreateMap<{sourceType.Name}, {destinationType.Name}>.");
+        private static InvalidOperationException MissingMapException(Type sourceType, Type destinationType)
+            => new($"Missing map from {sourceType} to {destinationType}. Create using CreateMap<{sourceType.Name}, {destinationType.Name}>.");
     }
 }

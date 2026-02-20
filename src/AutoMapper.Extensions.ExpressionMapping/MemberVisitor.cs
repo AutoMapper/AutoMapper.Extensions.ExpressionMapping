@@ -21,7 +21,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return node;
         }
 
-        private readonly List<MemberInfo> _members = new List<MemberInfo>();
+        private readonly List<MemberInfo> _members = [];
         public IEnumerable<MemberInfo> MemberPath => _members;
     }
 }

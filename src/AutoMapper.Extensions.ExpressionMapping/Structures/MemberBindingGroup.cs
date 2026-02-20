@@ -8,35 +8,28 @@ namespace AutoMapper.Extensions.ExpressionMapping.Structures
     /// The new bound members will be matched using MemberAssignmentInfos.PropertyMap and 
     /// assigned to the mapped expression (mapped from MemberAssignmentInfos.MemberAssignment.Expression).
     /// </summary>
-    internal class MemberBindingGroup
+    internal class MemberBindingGroup(DeclaringMemberKey declaringMemberKey, bool isRootMemberAssignment, Type newType, List<MemberAssignmentInfo> memberAssignmentInfos)
     {
-        public MemberBindingGroup(DeclaringMemberKey declaringMemberKey, bool isRootMemberAssignment, Type newType, List<MemberAssignmentInfo> memberAssignmentInfos)
-        {
-            DeclaringMemberKey = declaringMemberKey;
-            IsRootMemberAssignment = isRootMemberAssignment;
-            NewType = newType;
-            MemberAssignmentInfos = memberAssignmentInfos;
-        }
 
         /// <summary>
         /// DeclaringMemberKey will be null when the member assignment is a member binding of OldType on the initial (root) TypeMap (OldType -> NewType)
         /// </summary>
-        public DeclaringMemberKey DeclaringMemberKey { get; set; }
+        public DeclaringMemberKey DeclaringMemberKey { get; set; } = declaringMemberKey;
 
         /// <summary>
         /// MemberAssignment is true if it is a member binding of OldType on the initial (root) TypeMap (OldType -> NewType)
         /// </summary>
-        public bool IsRootMemberAssignment { get; set; }
+        public bool IsRootMemberAssignment { get; set; } = isRootMemberAssignment;
 
         /// <summary>
         /// Destination type of the member assignment. If IsRootMemberAssignment == true then this is the destination type of initial (root) TypeMap (OldType -> NewType)
         /// Otherwise it is the PropertyType/FieldType of DeclaringMemberInfo
         /// </summary>
-        public Type NewType { get; set; }
+        public Type NewType { get; set; } = newType;
 
         /// <summary>
         /// List of members to be mapped and bound to the new type
         /// </summary>
-        public List<MemberAssignmentInfo> MemberAssignmentInfos { get; set; }
+        public List<MemberAssignmentInfo> MemberAssignmentInfos { get; set; } = memberAssignmentInfos;
     }
 }

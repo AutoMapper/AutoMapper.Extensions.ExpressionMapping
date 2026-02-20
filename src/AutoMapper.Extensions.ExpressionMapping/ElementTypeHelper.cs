@@ -18,7 +18,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             if (enumerableType.HasElementType)
             {
-                return new[] { enumerableType.GetElementType() };
+                return [enumerableType.GetElementType()];
             }
 
             var iDictionaryType = enumerableType.GetDictionaryType();
@@ -43,7 +43,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             {
                 var first = enumerable?.Cast<object>().FirstOrDefault();
 
-                return new[] { first?.GetType() ?? typeof(object) };
+                return [first?.GetType() ?? typeof(object)];
             }
 
             throw new ArgumentException($"Unable to find the element type for type '{enumerableType}'.",

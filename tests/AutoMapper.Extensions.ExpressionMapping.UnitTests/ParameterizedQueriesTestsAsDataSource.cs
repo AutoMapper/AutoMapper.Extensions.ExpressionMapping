@@ -37,7 +37,7 @@
                 new Source()
             }.AsQueryable();
 
-            _dests = _sources.UseAsDataSource(Configuration).For<Dest>(new { value = 10 }).ToArray();
+            _dests = [.. _sources.UseAsDataSource(Configuration).For<Dest>(new { value = 10 })];
         }
 
         [Fact]
@@ -85,7 +85,7 @@
                 new Source()
             }.AsQueryable();
 
-            _dests = _sources.UseAsDataSource(Configuration).For<Dest>(new Dictionary<string, object> { { "value", 10 } }).ToArray();
+            _dests = [.. _sources.UseAsDataSource(Configuration).For<Dest>(new Dictionary<string, object> { { "value", 10 } })];
         }
 
         [Fact]
@@ -117,7 +117,9 @@
             public int Id { get; set; }
             public string Name { get; set; }
             public DateTime? DateActivated { get; set; }
+#pragma warning disable IDE1006 // Naming Styles
             public int position { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
         }
 
         public class DB
@@ -126,9 +128,9 @@
             {
                 Users = new List<User>()
                 {
-                    new User {DateActivated = new DateTime(2000, 1, 1), Id = 1, Name = "Joe Schmoe"},
-                    new User {DateActivated = new DateTime(2000, 2, 1), Id = 2, Name = "John Schmoe"},
-                    new User {DateActivated = new DateTime(2000, 3, 1), Id = 3, Name = "Jim Schmoe"},
+                    new() {DateActivated = new DateTime(2000, 1, 1), Id = 1, Name = "Joe Schmoe"},
+                    new() {DateActivated = new DateTime(2000, 2, 1), Id = 2, Name = "John Schmoe"},
+                    new() {DateActivated = new DateTime(2000, 3, 1), Id = 3, Name = "Jim Schmoe"},
                 }.AsQueryable();
             }
             public IQueryable<User> Users { get; }

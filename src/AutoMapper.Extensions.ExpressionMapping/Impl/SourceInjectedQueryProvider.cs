@@ -1,5 +1,4 @@
 using AutoMapper.Internal;
-using AutoMapper.Mappers;
 using AutoMapper.QueryableExtensions.Impl;
 using System;
 using System.Collections;
@@ -15,34 +14,23 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
     using MemberPaths = IEnumerable<IEnumerable<MemberInfo>>;
     using ParameterBag = IDictionary<string, object>;
 
-    public class SourceInjectedQueryProvider<TSource, TDestination> : IQueryProvider
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    public class SourceInjectedQueryProvider<TSource, TDestination>(IMapper mapper,
+        IQueryable<TSource> dataSource, IQueryable<TDestination> destQuery,
+            IEnumerable<ExpressionVisitor> beforeVisitors,
+            IEnumerable<ExpressionVisitor> afterVisitors,
+            Action<Exception> exceptionHandler,
+            IDictionary<string, object> parameters,
+            MemberPaths membersToExpand) : IQueryProvider
     {
-        private readonly IMapper _mapper;
-        private readonly IQueryable<TSource> _dataSource;
-        private readonly IQueryable<TDestination> _destQuery;
-        private readonly IEnumerable<ExpressionVisitor> _beforeVisitors;
-        private readonly IEnumerable<ExpressionVisitor> _afterVisitors;
-        private readonly IDictionary<string, object> _parameters;
-        private readonly MemberPaths _membersToExpand;
-        private readonly Action<Exception> _exceptionHandler;
-
-        public SourceInjectedQueryProvider(IMapper mapper,
-            IQueryable<TSource> dataSource, IQueryable<TDestination> destQuery,
-                IEnumerable<ExpressionVisitor> beforeVisitors,
-                IEnumerable<ExpressionVisitor> afterVisitors,
-                Action<Exception> exceptionHandler,
-                IDictionary<string, object> parameters,
-                MemberPaths membersToExpand)
-        {
-            _mapper = mapper;
-            _dataSource = dataSource;
-            _destQuery = destQuery;
-            _beforeVisitors = beforeVisitors;
-            _afterVisitors = afterVisitors;
-            _parameters = parameters ?? new Dictionary<string, object>();
-            _membersToExpand = membersToExpand ?? Enumerable.Empty<IEnumerable<MemberInfo>>();
-            _exceptionHandler = exceptionHandler ?? (x => { });
-        }
+        private readonly IMapper _mapper = mapper;
+        private readonly IQueryable<TSource> _dataSource = dataSource;
+        private readonly IQueryable<TDestination> _destQuery = destQuery;
+        private readonly IEnumerable<ExpressionVisitor> _beforeVisitors = beforeVisitors;
+        private readonly IEnumerable<ExpressionVisitor> _afterVisitors = afterVisitors;
+        private readonly IDictionary<string, object> _parameters = parameters ?? new Dictionary<string, object>();
+        private readonly MemberPaths _membersToExpand = membersToExpand ?? [];
+        private readonly Action<Exception> _exceptionHandler = exceptionHandler ?? (x => { });
 
         public SourceInjectedQueryInspector Inspector { get; set; }
         internal Action<IEnumerable<object>> EnumerationHandler { get; set; }
@@ -99,16 +87,16 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                         sourceResult.ElementType, 
                         typeof(TDestination),
                         _parameters,
-                        _membersToExpand.Select
+                        [.. _membersToExpand.Select
                         (
                             m => new MemberPath
                             (
                                 m.Distinct().ToArray()
                             )
-                        ).ToArray()
+                        )]
                     );
 
-                    destResult = (IQueryable<TDestination>)GetMapExpressions(queryExpressions).Aggregate(sourceResult, Select);
+                    destResult = (IQueryable<TDestination>)SourceInjectedQueryProvider<TSource, TDestination>.GetMapExpressions(queryExpressions).Aggregate(sourceResult, Select);
                 }
                 // case #2: query is arbitrary ("manual") projection
                 // example: users.UseAsDataSource().For<UserDto>().Select(user => user.Age).ToList()
@@ -118,7 +106,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                 {
                     var sourceResult = _dataSource.Provider.CreateQuery(sourceExpression);
                     var elementType = ElementTypeHelper.GetElementType(typeof(TResult));
-                    var constructorInfo = typeof(List<>).MakeGenericType(elementType).GetDeclaredConstructor(new Type[0]);
+                    var constructorInfo = typeof(List<>).MakeGenericType(elementType).GetDeclaredConstructor([]);
                     if (constructorInfo != null)
                     {
                         var listInstance = (IList)constructorInfo.Invoke(null);
@@ -187,16 +175,16 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                             sourceResultType, 
                             destResultType, 
                             _parameters,
-                            _membersToExpand.Select
+                            [.. _membersToExpand.Select
                             (
                                 m => new MemberPath
                                 (
                                     m.Distinct().ToArray()
                                 )
-                            ).ToArray()
+                            )]
                         );
                         // add projection via "select" operator
-                        var expr = GetMapExpressions(queryExpressions).Aggregate(sourceExpression, (source, lambda) => Select(source, lambda));
+                        var expr = SourceInjectedQueryProvider<TSource, TDestination>.GetMapExpressions(queryExpressions).Aggregate(sourceExpression, (source, lambda) => Select(source, lambda));
                         // in case an element operator without predicate expression was found (and thus not replaced)
                         var replacementMethod = replacer.ElementOperator;
                         // in case an element operator with predicate expression was replaced
@@ -242,24 +230,24 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
             }
         }
 
-        private LambdaExpression[] GetMapExpressions(QueryExpressions queryExpressions)
+        private static LambdaExpression[] GetMapExpressions(QueryExpressions queryExpressions)
         {
             if (queryExpressions.LetClause != null && queryExpressions.Projection != null)
-                return new LambdaExpression[] { queryExpressions.LetClause, queryExpressions.Projection };
+                return [queryExpressions.LetClause, queryExpressions.Projection];
             else if (queryExpressions.LetClause != null)
-                return new LambdaExpression[] { queryExpressions.LetClause };
+                return [queryExpressions.LetClause];
             else if (queryExpressions.Projection != null)
-                return new LambdaExpression[] { queryExpressions.Projection };
+                return [queryExpressions.Projection];
 
-            return new LambdaExpression[] { };
+            return [];
         }
 
-        private static Expression Select(Expression source, LambdaExpression lambda)
+        private static MethodCallExpression Select(Expression source, LambdaExpression lambda)
         {
             return Call(
                     null,
                     QueryableSelectMethod.MakeGenericMethod(lambda.Parameters[0].Type, lambda.ReturnType),
-                    new[] { source, Quote(lambda) }
+                    [source, Quote(lambda)]
                 );
         }
 
@@ -267,7 +255,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                 Call(
                     null,
                     QueryableSelectMethod.MakeGenericMethod(source.ElementType, lambda.ReturnType),
-                    new[] { source.Expression, Expression.Quote(lambda) }
+                    [source.Expression, Expression.Quote(lambda)]
                     )
                 );
 
@@ -316,7 +304,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
 
             var typeMap = _mapper.ConfigurationProvider.Internal().ResolveTypeMap(typeof(TDestination), typeof(TSource));
             var visitor = new ExpressionMapper.MappingVisitor(_mapper.ConfigurationProvider, typeMap, _destQuery.Expression, _dataSource.Expression, null,
-                new[] { typeof(TSource) });
+                [typeof(TSource)]);
             var sourceExpression = visitor.Visit(expression);
 
             // apply parameters
@@ -348,12 +336,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
         }
     }
 
-    internal class ConstantExpressionReplacementVisitor : ExpressionVisitor
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    internal class ConstantExpressionReplacementVisitor(
+        ParameterBag paramValues) : ExpressionVisitor
     {
-        private readonly ParameterBag _paramValues;
-
-        public ConstantExpressionReplacementVisitor(
-            ParameterBag paramValues) => _paramValues = paramValues;
+        private readonly ParameterBag _paramValues = paramValues;
 
         protected override Expression VisitMember(MemberExpression node)
         {
@@ -374,11 +361,12 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal class ReplaceableMethodNodeFinder<TDestination> : ExpressionVisitor
     {
         public MethodCallExpression MethodNode { get; private set; }
         private bool _ignoredMethodFound;
-        private static readonly string[] IgnoredMethods = { "Select" };
+        private static readonly string[] IgnoredMethods = ["Select"];
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
@@ -413,9 +401,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
         }
     }
 
-    internal class MethodNodeReplacer<TDestination> : ExpressionVisitor
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+    internal class MethodNodeReplacer<TDestination>(MethodCallExpression foundExpression) : ExpressionVisitor
     {
-        private readonly MethodCallExpression _foundExpression;
+        private readonly MethodCallExpression _foundExpression = foundExpression;
         private static readonly MethodInfo QueryableWhereMethod = FindQueryableWhereMethod();
 
 
@@ -425,8 +414,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
             var method = ((MethodCallExpression)select.Body).Method.GetGenericMethodDefinition();
             return method;
         }
-
-        public MethodNodeReplacer(MethodCallExpression foundExpression) => _foundExpression = foundExpression;
 
         public MethodInfo ReplacedMethod { get; private set; }
 

@@ -1,5 +1,4 @@
 ﻿using AutoMapper.Internal;
-using AutoMapper.Mappers;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {

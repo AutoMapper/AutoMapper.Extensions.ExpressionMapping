@@ -5,20 +5,15 @@ using AutoMapper.Extensions.ExpressionMapping.Structures;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {
-    public class MapperInfoDictionary : Dictionary<ParameterExpression, MapperInfo>
+    public class MapperInfoDictionary(ParameterExpressionEqualityComparer comparer) : Dictionary<ParameterExpression, MapperInfo>(comparer)
     {
-        public MapperInfoDictionary(ParameterExpressionEqualityComparer comparer) : base(comparer)
-        {
-        }
-
-        //const string PREFIX = "p";
         public void Add(ParameterExpression key, Dictionary<Type, Type> typeMappings)
         {
             if (ContainsKey(key))
                 return;
 
-            Add(key, typeMappings.ContainsKey(key.Type)
-                    ? new MapperInfo(Expression.Parameter(typeMappings[key.Type], key.Name), key.Type,typeMappings[key.Type])
+            Add(key, typeMappings.TryGetValue(key.Type, out Type valueType)
+                    ? new MapperInfo(Expression.Parameter(valueType, key.Name), key.Type, valueType)
                     : new MapperInfo(Expression.Parameter(key.Type, key.Name), key.Type, key.Type));
         }
     }

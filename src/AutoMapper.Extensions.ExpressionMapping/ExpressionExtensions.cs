@@ -5,39 +5,14 @@ using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper.Internal;
 
-namespace AutoMapper
+namespace AutoMapper.Extensions.ExpressionMapping
 {
-    using AutoMapper.Extensions.ExpressionMapping;
     using static Expression;
 
     internal static class ExpressionExtensions
     {
         public static Expression MemberAccesses(this IEnumerable<MemberInfo> members, Expression obj) =>
             members.Aggregate(obj, (expression, member) => MakeMemberAccess(expression, member));
-
-        public static IEnumerable<MemberExpression> GetMembers(this Expression expression)
-        {
-            var memberExpression = expression as MemberExpression;
-            if(memberExpression == null)
-            {
-                return new MemberExpression[0];
-            }
-            return memberExpression.GetMembers();
-        }
-
-        public static IEnumerable<MemberExpression> GetMembers(this MemberExpression expression)
-        {
-            while(expression != null)
-            {
-                yield return expression;
-                expression = expression.Expression as MemberExpression;
-            }
-        }
-
-        public static bool IsMemberPath(this LambdaExpression exp)
-        {
-            return exp.Body.GetMembers().LastOrDefault()?.Expression == exp.Parameters.First();
-        }
     }
 
     internal static class ExpressionHelpers

@@ -20,7 +20,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         protected abstract MapperConfiguration Configuration { get; }
         protected IConfigurationProvider ConfigProvider => Configuration;
 
-        protected IMapper Mapper => mapper ?? (mapper = Configuration.CreateMapper());
+        protected IMapper Mapper => mapper ??= Configuration.CreateMapper();
     }
 
     public abstract class SpecBaseBase
@@ -59,6 +59,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Dispose()
         {
             Cleanup();
+            GC.SuppressFinalize(this);
         }
     }
 }

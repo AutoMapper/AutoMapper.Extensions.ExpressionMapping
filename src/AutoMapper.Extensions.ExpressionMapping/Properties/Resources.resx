@@ -143,4 +143,8 @@
     <value>For members of literal types, use IMappingExpression.ForMember() to make the parent property types an exact match. Parent Source Type: {0}, Parent Destination Type: {1}, Full Member Name "{2}".</value>
     <comment>0=typeSource, 1=typeDestination; 2=sourceFullName</comment>
   </data>
+	<data name="argumentMustBeDelegateFormat" xml:space="preserve">
+    <value>Argument {0} must be a deledate type.</value>
+    <comment>0=argumentType</comment>
+  </data>
 </root>

@@ -1,0 +1,22 @@
+﻿// This file is used by Code Analysis to maintain SuppressMessage
+// attributes that are applied to this project.
+// Project-level suppressions either have no target or are given
+// a specific target and scoped to a namespace, type, member, etc.
+
+using System.Diagnostics.CodeAnalysis;
+
+[assembly: SuppressMessage("Performance", "CA1866:Use char overload", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl.SourceInjectedQuery.Shoud_support_enumerable_return_type_with_result")]
+[assembly: SuppressMessage("Performance", "CA1866:Use char overload", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl.SourceInjectedQuery.Shoud_support_enumerable_return_type_with_result_toList")]
+[assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.TypeExtensionsTest.ClassWithMethods.TestMethod")]
+[assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.TypeExtensionsTest.ClassWithMethods.AnotherMethod(System.Int32)")]
+[assembly: SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.TypeExtensionsTest.ClassWithStaticMembers.InstanceMethod")]
+[assembly: SuppressMessage("Performance", "CA1866:Use char overload", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.XpressionMapperTests.Map_projection")]
+[assembly: SuppressMessage("Performance", "CA1862:Use the 'StringComparison' method overloads to perform case-insensitive string comparisons", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.XpressionMapperTests.Map__flattened_property")]
+[assembly: SuppressMessage("Performance", "CA1866:Use char overload", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.XpressionMapperTests.Map__select_method")]
+[assembly: SuppressMessage("Performance", "CA1866:Use char overload", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.XpressionMapperTests.Map__select_method_projecting_to_anonymous_type")]
+[assembly: SuppressMessage("Performance", "CA1866:Use char overload", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.XpressionMapperTests.Map__select_method_projecting_to_model_type")]
+[assembly: SuppressMessage("Usage", "CA2263:Prefer generic overload when type is known", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.XpressionMapperTests.Map_orderBy_thenBy_To_Dictionary_Select_expression_without_generic_types")]
+[assembly: SuppressMessage("Usage", "CA2263:Prefer generic overload when type is known", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.ExpressionsMappingWithClosures.Should_map_with_closures")]
+[assembly: SuppressMessage("Usage", "CA2263:Prefer generic overload when type is known", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.XpressionMapperTests.Map_to_anonymous_type_when_init_member_is_not_a_literal")]
+[assembly: SuppressMessage("Usage", "CA2263:Prefer generic overload when type is known", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.XpressionMapperTests.Map_to_anonymous_type_when_init_member_is_not_a_literal_and_parameter_is_anonymous_type")]
+[assembly: SuppressMessage("Usage", "CA2263:Prefer generic overload when type is known", Justification = "For testing purposes.", Scope = "member", Target = "~M:AutoMapper.Extensions.ExpressionMapping.UnitTests.XpressionMapperTests.Map_to_anonymous_type_when_init_member_is_not_a_literal_with_navigation_property")]

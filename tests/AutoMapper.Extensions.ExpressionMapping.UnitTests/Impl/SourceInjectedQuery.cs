@@ -1,23 +1,22 @@
-﻿using System;
+﻿using Shouldly;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
-using AutoMapper.Mappers;
-using Shouldly;
 using Xunit;
 
 namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
 {
     public class SourceInjectedQuery : AutoMapperSpecBase
     {
-        readonly Source[] _source = new[]
-                    {
+        readonly Source[] _source =
+                    [
                         new Source {SrcValue = 5, InttoStringValue = 5},
                         new Source {SrcValue = 4, InttoStringValue = 4},
                         new Source {SrcValue = 7, InttoStringValue = 7}
-                    };
+                    ];
 
         public class Source
         {
@@ -82,7 +81,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
               .UseAsDataSource(Mapper).For<Destination>()
               .Where(s => s.DestValue > 6);
 
-            List<Destination> list = result.ToList();
+            List<Destination> list = [.. result];
         }
 
         [Fact]
@@ -148,9 +147,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         {
             var source = new[]
                     {
-                        new Source {SrcValue = 5, Strings = new [] {"lala5", "lili5"}},
-                        new Source {SrcValue = 4, Strings = new [] {"lala4", "lili4"}},
-                        new Source {SrcValue = 7, Strings = new [] {"lala7", "lili7"}}
+                        new Source {SrcValue = 5, Strings = ["lala5", "lili5"]},
+                        new Source {SrcValue = 4, Strings = ["lala4", "lili4"]},
+                        new Source {SrcValue = 7, Strings = ["lala7", "lili7"]}
                     };
 
             var result = source.AsQueryable()
@@ -175,11 +174,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
 
             result.First().A.ShouldBe(_source.Max(s => s.SrcValue));
         }
-        readonly User[] _source2 = new[]
-                    {
+        readonly User[] _source2 =
+                    [
                         new User { UserId = 2, Account = new Account(){ Id = 4,Things = {new Thing(){Bar = "Bar"}, new Thing(){ Bar ="Bar 2"}}}},
                         new User { UserId = 1, Account = new Account(){ Id = 3,Things = {new Thing(){Bar = "Bar 3"}, new Thing(){ Bar ="Bar 4"}}}},
-                    };
+                    ];
         
         [Fact]
         public void Map_select_method()
@@ -271,9 +270,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         {
             var source = new[]
                     {
-                        new Source {SrcValue = 5, Strings = new [] {"lala5", "lili5"}},
-                        new Source {SrcValue = 4, Strings = new [] {"lala4", "lili4"}},
-                        new Source {SrcValue = 7, Strings = new [] {"lala7", "lili7"}}
+                        new Source {SrcValue = 5, Strings = ["lala5", "lili5"]},
+                        new Source {SrcValue = 4, Strings = ["lala4", "lili4"]},
+                        new Source {SrcValue = 7, Strings = ["lala7", "lili7"]}
                     };
 
             var result = source.AsQueryable()
@@ -347,7 +346,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             var dto = mapper.Map<DetailCyclicDto>(detail);
 
             // Assert
-            AssertValidDtoGraph(detail, master, dto);
+            SourceInjectedQuery.AssertValidDtoGraph(detail, master, dto);
         }
 
         [Fact]
@@ -376,7 +375,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             // Assert
             var dto = detailDtoQuery.Single();
 
-            AssertValidDtoGraph(detail, master, dto);
+            SourceInjectedQuery.AssertValidDtoGraph(detail, master, dto);
         }
 
         [Fact]
@@ -406,7 +405,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             // Assert
             var dto = detailDtoQuery.Single();
 
-            AssertValidDtoGraph(detail, master, dto);
+            SourceInjectedQuery.AssertValidDtoGraph(detail, master, dto);
         }
 
         [Fact]
@@ -436,7 +435,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             // Assert
             var dto = detailDtoQuery.Single();
 
-            AssertValidDtoGraph(detail, master, dto);
+            SourceInjectedQuery.AssertValidDtoGraph(detail, master, dto);
         }
 
         [Fact]
@@ -457,10 +456,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
                 .Where(d => d.Master.Name == "Harry Marry");
 
             // Assert
-            detailDtoQuery.ToList().Count().ShouldBe(1);
+            detailDtoQuery.ToList().Count.ShouldBe(1);
         }
 
-        private void AssertValidDtoGraph(Detail detail, Master master, DetailCyclicDto dto)
+        private static void AssertValidDtoGraph(Detail detail, Master master, DetailCyclicDto dto)
         {
             dto.ShouldNotBeNull();
             detail.Id.ShouldBe(dto.Id);
@@ -531,27 +530,24 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             // Arrange
             var sources = new List<ResourceWithPermissions>()
             {
-                new ResourceWithPermissions
-                {
+                new() {
                     Title = "Resource 01",
-                    Permissions = new List<Permission>
-                    {
-                        new Permission {PermissionName = "Edit", UserId = 22},
-                        new Permission {PermissionName = "Read", UserId = 4}
-                    }
+                    Permissions =
+                    [
+                        new() {PermissionName = "Edit", UserId = 22},
+                        new() {PermissionName = "Read", UserId = 4}
+                    ]
                 },
-                new ResourceWithPermissions
-                {
+                new() {
                     Title = "Resource 02",
-                    Permissions = new List<Permission>
-                    {
+                    Permissions =
+                    [
                         new Permission {PermissionName = "Edit", UserId = 4}
-                    }
+                    ]
                 },
-                new ResourceWithPermissions
-                {
+                new() {
                     Title = "Resource 03",
-                    Permissions = new List<Permission>()
+                    Permissions = []
                 }
             };
 
@@ -563,7 +559,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 // parameter defined in mapping part
-                long userId = default(long);
+                long userId = default;
                 cfg.CreateMap<ResourceWithPermissions, ResourceDto>()
                     .ForMember(t => t.HasEditPermission,
                         o => o.MapFrom(s => s.Permissions.Any(p => p.PermissionName == "Edit" && p.UserId == userId)));
@@ -575,7 +571,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             var factoryFunc = new Func<IList<ResourceWithPermissions>, IQueryable<ResourceWithPermissions>>((list) =>
             {
                 // same parameter defined in query part
-                long userId = default(long);
+                long userId = default;
                 return list.AsQueryable().Where(r => r.Permissions.Any(p => p.UserId == userId));
             });
 
@@ -631,7 +627,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             var source = new NotSingleQueryingEnumerable<Detail>();
             
             // Act
-            source.AsQueryable()
+            _ = source.AsQueryable()
                 .UseAsDataSource(mapper).For<DetailDto>()
                 .Select(m => m.Name)
                 .ToList();
@@ -657,7 +653,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
                 cfg.CreateMap<UserModel, User>()
                     .ForMember(d => d.UserId, opt => opt.MapFrom(s => s.Id))
                     .ForMember(d => d.Name, opt => opt.MapFrom(s => s.FullName))
-                    .ForMember(d => d.IsLoggedOn, opt => opt.MapFrom(s => s.LoggedOn.ToUpper() == "Y"))
+                    .ForMember(d => d.IsLoggedOn, opt => opt.MapFrom(s => s.LoggedOn.Equals("Y", StringComparison.CurrentCultureIgnoreCase)))
                     .ForMember(d => d.Age, opt => opt.MapFrom(s => s.AgeInYears))
                     .ForMember(d => d.Active, opt => opt.MapFrom(s => s.IsActive))
                     .ForMember(d => d.Account, opt => opt.MapFrom(s => s.AccountModel));
@@ -700,7 +696,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
     {
         public Account()
         {
-            Things = new List<Thing>();
+            Things = [];
         }
         public int Id { get; set; }
         public double Balance { get; set; }
@@ -714,7 +710,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
     {
         public AccountModel()
         {
-            ThingModels = new List<ThingModel>();
+            ThingModels = [];
         }
         public int Id { get; set; }
         public double Bal { get; set; }
@@ -761,7 +757,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
     {
         public Master()
         {
-            Details = new List<Detail>();
+            Details = [];
         }
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -793,7 +789,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
     {
         public MasterCyclicDto()
         {
-            Details = new List<DetailCyclicDto>();
+            Details = [];
         }
         public Guid Id { get; set; }
         public string Name { get; set; }
@@ -856,6 +852,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         public void Dispose()
         {
             Instance = null;
+            GC.SuppressFinalize(this);
         }
     }
 
@@ -911,19 +908,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
 
             public void Dispose()
             {
-                if (_dataReader is not null)
-                {
-                    _dataReader.Dispose();
-                    _dataReader = null;
-                }
+                _dataReader?.Dispose();
+                _dataReader = null;
             }
 
             public bool MoveNext()
             {
-                if (_dataReader == null)
-                {
-                    _dataReader = new NotRelationalDataReader();
-                }
+                _dataReader ??= new NotRelationalDataReader();
                 return false;
             }
 
@@ -934,5 +925,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         }
     }
 }
+
 
 

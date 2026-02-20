@@ -22,13 +22,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             );
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-            List<EntityModel> source1 = new() {
+            List<EntityModel> source1 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value3 }
-            };
-            List<EntityModel> source2 = new() {
+            ];
+            List<EntityModel> source2 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value1 }
-            };
-            Entity[] entities = new Entity[]  { new Entity { SimpleEnum = SimpleEnum.Value1 }, new Entity { SimpleEnum = SimpleEnum.Value2 } };
+            ];
+            Entity[] entities = [new Entity { SimpleEnum = SimpleEnum.Value1 }, new Entity { SimpleEnum = SimpleEnum.Value2 }];
             Expression<Func<Entity, bool>> filter = e => entities.Any(en => e.SimpleEnum == en.SimpleEnum);
 
             //act
@@ -52,13 +52,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             );
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-            List<EntityModel> source1 = new() {
+            List<EntityModel> source1 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value3 }
-            };
-            List<EntityModel> source2 = new() {
+            ];
+            List<EntityModel> source2 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value1 }
-            };
-            List<SimpleEnum> enums = new() { SimpleEnum.Value1, SimpleEnum.Value2 };
+            ];
+            List<SimpleEnum> enums = [SimpleEnum.Value1, SimpleEnum.Value2];
             Expression<Func<Entity, bool>> filter = e => enums.Contains(e.SimpleEnum);
 
             //act
@@ -82,13 +82,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             );
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-            List<EntityModel> source1 = new() {
+            List<EntityModel> source1 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value3 }
-            };
-            List<EntityModel> source2 = new() {
+            ];
+            List<EntityModel> source2 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value1 }
-            };
-            List<SimpleEnum> enums = new() { SimpleEnum.Value1, SimpleEnum.Value2 };
+            ];
+            List<SimpleEnum> enums = [SimpleEnum.Value1, SimpleEnum.Value2];
             Expression<Func<Entity, bool>> filter = e => Enumerable.Contains(enums, e.SimpleEnum);
 
             //act
@@ -112,12 +112,12 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             );
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-            List<EntityModel> source1 = new() {
+            List<EntityModel> source1 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value3 }
-            };
-            List<EntityModel> source2 = new() {
+            ];
+            List<EntityModel> source2 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value1 }
-            };
+            ];
             Dictionary<string, SimpleEnum> enumDictionary = new() { ["A"] = SimpleEnum.Value1, ["B"] = SimpleEnum.Value2 };
             Expression<Func<Entity, bool>> filter = e => enumDictionary.Any(i => i.Value == e.SimpleEnum);
 
@@ -143,12 +143,12 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             );
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-            List<EntityModel> source1 = new() {
+            List<EntityModel> source1 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value3 }
-            };
-            List<EntityModel> source2 = new() {
+            ];
+            List<EntityModel> source2 = [
                 new EntityModel { SimpleEnum = SimpleEnumModel.Value1 }
-            };
+            ];
             Dictionary<SimpleEnum, Entity> enumDictionary = new() { [SimpleEnum.Value1] = new Entity { SimpleEnum = SimpleEnum.Value1 }, [SimpleEnum.Value2] = new Entity { SimpleEnum = SimpleEnum.Value2 } };
             Expression<Func<Entity, bool>> filter = e => enumDictionary.Any(i => i.Key == e.SimpleEnum && i.Value.SimpleEnum == e.SimpleEnum);
 

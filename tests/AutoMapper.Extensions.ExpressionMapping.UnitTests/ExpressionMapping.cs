@@ -95,8 +95,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 set
                 {
                     _parent = value;
-                    if (GrandChild != null)
-                        GrandChild.Parent = _parent;
+                    GrandChild?.Parent = _parent;
                 }
             }
 
@@ -142,7 +141,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             Expression<Func<GrandParentDTO, bool>> _predicateExpression = gp => gp.Parent.Children.Any(c => c.ID2 == 3);
             var expression = Mapper.Map<Expression<Func<GrandParent, bool>>>(_predicateExpression);
-            var items = new[] {new GrandParent(){Parent = new Parent(){Children = new[]{new Child(){ID2 = 3}}, Child = new Child(){ID2 = 3}}}}.AsQueryable();
+            var items = new[] {new GrandParent(){Parent = new Parent(){Children = [new Child(){ID2 = 3}], Child = new Child(){ID2 = 3}}}}.AsQueryable();
             items.Where(expression).ShouldContain(items.First());
             var items2 = items.UseAsDataSource(Mapper).For<GrandParentDTO>().Where(_predicateExpression);
             items2.Count().ShouldBe(1);
@@ -164,7 +163,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             var ids = new[] { 4, 5 };
             _predicateExpression = p => p.Children.Where((c, i) => c.ID_ > 4).Any(c => ids.Contains(c.ID_));
-            _valid = new Parent { Children = new[] { new Child { ID = 5 } } };
+            _valid = new Parent { Children = [new Child { ID = 5 }] };
         }
 
         [Fact]
@@ -206,21 +205,21 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void When_Use_Sub_Lambda_Statement()
         {
             _predicateExpression = p => p.Children.Any(c => c.ID_ > 4);
-            _valid = new Parent { Children = new[] { new Child { ID = 5 } } };
+            _valid = new Parent { Children = [new Child { ID = 5 }] };
         }
 
         [Fact]
         public void When_Use_Multiple_Parameter_Lambda_Statement()
         {
             _predicateExpression = p => p.Children.Any((c, i) => c.ID_ > 4);
-            _valid = new Parent { Children = new[] { new Child { ID = 5 } } };
+            _valid = new Parent { Children = [new Child { ID = 5 }] };
         }
 
         [Fact]
         public void When_Use_Lambda_Statement_With_TypeMapped_Property_Being_Other_Than_First()
         {
             _predicateExpression = p => p.Children.AnyParamReverse((c, c2) => c.ID_ > 4);
-            _valid = new Parent {Children = new[] {new Child {ID = 5}}};
+            _valid = new Parent {Children = [new Child {ID = 5}]};
         }
 
         [Fact]
@@ -229,10 +228,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             _predicateExpression = p => p.Children.Any(c => c.GrandChild.GrandChild.ID_ == 4);
             _valid = new Parent
             {
-                Children = new[]
-                {
+                Children =
+                [
                     new Child {GrandChild = new Child {GrandChild = new Child {ID = 4}}}
-                }
+                ]
             };
         }
 
@@ -243,7 +242,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             _valid = new Parent
             {
                 Child = new Child {ID = 4},
-                Children = new[] {new Child {GrandChild = new Child  {ID = 4}}}
+                Children = [new Child {GrandChild = new Child  {ID = 4}}]
             };
         }
 
@@ -296,7 +295,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             var year = DateTime.Now.Year;
             _predicateExpression = p => p.DateTime.Year == year && p.Child.Parent.Child.GrandChild.Parent.Child.GrandChild.GrandChild.ID_ == 4 && p.Children.Any(c => c.GrandChild.GrandChild.ID_ == 4);
-            _valid = new Parent { DateTime = DateTime.Now, Child = new Child { GrandChild = new Child { GrandChild = new Child { ID = 4 } } }, Children = new[] { new Child { GrandChild = new Child { GrandChild = new Child { ID = 4 } } } } };
+            _valid = new Parent { DateTime = DateTime.Now, Child = new Child { GrandChild = new Child { GrandChild = new Child { ID = 4 } } }, Children = [new Child { GrandChild = new Child { GrandChild = new Child { ID = 4 } } }] };
         }
 
         [Fact]
@@ -325,6 +324,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             var req = new TestData { Code = "DD" };
             Expression<Func<TestData, bool>> f = s => s.Code == req.Code;
+
             var result = (Expression<Func<TestModel, bool>>) Mapper.Map(f, typeof(Expression<Func<TestData, bool>>), typeof(Expression<Func<TestModel, bool>>));
 
             var func = result.Compile();

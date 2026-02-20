@@ -185,7 +185,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Expression<Func<Entity<TNumeric>, bool>> mappedExpression;
             {
                 var param = Expression.Parameter(typeof(EntityDto<TEnum>), "x");
-                var property = Expression.Property(param, nameof(EntityDto<TEnum>.Value));
+                var property = Expression.Property(param, nameof(EntityDto<>.Value));
                 var constantExp = Expression.Constant(enumConstant, typeof(TEnum));
                 var binaryExpression = Expression.Equal(property, constantExp);
                 var lambdaExpression = Expression.Lambda(binaryExpression, param);
@@ -208,7 +208,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Expression<Func<Entity<int?>, bool>> mappedExpression;
             {
                 var param = Expression.Parameter(typeof(EntityDto<SimpleEnumInt>), "x");
-                var property = Expression.Property(param, nameof(EntityDto<SimpleEnumInt>.Value));
+                var property = Expression.Property(param, nameof(EntityDto<>.Value));
                 var constantExp = Expression.Constant(enumConstant, typeof(SimpleEnumInt));
                 var binaryExpression = Expression.Equal(property, constantExp);
                 var lambdaExpression = Expression.Lambda(binaryExpression, param);
@@ -225,15 +225,26 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         private class ComplexEntity
         {
+#pragma warning disable IDE1006 // Naming Styles
             public int intToEnum { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
+#pragma warning disable IDE1006 // Naming Styles
             public SimpleEnumInt enumToInt { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
+#pragma warning disable IDE1006 // Naming Styles
             public SimpleEnumInt enumToEnum { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
+#pragma warning disable IDE1006 // Naming Styles
             public int intToInt { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
         }
 
         private class ComplexEntityDto
         {
+#pragma warning disable IDE1006 // Naming Styles
             public SimpleEnumInt intToEnum { get; set; }
+#pragma warning restore IDE1006 // Naming Styles
+#pragma warning disable IDE1006 // Naming Styles
             public int enumToInt { get; set; }
 
             public SimpleEnumInt enumToEnum { get; set; }
@@ -256,12 +267,12 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 var constant5 = Expression.Constant(SimpleEnumInt.Value3, typeof(SimpleEnumInt));
                 var constant6 = Expression.Constant(SimpleEnumInt.Value2, typeof(SimpleEnumInt));
 
-                Expression[] equals = new Expression[]{
+                Expression[] equals = [
                     Expression.Equal(property1, constant1),
                     Expression.Equal(property2, constant2),
                     Expression.Equal(property5, constant5),
                     Expression.Equal(property6, constant6),
-                };
+                ];
 
                 Expression andExpression = equals[0];
                 for (int i = 1; i < equals.Length; i++)

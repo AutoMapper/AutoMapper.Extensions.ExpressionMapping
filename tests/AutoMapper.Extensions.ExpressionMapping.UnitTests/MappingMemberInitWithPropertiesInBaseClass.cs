@@ -17,7 +17,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var mapper = config.CreateMapper();
 
             //Act
-            List<PlayerModel> models = mapper.ProjectTo<PlayerModel>(Players).ToList();
+            List<PlayerModel> models = [.. mapper.ProjectTo<PlayerModel>(Players)];
 
             //Assert
             Assert.Equal("Jack", models[0].Name);
@@ -45,7 +45,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<Player, Player>> selectionMapped = mapper.MapExpression<Expression<Func<Player, Player>>>(selection);
-            List<Player> result = Players.Select(selectionMapped).ToList();
+            List<Player> result = [.. Players.Select(selectionMapped)];
 
             //Assert
             Assert.Equal("Jack", result[0].Name);
@@ -78,7 +78,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<Player, Player>> selectionMapped = mapper.MapExpression<Expression<Func<Player, Player>>>(selection);
-            List<Player> result = Players.Select(selectionMapped).ToList();
+            List<Player> result = [.. Players.Select(selectionMapped)];
 
             //Assert
             Assert.Equal("Jack", result[0].Name);
@@ -106,7 +106,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<Player, string>> selectionMapped = mapper.MapExpression<Expression<Func<Player, string>>>(selection);
-            List<string> result = Players.Select(selectionMapped).ToList();
+            List<string> result = [.. Players.Select(selectionMapped)];
 
             //Assert
             Assert.Equal("Atlanta", result[0]);
@@ -117,14 +117,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_member_init_without_include_members()
         {
             //Arrange
-            var config = GetConfigurationWiithoutIncludeMembers();
+            var config = MappingMemberInitWithPropertiesInBaseClass.GetConfigurationWiithoutIncludeMembers();
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
             Expression<Func<PlayerModel, PlayerModel>> selection = s => new PlayerModel { Name = s.Name, StatsASpeed = s.StatsASpeed, StatsAPower = s.StatsAPower, StatsARating = s.StatsARating };
 
             //Act
             Expression<Func<Player, Player>> selectionMapped = mapper.MapExpression<Expression<Func<Player, Player>>>(selection);
-            List<Player> result = Players.Select(selectionMapped).ToList();
+            List<Player> result = [.. Players.Select(selectionMapped)];
 
             //Assert
             Assert.Equal("Jack", result[0].Name);
@@ -137,7 +137,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_member_init_without_include_members_and_including_nested_members()
         {
             //Arrange
-            var config = GetConfigurationWiithoutIncludeMembers();
+            var config = MappingMemberInitWithPropertiesInBaseClass.GetConfigurationWiithoutIncludeMembers();
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
             Expression<Func<PlayerModel, PlayerModel>> selection = s => new PlayerModel
@@ -157,7 +157,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<Player, Player>> selectionMapped = mapper.MapExpression<Expression<Func<Player, Player>>>(selection);
-            List<Player> result = Players.Select(selectionMapped).ToList();
+            List<Player> result = [.. Players.Select(selectionMapped)];
 
             //Assert
             Assert.Equal("Jack", result[0].Name);
@@ -174,7 +174,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Assert.Equal("Columbia", result[0].StatsB.StatsBuilder.City);
         }
 
-        MapperConfiguration GetConfigurationWiithoutIncludeMembers()
+        static MapperConfiguration GetConfigurationWiithoutIncludeMembers()
             => ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
@@ -190,7 +190,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                     .ForMember(d => d.StatsBSpeed, opt => opt.MapFrom(s => s.StatsB.SpeedValue));
             });
 
-        MapperConfiguration GetConfigurationWiithIncludeMembers()
+        static MapperConfiguration GetConfigurationWiithIncludeMembers()
             => ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.AddExpressionMapping();
@@ -224,8 +224,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         readonly IQueryable<Player> Players = new List<Player>
         {
-            new Player
-            {
+            new() {
                 Name = "Jack",
                 StatsA = new Stats
                 {
@@ -250,8 +249,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                     }
                 }
             },
-            new Player
-            {
+            new() {
                 Name = "Jane",
                 StatsA = new Stats
                 {

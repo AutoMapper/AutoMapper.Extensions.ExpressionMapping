@@ -11,7 +11,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public XpressionMapperForPathTests()
         {
             SetupAutoMapper();
-            SetupQueryableCollection();
+            XpressionMapperForPathTests.SetupQueryableCollection();
         }
 
         #region Tests
@@ -23,10 +23,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<DerivedData, bool>> selectionMapped = mapper.Map<Expression<Func<DerivedData, bool>>>(selection);
-            List<DerivedData> items = DataObjects.Where(selectionMapped).ToList();
+            List<DerivedData> items = [.. DataObjects.Where(selectionMapped)];
 
             //Assert
-            Assert.True(items.Count == 1);
+            Assert.Single(items);
         }
 
         [Fact]
@@ -37,10 +37,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<RootData, bool>> selectionMapped = mapper.MapExpression<Expression<Func<RootData, bool>>>(selection);
-            List<RootData> items = DataObjects.Where(selectionMapped).ToList();
+            List<RootData> items = [.. DataObjects.Where(selectionMapped)];
 
             //Assert
-            Assert.True(items.Count == 1);
+            Assert.Single(items);
         }
 
         [Fact]
@@ -51,10 +51,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<OrderDto, bool>> selectionMapped = mapper.Map<Expression<Func<OrderDto, bool>>>(selection);
-            List<OrderDto> items = Orders.Where(selectionMapped).ToList();
+            List<OrderDto> items = [.. Orders.Where(selectionMapped)];
 
             //Assert
-            Assert.True(items.Count == 1);
+            Assert.Single(items);
         }
 
         [Fact]
@@ -65,79 +65,30 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<OrderDto, bool>> selectionMapped = mapper.Map<Expression<Func<OrderDto, bool>>>(selection);
-            List<OrderDto> items = Orders.Where(selectionMapped).ToList();
+            List<OrderDto> items = [.. Orders.Where(selectionMapped)];
 
             //Assert
-            Assert.True(items.Count == 1);
+            Assert.Single(items);
         }
 
-        [Fact]
-        public void Maps_top_level_string_member_as_include()
-        {
-            //Arrange
-            Expression<Func<Order, object>> selection = s => s.CustomerHolder.Customer.Name;
-
-            //Act
-            Expression<Func<OrderDto, object>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<OrderDto, object>>>(selection);
-            List<object> orders = Orders.Select(selectionMapped).ToList();
-
-            //Assert
-            Assert.True(orders.Count == 2);
-        }
-
-        [Fact]
-        public void Maps_top_level_value_type_as_include()
-        {
-            //Arrange
-            Expression<Func<Order, object>> selection = s => s.CustomerHolder.Customer.Total;
-
-            //Act
-            Expression<Func<OrderDto, object>> selectionMapped = mapper.MapExpressionAsInclude<Expression<Func<OrderDto, object>>>(selection);
-            List<object> orders = Orders.Select(selectionMapped).ToList();
-
-            //Assert
-            Assert.True(orders.Count == 2);
-        }
-
-        [Fact]
-        public void Throws_exception_when_mapped_value_type_is_a_child_of_the_parameter()
-        {
-            //Arrange
-            Expression<Func<Order, object>> selection = s => s.CustomerHolder.Customer.Age;
-
-            //Assert
-            Assert.Throws<InvalidOperationException>(() => mapper.MapExpressionAsInclude<Expression<Func<OrderDto, object>>>(selection));
-        }
-
-        [Fact]
-        public void Throws_exception_when_mapped_string_is_a_child_of_the_parameter()
-        {
-            //Arrange
-            Expression<Func<Order, object>> selection = s => s.CustomerHolder.Customer.Address;
-
-            //Assert
-            Assert.Throws<InvalidOperationException>(() => mapper.MapExpressionAsInclude<Expression<Func<OrderDto, object>>>(selection));
-        }
         #endregion Tests
 
-        private void SetupQueryableCollection()
+        private static void SetupQueryableCollection()
         {
             DataObjects = new DerivedData[]
             {
-                new DerivedData() { OtherID = 2, Title2 = "nested test", ID = 1, Title = "test", DescendantField = "descendant field" },
-                new DerivedData() { OtherID = 3, Title2 = "nested", ID = 4, Title = "title", DescendantField = "some text" }
+                new() { OtherID = 2, Title2 = "nested test", ID = 1, Title = "test", DescendantField = "descendant field" },
+                new() { OtherID = 3, Title2 = "nested", ID = 4, Title = "title", DescendantField = "some text" }
             }.AsQueryable<DerivedData>();
 
             Orders = new OrderDto[]
             {
-                new OrderDto
-                {
+                new() {
                      Customer = new CustomerDto{ Name = "George Costanza", Total = 7 },
                      CustomerAddress = "333 First Ave",
                      CustomerAge = 32
                 },
-                new OrderDto
-                {
+                new() {
                      Customer = new CustomerDto{ Name = "Jerry Springer", Total = 8 },
                      CustomerAddress = "444 First Ave",
                      CustomerAge = 31
@@ -148,7 +99,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         private static IQueryable<OrderDto> Orders { get; set; }
         private static IQueryable<DerivedData> DataObjects { get; set; }
 
-        private void SetupAutoMapper()
+        private static void SetupAutoMapper()
         {
             var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
