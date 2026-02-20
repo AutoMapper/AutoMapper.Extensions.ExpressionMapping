@@ -89,17 +89,14 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
             else if (sourceType.IsGenericType)
             {
-                if (TypeMappings.TryGetValue(sourceType, out Type destType))
-                    return destType;
-                else
-                {
-                    return sourceType.GetGenericTypeDefinition().MakeGenericType
+                return TypeMappings.TryGetValue(sourceType, out Type destType)
+                    ? destType
+                    : sourceType.GetGenericTypeDefinition().MakeGenericType
                     (
                         [.. sourceType
                         .GetGenericArguments()
                         .Select(ReplaceType)]
                     );
-                }
             }
             else
             {
@@ -182,11 +179,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
             FindMaps([.. typeMap.PropertyMaps]);
             void FindMaps(List<PropertyMap> maps)
             {
-                foreach (PropertyMap pm in maps)
+                foreach (PropertyMap pm in maps.Where(p => p.SourceMembers.Length > 0 || p.CustomMapExpression != null))
                 {
-                    if (pm.SourceMembers.Length < 1 && pm.CustomMapExpression == null)
-                        continue;
-
                     AddChildMappings
                     (
                         source.GetFieldOrProperty(pm.DestinationMember.Name).GetMemberType(),

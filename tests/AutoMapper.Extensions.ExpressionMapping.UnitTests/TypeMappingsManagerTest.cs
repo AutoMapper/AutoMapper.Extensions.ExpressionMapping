@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using AutoMapper;
 using Xunit;
 
 namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
@@ -118,8 +116,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 typeof(Func<DestModel, bool>));
 
             // Assert
-            Assert.True(manager.TypeMappings.ContainsKey(typeof(SourceModel)));
-            Assert.Equal(typeof(DestModel), manager.TypeMappings[typeof(SourceModel)]);
+            Assert.Contains(new KeyValuePair<Type, Type>(typeof(SourceModel), typeof(DestModel)), manager.TypeMappings);
         }
 
         #endregion
@@ -143,8 +140,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             manager.AddTypeMapping(typeof(SourceChild), typeof(DestChild));
 
             // Assert
-            Assert.True(manager.TypeMappings.ContainsKey(typeof(SourceChild)));
-            Assert.Equal(typeof(DestChild), manager.TypeMappings[typeof(SourceChild)]);
+            Assert.Contains(new KeyValuePair<Type, Type>(typeof(SourceChild), typeof(DestChild)), manager.TypeMappings);
         }
 
         [Fact]
@@ -187,8 +183,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 typeof(Expression<Func<DestChild, bool>>));
 
             // Assert
-            Assert.True(manager.TypeMappings.ContainsKey(typeof(Func<SourceChild, bool>)));
-            Assert.Equal(typeof(Func<DestChild, bool>), manager.TypeMappings[typeof(Func<SourceChild, bool>)]);
+            Assert.Contains(new KeyValuePair<Type, Type>(typeof(Func<SourceChild, bool>), typeof(Func<DestChild, bool>)), manager.TypeMappings);
         }
 
         [Fact]
@@ -231,9 +226,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             manager.AddTypeMapping(typeof(List<SourceItem>), typeof(List<DestItem>));
 
             // Assert
-            Assert.True(manager.TypeMappings.ContainsKey(typeof(List<SourceItem>)));
-            Assert.True(manager.TypeMappings.ContainsKey(typeof(SourceItem)));
-            Assert.Equal(typeof(DestItem), manager.TypeMappings[typeof(SourceItem)]);
+            Assert.Contains(new KeyValuePair<Type, Type>(typeof(SourceItem), typeof(DestItem)), manager.TypeMappings);
+            Assert.Contains(new KeyValuePair<Type, Type>(typeof(List<SourceItem>), typeof(List<DestItem>)), manager.TypeMappings);
         }
 
         [Fact]
@@ -254,9 +248,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             manager.AddTypeMapping(typeof(SourceItem[]), typeof(DestItem[]));
 
             // Assert
-            Assert.True(manager.TypeMappings.ContainsKey(typeof(SourceItem[])));
-            Assert.True(manager.TypeMappings.ContainsKey(typeof(SourceItem)));
-            Assert.Equal(typeof(DestItem), manager.TypeMappings[typeof(SourceItem)]);
+            Assert.Contains(new KeyValuePair<Type, Type>(typeof(SourceItem), typeof(DestItem)), manager.TypeMappings);
+            Assert.Contains(new KeyValuePair<Type, Type>(typeof(SourceItem[]), typeof(DestItem[])), manager.TypeMappings);
         }
 
         #endregion
@@ -589,8 +582,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 typeof(Func<DestChild, string>));
 
             // Assert
-            Assert.True(manager.TypeMappings.ContainsKey(typeof(SourceChild)));
-            Assert.Equal(typeof(DestChild), manager.TypeMappings[typeof(SourceChild)]);
+            Assert.Contains(new KeyValuePair<Type, Type>(typeof(SourceChild), typeof(DestChild)), manager.TypeMappings);
         }
 
         [Fact]
@@ -633,8 +625,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 typeof(Action<DestChild>));
 
             // Assert
-            Assert.True(manager.TypeMappings.ContainsKey(typeof(SourceChild)));
-            Assert.Equal(typeof(DestChild), manager.TypeMappings[typeof(SourceChild)]);
+            Assert.Contains(new KeyValuePair<Type, Type>(typeof(SourceChild), typeof(DestChild)), manager.TypeMappings);
         }
 
         #endregion
