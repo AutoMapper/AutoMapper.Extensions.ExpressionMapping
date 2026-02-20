@@ -701,8 +701,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             DateTime firstReleaseDate = new DateTime();
             DateTime lastReleaseDate = new DateTime();
 
-            Expression<Func<ItemDto, bool>> exp = x => (firstReleaseDate == null || x.CreateDate >= firstReleaseDate) &&
-                                      (lastReleaseDate == null || x.CreateDate <= lastReleaseDate);
+            Expression<Func<ItemDto, bool>> exp = x => (firstReleaseDate == default || x.CreateDate >= firstReleaseDate) &&
+                                      (lastReleaseDate == default || x.CreateDate <= lastReleaseDate);
 
             //Act
             Expression<Func<Item, bool>> expMapped = mapper.MapExpression<Expression<Func<Item, bool>>>(exp);
@@ -716,7 +716,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             //Arrange
             Expression<Func<AccountModel, bool>> exp = f => (f != null ? f.Id : 0) > 10
-             && (f != null && f.DateCreated != null ? f.DateCreated : default(DateTime)) > new DateTime(2007, 02, 17);
+             && (f != null && f.DateCreated != default ? f.DateCreated : default(DateTime)) > new DateTime(2007, 02, 17);
 
 
             //Act

@@ -18,7 +18,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         public static Type CreateAnonymousType(IDictionary<string, Type> memberDetails)
         {
-            AssemblyName dynamicAssemblyName = new AssemblyName("TempAssembly.AutoMapper.Extensions.ExpressionMapping");
+            AssemblyName dynamicAssemblyName = new("TempAssembly.AutoMapper.Extensions.ExpressionMapping");
             AssemblyBuilder dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(dynamicAssemblyName, AssemblyBuilderAccess.Run);
             ModuleBuilder dynamicModule = dynamicAssembly.DefineDynamicModule("TempAssembly.AutoMapper.Extensions.ExpressionMapping");
             TypeBuilder typeBuilder = dynamicModule.DefineType(GetAnonymousTypeName(), TypeAttributes.Public);
@@ -35,7 +35,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                         FieldBuilder = typeBuilder.DefineField(string.Concat("_", memberName), memberType, FieldAttributes.Private),
                         PropertyBuilder = typeBuilder.DefineProperty(memberName, PropertyAttributes.HasDefault, memberType, null),
                         GetMethodBuilder = typeBuilder.DefineMethod(string.Concat("get_", memberName), getSetAttr, memberType, Type.EmptyTypes),
-                        SetMethodBuilder = typeBuilder.DefineMethod(string.Concat("set_", memberName), getSetAttr, null, new Type[] { memberType })
+                        SetMethodBuilder = typeBuilder.DefineMethod(string.Concat("set_", memberName), getSetAttr, null, [memberType])
                     };
                 }
             );

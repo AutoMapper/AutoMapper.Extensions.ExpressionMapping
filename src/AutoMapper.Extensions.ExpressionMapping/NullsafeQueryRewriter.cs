@@ -39,7 +39,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
     /// </remarks>
     internal class NullsafeQueryRewriter : ExpressionVisitor
     {
-        static readonly LockingConcurrentDictionary<Type, Expression> Cache = new LockingConcurrentDictionary<Type, Expression>(Fallback);
+        static readonly LockingConcurrentDictionary<Type, Expression> Cache = new(Fallback);
 
         /// <inheritdoc />
         protected override Expression VisitMember(MemberExpression node)
@@ -137,7 +137,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return null;
         }
 
-        static Expression CollectionFallback(Type definition, Type type)
+        static UnaryExpression CollectionFallback(Type definition, Type type)
         {
             var collection = definition.MakeGenericType(type.GetTypeInfo().GenericTypeArguments);
 

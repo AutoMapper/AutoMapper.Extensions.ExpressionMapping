@@ -2,18 +2,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace AutoMapper
+namespace AutoMapper.Extensions.ExpressionMapping
 {
-    internal struct LockingConcurrentDictionary<TKey, TValue>
+    internal readonly struct LockingConcurrentDictionary<TKey, TValue>(Func<TKey, TValue> valueFactory)
     {
-        private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _dictionary;
-        private readonly Func<TKey, Lazy<TValue>> _valueFactory;
-
-        public LockingConcurrentDictionary(Func<TKey, TValue> valueFactory)
-        {
-            _dictionary = new ConcurrentDictionary<TKey, Lazy<TValue>>();
-            _valueFactory = key => new Lazy<TValue>(() => valueFactory(key));
-        }
+        private readonly ConcurrentDictionary<TKey, Lazy<TValue>> _dictionary = new();
+        private readonly Func<TKey, Lazy<TValue>> _valueFactory = key => new Lazy<TValue>(() => valueFactory(key));
 
         public TValue GetOrAdd(TKey key) => _dictionary.GetOrAdd(key, _valueFactory).Value;
         public TValue GetOrAdd(TKey key, Func<TKey, Lazy<TValue>> valueFactory) => _dictionary.GetOrAdd(key, valueFactory).Value;
@@ -31,7 +25,7 @@ namespace AutoMapper
                 value = lazy.Value;
                 return true;
             }
-            value = default(TValue);
+            value = default;
             return false;
         }
 

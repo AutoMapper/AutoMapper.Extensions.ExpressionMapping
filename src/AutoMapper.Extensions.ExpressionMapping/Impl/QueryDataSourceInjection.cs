@@ -49,24 +49,18 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
     }
 
     [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-    public class QueryDataSourceInjection<TSource> : IQueryDataSourceInjection<TSource>
+    public class QueryDataSourceInjection<TSource>(IQueryable<TSource> dataSource, IMapper mapper) : IQueryDataSourceInjection<TSource>
     {
-        private readonly IQueryable<TSource> _dataSource;
-        private readonly IMapper _mapper;
-        private readonly List<ExpressionVisitor> _beforeMappingVisitors = new List<ExpressionVisitor>();
-        private readonly List<ExpressionVisitor> _afterMappingVisitors = new List<ExpressionVisitor>();
+        private readonly IQueryable<TSource> _dataSource = dataSource;
+        private readonly IMapper _mapper = mapper;
+        private readonly List<ExpressionVisitor> _beforeMappingVisitors = [];
+        private readonly List<ExpressionVisitor> _afterMappingVisitors = [];
         private readonly ExpressionVisitor _sourceExpressionTracer = null;
         private readonly ExpressionVisitor _destinationExpressionTracer = null;
         private Action<Exception> _exceptionHandler = x => { };
         private MemberPaths _membersToExpand;
         private IObjectDictionary _parameters;
         private SourceInjectedQueryInspector _inspector;
-
-        public QueryDataSourceInjection(IQueryable<TSource> dataSource, IMapper mapper)
-        {
-            _dataSource = dataSource;
-            _mapper = mapper;
-        }
 
         public ISourceInjectedQueryable<TDestination> For<TDestination>() => CreateQueryable<TDestination>();
 
@@ -143,9 +137,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
             return this;
         }
 
-        private ISourceInjectedQueryable<TDestination> CreateQueryable<TDestination>() =>
-            new SourceSourceInjectedQuery<TSource, TDestination>(_dataSource,
-                new TDestination[0].AsQueryable(),
+        private SourceSourceInjectedQuery<TSource, TDestination> CreateQueryable<TDestination>() =>
+            new(_dataSource,
+                Array.Empty<TDestination>().AsQueryable(),
                 _mapper,
                 _beforeMappingVisitors,
                 _afterMappingVisitors,
@@ -154,7 +148,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
                 _membersToExpand,
                 _inspector);
 
-        private static IObjectDictionary GetParameters(object parameters)
+        private static Dictionary<string, object> GetParameters(object parameters)
         {
             return (parameters ?? new object()).GetType()
                 .GetDeclaredProperties()

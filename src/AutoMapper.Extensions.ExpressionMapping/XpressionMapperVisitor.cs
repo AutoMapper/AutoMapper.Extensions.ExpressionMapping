@@ -1,7 +1,9 @@
-﻿using AutoMapper.Extensions.ExpressionMapping.Extensions;
+﻿using AutoMapper.Extensions.ExpressionMapping;
+using AutoMapper.Extensions.ExpressionMapping.Extensions;
 using AutoMapper.Extensions.ExpressionMapping.Structures;
 using AutoMapper.Internal;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,27 +13,20 @@ using System.Text;
 
 namespace AutoMapper.Extensions.ExpressionMapping
 {
-    public class XpressionMapperVisitor : ExpressionVisitor
+    public class XpressionMapperVisitor(IMapper mapper, ITypeMappingsManager typeMappingsManager) : ExpressionVisitor
     {
-        public XpressionMapperVisitor(IMapper mapper, ITypeMappingsManager typeMappingsManager)
-        {
-            Mapper = mapper;
-            TypeMappingsManager = typeMappingsManager;
-            ConfigurationProvider = mapper.ConfigurationProvider;
-        }
-
         private MapperInfoDictionary InfoDictionary { get { return TypeMappingsManager.InfoDictionary; } }
 
         private Dictionary<Type, Type> TypeMappings { get { return TypeMappingsManager.TypeMappings; } }
 
-        private IConfigurationProvider ConfigurationProvider { get; }
+        private IConfigurationProvider ConfigurationProvider { get; } = mapper.ConfigurationProvider;
 
-        private IMapper Mapper { get; }
+        private IMapper Mapper { get; } = mapper;
 
         private IConfigurationProvider anonymousTypesConfigurationProvider;
-        private readonly MapperConfigurationExpression anonymousTypesBaseMappings = new MapperConfigurationExpression();
+        private readonly MapperConfigurationExpression anonymousTypesBaseMappings = new();
 
-        private ITypeMappingsManager TypeMappingsManager { get; }
+        private ITypeMappingsManager TypeMappingsManager { get; } = typeMappingsManager;
 
         protected override Expression VisitParameter(ParameterExpression node)
         {
@@ -40,7 +35,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return !pair.Equals(default(KeyValuePair<Type, MapperInfo>)) ? pair.Value.NewParameter : base.VisitParameter(node);
         }
 
-        private object GetConstantValue(object constantObject, string fullName, Type parentType)
+        private static object GetConstantValue(object constantObject, string fullName, Type parentType)
         {
             return fullName.Split('.').Aggregate(constantObject, (parent, memberName) =>
             {
@@ -80,7 +75,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
 
             InfoDictionary.Add(parameterExpression, TypeMappings);
-            return GetMappedMemberExpression(node.GetBaseOfMemberExpression(), new List<PropertyMapInfo>());
+            return GetMappedMemberExpression(node.GetBaseOfMemberExpression(), []);
 
             Expression GetMappedMemberExpression(Expression parentExpression, List<PropertyMapInfo> propertyMapInfoList)
             {
@@ -103,7 +98,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     return fromCustomExpression;
                 }
 
-                Expression memberExpression = GetMemberExpressionFromMemberMaps(BuildFullName(propertyMapInfoList), mappedParentExpression);
+                Expression memberExpression = GetMemberExpressionFromMemberMaps(XpressionMapperVisitor.BuildFullName(propertyMapInfoList), mappedParentExpression);
                 if (ShouldConvertMemberExpression(node.Type, memberExpression.Type))
                     memberExpression = memberExpression.ConvertTypeIfNecessary(node.Type);
 
@@ -113,10 +108,10 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
         }
 
-        protected MemberExpression GetMemberExpressionFromMemberMaps(string fullName, Expression visitedParentExpr) 
+        protected static MemberExpression GetMemberExpressionFromMemberMaps(string fullName, Expression visitedParentExpr) 
             => ExpressionHelpers.MemberAccesses(fullName, visitedParentExpr);
 
-        private Expression GetMemberExpressionFromCustomExpression(PropertyMapInfo lastWithCustExpression,
+        private static Expression GetMemberExpressionFromCustomExpression(PropertyMapInfo lastWithCustExpression,
                 PropertyMapInfo lastInList,
                 List<PropertyMapInfo> beforeCustExpression,
                 List<PropertyMapInfo> afterCustExpression,
@@ -141,7 +136,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 );
         }
 
-        private bool ShouldConvertMemberExpression(Type initialType, Type mappedType)
+        private static bool ShouldConvertMemberExpression(Type initialType, Type mappedType)
         {
             if (initialType.IsLiteralType())
                 return true;
@@ -158,7 +153,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return mappedType == Enum.GetUnderlyingType(initialType);
         }
 
-        protected Expression GetMemberExpressionFromCustomExpression(List<PropertyMapInfo> propertyMapInfoList, PropertyMapInfo lastWithCustExpression, Expression mappedParentExpr) 
+        protected static Expression GetMemberExpressionFromCustomExpression(List<PropertyMapInfo> propertyMapInfoList, PropertyMapInfo lastWithCustExpression, Expression mappedParentExpr) 
             => GetMemberExpressionFromCustomExpression
             (
                 lastWithCustExpression,
@@ -196,7 +191,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             else if (node.Arguments.Count > 0 && IsAnonymousType(node.Type))
             {
                 ParameterInfo[] parameters = node.Type.GetConstructors()[0].GetParameters();
-                Dictionary<string, Expression> bindingExpressions = new Dictionary<string, Expression>();
+                Dictionary<string, Expression> bindingExpressions = [];
 
                 for (int i = 0; i < parameters.Length; i++)
                     bindingExpressions.Add(parameters[i].Name, this.Visit(node.Arguments[i]));
@@ -269,7 +264,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         private void ConfigureAnonymousTypeMaps(Type oldType, Type newAnonymousType)
         {
             anonymousTypesBaseMappings.CreateMap(newAnonymousType, oldType);
-            Dictionary<Type, Type> memberTypeMaps = new Dictionary<Type, Type>();
+            Dictionary<Type, Type> memberTypeMaps = [];
             newAnonymousType.GetMembers()
                 .OfType<PropertyInfo>()
                 .ToList()
@@ -307,7 +302,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         private MemberInitExpression GetMemberInit(MemberBindingGroup memberBindingGroup)
         {
-            Dictionary<DeclaringMemberKey, List<MemberAssignmentInfo>> includedMembers = new Dictionary<DeclaringMemberKey, List<MemberAssignmentInfo>>();
+            Dictionary<DeclaringMemberKey, List<MemberAssignmentInfo>> includedMembers = [];
 
             List<MemberBinding> bindings = memberBindingGroup.MemberAssignmentInfos.Aggregate(new List<MemberBinding>(), (list, next) =>
             {
@@ -318,8 +313,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 if (sourceMember == null)
                     return list;
 
-                DeclaringMemberKey declaringMemberKey = new DeclaringMemberKey
-                (
+                DeclaringMemberKey declaringMemberKey = new                (
                     GetParentMember(propertyMap),
                     BuildParentFullName(propertyMap)
                 );
@@ -339,21 +333,20 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 else
                 {
                     if (declaringMemberKey.DeclaringMemberInfo == null)
-                        throw new ArgumentNullException(nameof(declaringMemberKey.DeclaringMemberInfo));
+                        throw new InvalidOperationException("DeclaringMemberInfo is null.");
 
                     if (!includedMembers.TryGetValue(declaringMemberKey, out List<MemberAssignmentInfo> assignments))
                     {
                         includedMembers.Add
                         (
                             declaringMemberKey,
-                            new List<MemberAssignmentInfo>
-                            {
+                            [
                                 new MemberAssignmentInfo
                                 (
                                     propertyMap,
                                     binding
                                 )
-                            }
+                            ]
                         );
                     }
                     else
@@ -376,7 +369,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                     declaringMemberKey: kvp.Key,
                     isRootMemberAssignment: false,
                     newType: kvp.Key.DeclaringMemberInfo.GetMemberType(),
-                    memberAssignmentInfos: includedMembers.Values.SelectMany(m => m).ToList()
+                    memberAssignmentInfos: [.. includedMembers.Values.SelectMany(m => m)]
                 )
             )
             .ToList()
@@ -396,45 +389,43 @@ namespace AutoMapper.Extensions.ExpressionMapping
             return Expression.MemberInit(Expression.New(memberBindingGroup.NewType), bindings);
         }
 
-        private MemberBinding DoBind(MemberInfo sourceMember, Expression initial, Expression mapped)
+        private MemberAssignment DoBind(MemberInfo sourceMember, Expression initial, Expression mapped)
         {
             mapped = mapped.ConvertTypeIfNecessary(sourceMember.GetMemberType());
             this.TypeMappingsManager.AddTypeMapping(initial.Type, mapped.Type);
             return Expression.Bind(sourceMember, mapped);
         }
 
-        private MemberInfo GetSourceMember(PropertyMap propertyMap)
+        private static MemberInfo GetSourceMember(PropertyMap propertyMap)
             => propertyMap.CustomMapExpression != null
                 ? propertyMap.CustomMapExpression.GetMemberExpression()?.Member
                 : propertyMap.SourceMembers.Last();
 
-        private MemberInfo GetParentMember(PropertyMap propertyMap)
+        private static MemberInfo GetParentMember(PropertyMap propertyMap)
             => propertyMap.IncludedMember?.ProjectToCustomSource != null
                             ? propertyMap.IncludedMember.ProjectToCustomSource.GetMemberExpression().Member
                             : GetSourceParentMember(propertyMap);
 
-        private MemberInfo GetSourceParentMember(PropertyMap propertyMap)
+        private static MemberInfo GetSourceParentMember(PropertyMap propertyMap)
         {
             if (propertyMap.CustomMapExpression != null)
                 return propertyMap.CustomMapExpression.GetMemberExpression()?.Expression.GetMemberExpression()?.Member;
 
-            if (propertyMap.SourceMembers.Count() > 1)
-                return new List<MemberInfo>(propertyMap.SourceMembers)[propertyMap.SourceMembers.Count() - 2];
+            if (propertyMap.SourceMembers.Length > 1)
+                return new List<MemberInfo>(propertyMap.SourceMembers)[propertyMap.SourceMembers.Length - 2];
 
             return null;
         }
 
-        private string BuildParentFullName(PropertyMap propertyMap)
+        private static string BuildParentFullName(PropertyMap propertyMap)
         {
-            List<PropertyMapInfo> propertyMapInfos = new List<PropertyMapInfo>();
+            List<PropertyMapInfo> propertyMapInfos = [];
             if (propertyMap.IncludedMember?.ProjectToCustomSource != null)
-                propertyMapInfos.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, new List<MemberInfo>()));
+                propertyMapInfos.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, []));
 
-            propertyMapInfos.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, propertyMap.SourceMembers.ToList()));
+            propertyMapInfos.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, [.. propertyMap.SourceMembers]));
 
-            List<string> fullNameArray = BuildFullName(propertyMapInfos)
-                .Split(new char[] { '.' })
-                .ToList();
+            List<string> fullNameArray = [.. BuildFullName(propertyMapInfos).Split(['.'])];
 
             fullNameArray.Remove(fullNameArray.Last());
 
@@ -495,13 +486,11 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 if (mapped == node.Expression)
                     return base.VisitTypeBinary(node);
 
-                switch (node.NodeType)
+                return node.NodeType switch
                 {
-                    case ExpressionType.TypeIs:
-                        return Expression.TypeIs(mapped, mappedType);
-                }
-
-                return base.VisitTypeBinary(node);
+                    ExpressionType.TypeIs => Expression.TypeIs(mapped, mappedType),
+                    _ => base.VisitTypeBinary(node),
+                };
             }
         }
 
@@ -575,25 +564,25 @@ namespace AutoMapper.Extensions.ExpressionMapping
             MethodCallExpression GetInstanceExpression(Expression instance)
             {
                 return node.Method.IsGenericMethod
-                            ? Expression.Call(instance, node.Method.Name, typeArgsForNewMethod.ToArray(), listOfArgumentsForNewMethod.ToArray())
-                            : Expression.Call(instance, GetMethodInfoForNonGeneric(), listOfArgumentsForNewMethod.ToArray());
+                            ? Expression.Call(instance, node.Method.Name, [.. typeArgsForNewMethod], [.. listOfArgumentsForNewMethod])
+                            : Expression.Call(instance, GetMethodInfoForNonGeneric(), [.. listOfArgumentsForNewMethod]);
 
                 MethodInfo GetMethodInfoForNonGeneric()
                 {
-                    MethodInfo methodInfo = instance.Type.GetMethod(node.Method.Name, listOfArgumentsForNewMethod.Select(a => a.Type).ToArray());
+                    MethodInfo methodInfo = instance.Type.GetMethod(node.Method.Name, [.. listOfArgumentsForNewMethod.Select(a => a.Type)]);
                     if (methodInfo.DeclaringType != instance.Type)
-                        methodInfo = methodInfo.DeclaringType.GetMethod(node.Method.Name, listOfArgumentsForNewMethod.Select(a => a.Type).ToArray());
+                        methodInfo = methodInfo.DeclaringType.GetMethod(node.Method.Name, [.. listOfArgumentsForNewMethod.Select(a => a.Type)]);
                     return methodInfo;
                 }
             }
 
             MethodCallExpression GetStaticExpression()
                 => node.Method.IsGenericMethod
-                    ? Expression.Call(node.Method.DeclaringType, node.Method.Name, typeArgsForNewMethod.ToArray(), listOfArgumentsForNewMethod.ToArray())
-                    : Expression.Call(node.Method, listOfArgumentsForNewMethod.ToArray());
+                    ? Expression.Call(node.Method.DeclaringType, node.Method.Name, [.. typeArgsForNewMethod], [.. listOfArgumentsForNewMethod])
+                    : Expression.Call(node.Method, [.. listOfArgumentsForNewMethod]);
         }
 
-        void ConvertTypesIfNecessary(ParameterInfo[] parameters, List<Expression> listOfArgumentsForNewMethod, MethodInfo mInfo)
+        static void ConvertTypesIfNecessary(ParameterInfo[] parameters, List<Expression> listOfArgumentsForNewMethod, MethodInfo mInfo)
         {
             if (mInfo.IsGenericMethod)
                 return;
@@ -606,7 +595,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             }
         }
 
-        protected string BuildFullName(List<PropertyMapInfo> propertyMapInfoList)
+        protected static string BuildFullName(List<PropertyMapInfo> propertyMapInfoList)
         {
             var fullName = string.Empty;
             foreach (var info in propertyMapInfoList)
@@ -625,7 +614,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
                             sb.Append(next.Name);
                         else
                         {
-                            sb.Append(".");
+                            sb.Append('.');
                             sb.Append(next.Name);
                         }
                         return sb;
@@ -644,15 +633,15 @@ namespace AutoMapper.Extensions.ExpressionMapping
             switch (sourceMemberInfo)
             {
                 case PropertyInfo propertyInfo:
-                    propertyMapInfoList.Add(new PropertyMapInfo(null, new List<MemberInfo> { propertyInfo }));
+                    propertyMapInfoList.Add(new PropertyMapInfo(null, [propertyInfo]));
                     break;
                 case FieldInfo fieldInfo:
-                    propertyMapInfoList.Add(new PropertyMapInfo(null, new List<MemberInfo> { fieldInfo }));
+                    propertyMapInfoList.Add(new PropertyMapInfo(null, [fieldInfo]));
                     break;
             }
         }
 
-        private bool GenericTypeDefinitionsAreEquivalent(Type typeSource, Type typeDestination) 
+        private static bool GenericTypeDefinitionsAreEquivalent(Type typeSource, Type typeDestination) 
             => typeSource.IsGenericType() && typeDestination.IsGenericType() && typeSource.GetGenericTypeDefinition() == typeDestination.GetGenericTypeDefinition();
 
         protected void FindDestinationFullName(Type typeSource, Type typeDestination, string sourceFullName, List<PropertyMapInfo> propertyMapInfoList)
@@ -686,22 +675,23 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             if (typeSource == typeDestination)
             {
-                var sourceFullNameArray = sourceFullName.Split(new[] { period[0] }, StringSplitOptions.RemoveEmptyEntries);
-                sourceFullNameArray.Aggregate(propertyMapInfoList, (list, next) =>
+                var sourceFullNameArray = sourceFullName.Split([period[0]], StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (string next in sourceFullNameArray)
                 {
-                    if (list.Count == 0)
+                    if (propertyMapInfoList.Count == 0)
                     {
-                        AddPropertyMapInfo(typeSource, next, list);
+                        AddPropertyMapInfo(typeSource, next, propertyMapInfoList);
                     }
                     else
                     {
-                        var last = list[list.Count - 1];
+                        var last = propertyMapInfoList[propertyMapInfoList.Count - 1];
                         AddPropertyMapInfo(last.CustomExpression == null
                             ? last.DestinationPropertyInfos[last.DestinationPropertyInfos.Count - 1].GetMemberType()
-                            : last.CustomExpression.ReturnType, next, list);
+                            : last.CustomExpression.ReturnType, next, propertyMapInfoList);
                     }
-                    return list;
-                });
+                }
+
                 return;
             }
 
@@ -740,7 +730,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             PathMap pathMap = typeMap.FindPathMapByDestinationFullPath(destinationFullPath: sourceFullName);
             if (pathMap != null)
             {
-                propertyMapInfoList.Add(new PropertyMapInfo(pathMap.CustomMapExpression, new List<MemberInfo>()));
+                propertyMapInfoList.Add(new PropertyMapInfo(pathMap.CustomMapExpression, []));
                 return;
             }
 
@@ -748,15 +738,14 @@ namespace AutoMapper.Extensions.ExpressionMapping
             if (sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) < 0)
             {
                 var propertyMap = typeMap.GetMemberMapByDestinationProperty(sourceFullName);
-                var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.GetDestinationName());
 
-                if (propertyMap.CustomMapExpression == null && !propertyMap.SourceMembers.Any())
+                if (propertyMap.CustomMapExpression == null && propertyMap.SourceMembers.Length == 0)
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Properties.Resources.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, sourceFullName));
 
                 if (propertyMap.IncludedMember?.ProjectToCustomSource != null)
-                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, new List<MemberInfo>()));
+                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, []));
 
-                propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, propertyMap.SourceMembers.ToList()));
+                propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, [.. propertyMap.SourceMembers]));
             }
             else
             {
@@ -764,13 +753,13 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 var propertyMap = typeMap.GetMemberMapByDestinationProperty(propertyName);
 
                 var sourceMemberInfo = typeSource.GetFieldOrProperty(propertyMap.GetDestinationName());
-                if (propertyMap.CustomMapExpression == null && !propertyMap.SourceMembers.Any())//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
+                if (propertyMap.CustomMapExpression == null && propertyMap.SourceMembers.Length == 0)//If sourceFullName has a period then the SourceMember cannot be null.  The SourceMember is required to find the ProertyMap of its child object.
                     throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, Properties.Resources.srcMemberCannotBeNullFormat, typeSource.Name, typeDestination.Name, propertyName));
 
                 if (propertyMap.IncludedMember?.ProjectToCustomSource != null)
-                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, new List<MemberInfo>()));
+                    propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.IncludedMember.ProjectToCustomSource, []));
 
-                propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, propertyMap.SourceMembers.ToList()));
+                propertyMapInfoList.Add(new PropertyMapInfo(propertyMap.CustomMapExpression, [.. propertyMap.SourceMembers]));
                 var childFullName = sourceFullName.Substring(sourceFullName.IndexOf(period, StringComparison.OrdinalIgnoreCase) + 1);
 
                 FindDestinationFullName(sourceMemberInfo.GetMemberType(), propertyMap.CustomMapExpression == null

@@ -5,9 +5,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using AutoMapper.Internal;
 
-namespace AutoMapper
+namespace AutoMapper.Extensions.ExpressionMapping
 {
-    using AutoMapper.Extensions.ExpressionMapping;
     using static Expression;
 
     internal static class ExpressionExtensions

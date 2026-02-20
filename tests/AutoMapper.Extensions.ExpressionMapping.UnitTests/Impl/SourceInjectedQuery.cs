@@ -1,11 +1,10 @@
-﻿using System;
+﻿using Shouldly;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
-using AutoMapper.Mappers;
-using Shouldly;
 using Xunit;
 
 namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl

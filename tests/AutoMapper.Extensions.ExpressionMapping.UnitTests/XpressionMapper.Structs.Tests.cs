@@ -209,8 +209,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             DateTime firstReleaseDate = new DateTime();
             DateTime lastReleaseDate = new DateTime();
 
-            Expression<Func<ItemWithDateLiteralDto, bool>> exp = x => (firstReleaseDate == null || x.CreateDate >= firstReleaseDate) &&
-                                      (lastReleaseDate == null || x.CreateDate <= lastReleaseDate);
+            Expression<Func<ItemWithDateLiteralDto, bool>> exp = x => (firstReleaseDate == default || x.CreateDate >= firstReleaseDate) &&
+                                      (lastReleaseDate == default || x.CreateDate <= lastReleaseDate);
 
             //Act
             Expression<Func<ItemWithDateLiteral, bool>> expMapped = mapper.MapExpression<Expression<Func<ItemWithDateLiteral, bool>>>(exp);

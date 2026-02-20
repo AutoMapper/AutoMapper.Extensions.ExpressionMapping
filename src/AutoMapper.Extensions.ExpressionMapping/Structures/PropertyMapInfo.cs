@@ -4,15 +4,9 @@ using System.Reflection;
 
 namespace AutoMapper.Extensions.ExpressionMapping.Structures
 {
-    public class PropertyMapInfo
+    public class PropertyMapInfo(LambdaExpression customExpression, List<MemberInfo> destinationPropertyInfos)
     {
-        public PropertyMapInfo(LambdaExpression customExpression, List<MemberInfo> destinationPropertyInfos)
-        {
-            CustomExpression = customExpression;
-            DestinationPropertyInfos = destinationPropertyInfos;
-        }
-
-        public LambdaExpression CustomExpression { get; set; }
-        public List<MemberInfo> DestinationPropertyInfos { get; set; }
+        public LambdaExpression CustomExpression { get; set; } = customExpression;
+        public List<MemberInfo> DestinationPropertyInfos { get; set; } = destinationPropertyInfos;
     }
 }
