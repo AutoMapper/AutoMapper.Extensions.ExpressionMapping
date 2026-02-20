@@ -11,7 +11,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             //arrange
             var mapper = GetMapper();
-            Expression<Func<ProductModel, bool>> expression = x => x.DateTimeOffset.Value.Day.ToString() == "2";
+            Expression<Func<ProductModel, bool>> expression = x => x.DateTimeOffset.HasValue && x.DateTimeOffset.Value.Day.ToString() == "2";
 
             //act
             var exception = Assert.Throws<InvalidOperationException>(() => mapper.MapExpression<Expression<Func<Product, bool>>>(expression));
@@ -47,7 +47,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             //arrange
             var mapper = GetMapperWithCustomExpressions();
-            Expression<Func<ProductModel, bool>> expression = x => x.DateTimeOffset.Value.Day.ToString() == "2";
+            Expression<Func<ProductModel, bool>> expression = x => x.DateTimeOffset.HasValue && x.DateTimeOffset.Value.Day.ToString() == "2";
 
             //act
             var mappedExpression = mapper.MapExpression<Expression<Func<Product, bool>>>(expression);
@@ -92,7 +92,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var config = ConfigurationHelper.GetMapperConfiguration(c =>
             {
                 c.CreateMap<Product, ProductModel>()
-                    .ForMember(d => d.DateTime, o => o.MapFrom(s => s.DateTime.Value))
+                    .ForMember(d => d.DateTime, o => o.MapFrom(s => s.DateTime ?? default))
                     .ForMember(d => d.DateTimeOffset, o => o.MapFrom(s => (DateTimeOffset?)s.DateTimeOffset));
             });
             config.AssertConfigurationIsValid();

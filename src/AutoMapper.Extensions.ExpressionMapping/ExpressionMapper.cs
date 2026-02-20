@@ -267,7 +267,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
             private PropertyMap FindPropertyMapOfExpression(MemberExpression expression)
             {
                 var propertyMap = PropertyMap(expression);
-                return propertyMap == null && expression.Expression is MemberExpression memberExpression
+                return propertyMap == null && expression?.Expression is MemberExpression memberExpression
                     ? FindPropertyMapOfExpression(memberExpression)
                     : propertyMap;
             }
