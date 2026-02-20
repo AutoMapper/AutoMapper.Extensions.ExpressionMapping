@@ -48,6 +48,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
         IQueryDataSourceInjection<TSource> OnError(Action<Exception> exceptionHandler);
     }
 
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class QueryDataSourceInjection<TSource> : IQueryDataSourceInjection<TSource>
     {
         private readonly IQueryable<TSource> _dataSource;

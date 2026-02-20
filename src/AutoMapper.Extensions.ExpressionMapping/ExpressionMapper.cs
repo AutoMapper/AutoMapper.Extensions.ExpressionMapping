@@ -1,11 +1,12 @@
-﻿using System;
+﻿using AutoMapper.Extensions.ExpressionMapping;
+using AutoMapper.Internal;
+using AutoMapper.Internal.Mappers;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using AutoMapper.Extensions.ExpressionMapping;
-using AutoMapper.Internal;
-using AutoMapper.Internal.Mappers;
 using static System.Linq.Expressions.Expression;
 
 namespace AutoMapper.Mappers
@@ -37,6 +38,7 @@ namespace AutoMapper.Mappers
             return null;
         }
 
+        [ExcludeFromCodeCoverage]
         internal class MappingVisitor : ExpressionVisitor
         {
             private IList<Type> _destSubTypes = new Type[0];
@@ -226,6 +228,7 @@ namespace AutoMapper.Mappers
                     .Aggregate(replacedExpression, getExpression);
             }
 
+            [ExcludeFromCodeCoverage]
             private class IsConstantExpressionVisitor : ExpressionVisitor
             {
                 public bool IsConstant { get; private set; }

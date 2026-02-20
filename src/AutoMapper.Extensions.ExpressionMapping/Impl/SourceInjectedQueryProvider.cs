@@ -15,6 +15,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
     using MemberPaths = IEnumerable<IEnumerable<MemberInfo>>;
     using ParameterBag = IDictionary<string, object>;
 
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class SourceInjectedQueryProvider<TSource, TDestination> : IQueryProvider
     {
         private readonly IMapper _mapper;
@@ -348,6 +349,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal class ConstantExpressionReplacementVisitor : ExpressionVisitor
     {
         private readonly ParameterBag _paramValues;
@@ -374,6 +376,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal class ReplaceableMethodNodeFinder<TDestination> : ExpressionVisitor
     {
         public MethodCallExpression MethodNode { get; private set; }
@@ -413,6 +416,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     internal class MethodNodeReplacer<TDestination> : ExpressionVisitor
     {
         private readonly MethodCallExpression _foundExpression;

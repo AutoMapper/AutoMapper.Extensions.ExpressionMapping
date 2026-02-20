@@ -10,6 +10,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Impl
     using IObjectDictionary = IDictionary<string, object>;
     using MemberPaths = IEnumerable<IEnumerable<MemberInfo>>;
 
+    [System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
     public class SourceSourceInjectedQuery<TSource, TDestination> : IOrderedQueryable<TDestination>, ISourceInjectedQueryable<TDestination>
     {
         private readonly Action<Exception> _exceptionHandler;

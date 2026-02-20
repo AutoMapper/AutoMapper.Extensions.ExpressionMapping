@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace AutoMapper
+namespace AutoMapper.Extensions.ExpressionMapping
 {
-
     internal static class TypeExtensions
     {
         public static bool Has<TAttribute>(this Type type) where TAttribute : Attribute => type.GetTypeInfo().IsDefined(typeof(TAttribute), inherit: false);
