@@ -416,10 +416,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, Account, object>> selectionMapped = mapper.Map<Expression<Func<User, Account, object>>>(selection);
-            object val = selectionMapped.Compile().Invoke(Users.ToList()[0], Users.ToList()[0].Account);
+            object valLocal = selectionMapped.Compile().Invoke(Users.ToList()[0], Users.ToList()[0].Account);
 
             //Assert
-            Assert.False((bool)val);
+            Assert.False((bool)valLocal);
         }
 
         [Fact]
@@ -838,9 +838,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         object val;
-        void CallSomeAction<T>(T val)
+        void CallSomeAction<T>(T valParam)
         {
-            this.val = val;
+            this.val = valParam;
         }
 
         [Fact]

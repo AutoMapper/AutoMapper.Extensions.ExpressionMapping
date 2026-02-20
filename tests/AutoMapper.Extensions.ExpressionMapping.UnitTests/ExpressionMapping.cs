@@ -140,11 +140,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void GrandParent_Mapping_To_Sub_Sub_Property_Condition()
         {
-            Expression<Func<GrandParentDTO, bool>> _predicateExpression = gp => gp.Parent.Children.Any(c => c.ID2 == 3);
-            var expression = Mapper.Map<Expression<Func<GrandParent, bool>>>(_predicateExpression);
+            Expression<Func<GrandParentDTO, bool>> predicateExpression = gp => gp.Parent.Children.Any(c => c.ID2 == 3);
+            var expression = Mapper.Map<Expression<Func<GrandParent, bool>>>(predicateExpression);
             var items = new[] {new GrandParent(){Parent = new Parent(){Children = [new Child(){ID2 = 3}], Child = new Child(){ID2 = 3}}}}.AsQueryable();
             items.Where(expression).ShouldContain(items.First());
-            var items2 = items.UseAsDataSource(Mapper).For<GrandParentDTO>().Where(_predicateExpression);
+            var items2 = items.UseAsDataSource(Mapper).For<GrandParentDTO>().Where(predicateExpression);
             items2.Count().ShouldBe(1);
             When_Use_Outside_Class_Method_Call();
         }
@@ -152,9 +152,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void GrandParent_Mapping_To_Sub_Sub_Property_Condition2()
         {
-            Expression<Func<IQueryable<GrandParentDTO>, bool>> _predicateExpression = gps => gps.Any(gp => gp.Parent.Children.Any(c => c.ID_ == 3));
+            Expression<Func<IQueryable<GrandParentDTO>, bool>> predicateExpression = gps => gps.Any(gp => gp.Parent.Children.Any(c => c.ID_ == 3));
             Expression<Func<IQueryable<GrandParentDTO>, IQueryable<GrandParentDTO>>> _predicateExpression2 = gps => gps.Where(gp => gp.Parent.Children.Any(c => c.ID_ == 3));
-            var expression = Mapper.Map<Expression<Func<IQueryable<GrandParent>, bool>>>(_predicateExpression);
+            var expression = Mapper.Map<Expression<Func<IQueryable<GrandParent>, bool>>>(predicateExpression);
             var expression1 = Mapper.Map<Expression<Func<IQueryable<GrandParent>, IQueryable<GrandParent>>>>(_predicateExpression2);
             expression.ShouldNotBeNull();
             expression1.ShouldNotBeNull();

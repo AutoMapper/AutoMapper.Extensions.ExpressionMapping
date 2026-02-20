@@ -3,7 +3,6 @@ using AutoMapper.Extensions.ExpressionMapping.Extensions;
 using AutoMapper.Extensions.ExpressionMapping.Structures;
 using AutoMapper.Internal;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -440,10 +439,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
             {
                 if (newLeft != node.Left || newRight != node.Right || conversion != node.Conversion)
                 {
-                    if (node.NodeType == ExpressionType.Coalesce && node.Conversion != null)
-                        return Expression.Coalesce(newLeft, newRight, conversion as LambdaExpression);
-                    else
-                        return Expression.MakeBinary
+                    return node.NodeType == ExpressionType.Coalesce && node.Conversion != null
+                        ? Expression.Coalesce(newLeft, newRight, conversion as LambdaExpression)
+                        : Expression.MakeBinary
                         (
                             node.NodeType,
                             newLeft,

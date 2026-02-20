@@ -82,6 +82,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
               .Where(s => s.DestValue > 6);
 
             List<Destination> list = [.. result];
+            Assert.NotEmpty(list);
         }
 
         [Fact]

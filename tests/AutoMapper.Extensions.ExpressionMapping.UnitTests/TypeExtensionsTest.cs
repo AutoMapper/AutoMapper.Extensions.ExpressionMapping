@@ -207,8 +207,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         private class ClassWithStaticMembers
         {
-            public static int StaticField = 0;
-            public int InstanceField = 0;
+            public static readonly int StaticField = 0;
+            public readonly int InstanceField = 0;
             public static int StaticProperty { get; set; }
             public int InstanceProperty { get; set; }
             public static void StaticMethod() { }

@@ -301,7 +301,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         public override readonly int GetHashCode()
         {
-            return this.val.GetHashCode();
+            return this.val;
         }
 
         public override readonly bool Equals(object obj)
@@ -370,7 +370,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         public override readonly int GetHashCode()
         {
-            return this.val.GetHashCode();
+            return this.val;
         }
 
         public override readonly bool Equals(object obj)
@@ -417,7 +417,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
         public override readonly int GetHashCode()
         {
-            return Year.GetHashCode();
+            return Year;
         }
     }
 
@@ -444,7 +444,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
         public override readonly int GetHashCode()
         {
-            return Year.GetHashCode();
+            return Year;
         }
     }
 
