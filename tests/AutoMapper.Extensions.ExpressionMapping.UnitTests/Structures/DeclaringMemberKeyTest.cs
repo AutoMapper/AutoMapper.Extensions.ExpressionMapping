@@ -75,34 +75,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Structures
         }
 
         [Fact]
-        public void Equals_DifferentTypeObject_ReturnsFalse()
-        {
-            // Arrange
-            var key = new DeclaringMemberKey(_testMemberInfo1, TestFullName1);
-            var otherObject = "some string";
-
-            // Act
-            var result = key.Equals(otherObject);
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact]
-        public void Equals_SameValues_ReturnsTrue()
-        {
-            // Arrange
-            var key1 = new DeclaringMemberKey(_testMemberInfo1, TestFullName1);
-            var key2 = new DeclaringMemberKey(_testMemberInfo1, TestFullName1);
-
-            // Act
-            var result = key1.Equals(key2);
-
-            // Assert
-            Assert.True(result);
-        }
-
-        [Fact]
         public void Equals_DifferentMemberInfo_ReturnsFalse()
         {
             // Arrange

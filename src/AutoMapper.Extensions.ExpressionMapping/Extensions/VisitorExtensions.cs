@@ -62,7 +62,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
             => expr.Body.GetUnconvertedExpression() as MemberExpression;
 
         public static MemberExpression GetMemberExpression(this Expression expr)
-            => expr.GetUnconvertedExpression() as MemberExpression;
+            => expr?.GetUnconvertedExpression() as MemberExpression;
 
         /// <summary>
         /// Returns the ParameterExpression for the LINQ parameter.
@@ -100,6 +100,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.Extensions
                     var isExtension = methodExpression != null && methodExpression.Method.IsDefined(typeof(ExtensionAttribute), true);
                     if (isExtension && parentExpression == null && methodExpression.Arguments.Count > 0)
                         parentExpression = methodExpression.Arguments[0];//Method is an extension method based on the type of methodExpression.Arguments[0].
+
+                    if (parentExpression == null) 
+                        return null;
 
                     return GetParameterExpression(parentExpression);
             }

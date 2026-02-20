@@ -276,7 +276,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             //Arrange
             int age = 25;
-            Expression<Func<UserModel, bool>> selection = s => ((s != null ? s.AccountName : null) ?? "").ToLower().StartsWith("P".ToLower()) && ((s.AgeInYears == age) && s.IsActive);
+            Expression<Func<UserModel, bool>> selection = s => ((s != null ? s.AccountName : null) ?? "").ToLower().StartsWith("P".ToLower()) && s != null && s.AgeInYears == age && s.IsActive;
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
@@ -531,7 +531,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_to_anonymous_type_when_init_member_is_not_a_literal_and_parameter_is_anonymous_type()
         {
             //Arrange
-            Expression<Func<IQueryable<UserModel>, IEnumerable<object>>> expression = q => q.OrderBy(s => s.Id).Select(u => new { UserId = u.Id, Account = u.AccountModel }).Where(a => a.Account.Bal != -1);
+            Expression<Func<IQueryable<UserModel>, IEnumerable<object>>> expression = q => q.OrderBy(s => s.Id).Select(u => new { UserId = u.Id, Account = u.AccountModel }).Where(a => Math.Abs(a.Account.Bal + 1) > double.Epsilon);
 
             //Act
             Expression<Func<IQueryable<User>, IEnumerable<object>>> expMapped = (Expression<Func<IQueryable<User>, IEnumerable<object>>>)mapper.MapExpression
