@@ -72,6 +72,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             };
 
             var items2 = items.AsQueryable().Select(mapped).ToList();
+            Assert.NotNull(items2);
         }
 
         [Fact]
@@ -178,6 +179,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             };
 
             var items2 = items.AsQueryable().Select(mapped).ToList();
+            Assert.NotNull(items2);
         }
     }
 }

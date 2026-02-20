@@ -36,19 +36,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Structures
         #region Equals Tests
 
         [Fact]
-        public void Equals_SameReference_ReturnsTrue()
-        {
-            // Arrange
-            var key = new DeclaringMemberKey(_testMemberInfo1, TestFullName1);
-
-            // Act
-            var result = key.Equals(key);
-
-            // Assert
-            Assert.True(result);
-        }
-
-        [Fact]
         public void Equals_NullObject_ReturnsFalse()
         {
             // Arrange
@@ -72,6 +59,20 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Structures
 
             // Assert
             Assert.False(result);
+        }
+
+        [Fact]
+        public void Equals_SameValues_ReturnsTrue()
+        {
+            // Arrange
+            var key1 = new DeclaringMemberKey(_testMemberInfo1, TestFullName1);
+            var key2 = new DeclaringMemberKey(_testMemberInfo1, TestFullName1);
+
+            // Act
+            var result = key1.Equals(key2);
+
+            // Assert
+            Assert.True(result);
         }
 
         [Fact]

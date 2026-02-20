@@ -111,7 +111,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         {
             var result = _source.AsQueryable()
               .UseAsDataSource(Mapper).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 7).Take(1)
               .OrderByDescending(s => s.DestValue).Select(s => s.DestValue);
 
@@ -123,7 +123,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         {
             var result = _source.AsQueryable()
               .UseAsDataSource(Mapper).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 7).Take(1)
               .OrderByDescending(s => s.DestValue).Select(s => s.StringValue);
 
@@ -134,7 +134,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         {
             var result = _source.AsQueryable()
               .UseAsDataSource(Mapper).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 7).Take(1)
               .OrderByDescending(s => s.DestValue).Select(s => s.Strings);
 
@@ -154,7 +154,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
 
             var result = source.AsQueryable()
               .UseAsDataSource(Configuration).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 5).Take(2)
               .OrderByDescending(s => s.DestValue).Select(s => s.Strings);
 
@@ -168,7 +168,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         {
             var result = _source.AsQueryable()
               .UseAsDataSource(Mapper).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 7).Take(1)
               .OrderByDescending(s => s.DestValue).Select(s => new { A = s.DestValue });
 
@@ -227,7 +227,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         {
             var result = _source.AsQueryable()
               .UseAsDataSource(Configuration).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 7).Take(1)
               .OrderByDescending(s => s.DestValue).Select(s => s.DestValue);
 
@@ -240,7 +240,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         {
             var result = _source.AsQueryable()
               .UseAsDataSource(Configuration).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 7).Take(1)
               .OrderByDescending(s => s.DestValue).Select(s => s.StringValue);
 
@@ -257,7 +257,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
 
             var result = _source.AsQueryable()
               .UseAsDataSource(Configuration).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 7).Take(1)
               .OrderByDescending(s => s.DestValue).Select(s => s.Strings);
 
@@ -277,7 +277,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
 
             var result = source.AsQueryable()
               .UseAsDataSource(Configuration).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 5).Take(2)
               .OrderByDescending(s => s.DestValue).Select(s => s.Strings);
 
@@ -297,7 +297,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
         {
             var result = _source.AsQueryable()
               .UseAsDataSource(Configuration).For<Destination>()
-              .Where(s => true && 5.ToString() == "5" && s.DestValue.ToString() != "0")
+              .Where(s => 5.ToString() == "5" && s.DestValue.ToString() != "0")
               .OrderBy(s => s.DestValue).SkipWhile(d => d.DestValue < 7).Take(1)
               .OrderByDescending(s => s.DestValue).Select(s => new { A = s.DestValue });
 
@@ -518,6 +518,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests.Impl
             var result = source.UseAsDataSource(mapper).For<DestWithParams>(new Dictionary<string, object> { { "value", 15 } }).ToArray();
 
             // Assert
+            result1.ShouldNotBeNull();
             result.ShouldNotBeNull();
             result.ShouldNotBeEmpty();
             result.Single().Value.ShouldBe(20);

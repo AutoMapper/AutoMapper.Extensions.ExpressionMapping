@@ -39,6 +39,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             var source = new SourceExpressionHolder() { Expression = p => p.Child != null };
             var dest = Mapper.Map<DestExpressionHolder>(source);
+            Assert.NotNull(dest);
         }
     }
 
@@ -154,7 +155,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Expression<Func<IQueryable<GrandParentDTO>, bool>> _predicateExpression = gps => gps.Any(gp => gp.Parent.Children.Any(c => c.ID_ == 3));
             Expression<Func<IQueryable<GrandParentDTO>, IQueryable<GrandParentDTO>>> _predicateExpression2 = gps => gps.Where(gp => gp.Parent.Children.Any(c => c.ID_ == 3));
             var expression = Mapper.Map<Expression<Func<IQueryable<GrandParent>, bool>>>(_predicateExpression);
-            var expression2 = Mapper.Map<Expression<Func<IQueryable<GrandParent>, IQueryable<GrandParent>>>>(_predicateExpression2);
+            var expression1 = Mapper.Map<Expression<Func<IQueryable<GrandParent>, IQueryable<GrandParent>>>>(_predicateExpression2);
+            expression.ShouldNotBeNull();
+            expression1.ShouldNotBeNull();
             When_Use_Outside_Class_Method_Call();
         }
 
