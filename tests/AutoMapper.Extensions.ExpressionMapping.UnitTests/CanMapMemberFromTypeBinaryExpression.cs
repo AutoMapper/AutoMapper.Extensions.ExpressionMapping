@@ -66,8 +66,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Expression<Func<ShapeHolder, bool>> whereMapped = mapper.MapExpression<Expression<Func<ShapeHolder, bool>>>(where);
             var list = new List<ShapeHolder> 
             { 
-                new ShapeHolder { Shape = new Circle() },
-                new ShapeHolder { Shape = new Triangle()  }
+                new() { Shape = new Circle() },
+                new() { Shape = new Triangle()  }
             }
             .AsQueryable()
             .Where(whereMapped).ToList();
@@ -130,7 +130,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //act
             Expression<Func<Shape, bool>> whereMapped = mapper.MapExpression<Expression<Func<Shape, bool>>>(where);
-            var list = new List<Shape> { new Circle() { Messages = new List<string> { "" } }, new Triangle() { Messages = new List<string>() } }.AsQueryable().Where(whereMapped).ToList();
+            var list = new List<Shape> { new Circle() { Messages = [""] }, new Triangle() { Messages = [] } }.AsQueryable().Where(whereMapped).ToList();
 
             //assert
             Assert.Single(list);
@@ -218,7 +218,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     {
         public static bool HasMessages(this CanMapMemberFromTypeBinaryExpression.Shape shape)
         {
-            return shape.Messages.Any();
+            return shape.Messages.Count != 0;
         }
 
         public static bool IsCircle<T>(this T shape)

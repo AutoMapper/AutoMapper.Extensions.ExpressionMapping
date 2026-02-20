@@ -27,10 +27,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 1);
+            Assert.Single(users);
         }
 
         [Fact]
@@ -41,10 +41,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 1);
+            Assert.Single(users);
         }
 
         [Fact]
@@ -55,10 +55,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 1);
+            Assert.Single(users);
         }
 
         [Fact]
@@ -69,10 +69,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 0);
+            Assert.Empty(users);
         }
 
         [Fact]
@@ -83,10 +83,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 0);
+            Assert.Empty(users);
         }
 
         [Fact]
@@ -97,10 +97,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 2);
+            Assert.Equal(2, users.Count);
         }
 
         [Fact]
@@ -142,10 +142,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             );
 
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 1);
+            Assert.Single(users);
         }
 
         [Fact]
@@ -175,10 +175,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.MapExpression<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 2);
+            Assert.Equal(2, users.Count);
         }
 
         [Fact]
@@ -251,10 +251,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 0);
+            Assert.Empty(users);
         }
 
         [Fact]
@@ -265,10 +265,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 1);
+            Assert.Single(users);
         }
 
         [Fact]
@@ -280,10 +280,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, bool>> selectionMapped = mapper.Map<Expression<Func<User, bool>>>(selection);
-            List<User> users = Users.Where(selectionMapped).ToList();
+            List<User> users = [.. Users.Where(selectionMapped)];
 
             //Assert
-            Assert.True(users.Count == 1);
+            Assert.Single(users);
         }
 
         [Fact]
@@ -294,10 +294,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, IEnumerable<string>>> selectionMapped = mapper.Map<Expression<Func<User, IEnumerable<string>>>>(selection);
-            List<string> bars = Users.SelectMany(selectionMapped).ToList();
+            List<string> bars = [.. Users.SelectMany(selectionMapped)];
 
             //Assert
-            Assert.True(bars.Count == 1);
+            Assert.Single(bars);
         }
 
         [Fact]
@@ -308,10 +308,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, IEnumerable<object>>> selectionMapped = mapper.Map<Expression<Func<User, IEnumerable<object>>>>(selection);
-            List<object> bars = Users.SelectMany(selectionMapped).ToList();
+            List<object> bars = [.. Users.SelectMany(selectionMapped)];
 
             //Assert
-            Assert.True(bars.Count == 1);
+            Assert.Single(bars);
         }
 
         [Fact]
@@ -322,10 +322,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, IEnumerable<Thing>>> selectionMapped = mapper.MapExpression<Expression<Func<User, IEnumerable<Thing>>>>(selection);
-            List<Thing> things = Users.SelectMany(selectionMapped).ToList();
+            List<Thing> things = [.. Users.SelectMany(selectionMapped)];
 
             //Assert
-            Assert.True(things.Count == 2);
+            Assert.Equal(2, things.Count);
         }
 
         [Fact]
@@ -388,10 +388,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, IEnumerable<int>>> selectionMapped = mapper.Map<Expression<Func<User, IEnumerable<int>>>>(selection);
-            List<int> bars = Users.SelectMany(selectionMapped).ToList();
+            List<int> bars = [.. Users.SelectMany(selectionMapped)];
 
             //Assert
-            Assert.True(bars.Count == 2);
+            Assert.Equal(2, bars.Count);
         }
 
         [Fact]
@@ -402,10 +402,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<User, IEnumerable<Thing>>> selectionMapped = mapper.Map<Expression<Func<User, IEnumerable<Thing>>>>(selection);
-            List<Thing> things = Users.SelectMany(selectionMapped).ToList();
+            List<Thing> things = [.. Users.SelectMany(selectionMapped)];
 
             //Assert
-            Assert.True(things.Count == 0);
+            Assert.Empty(things);
         }
 
         [Fact]
@@ -430,10 +430,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<IQueryable<User>, IQueryable<User>>> expMapped = mapper.Map<Expression<Func<IQueryable<User>, IQueryable<User>>>>(exp);
-            List<User> users = expMapped.Compile().Invoke(Users).ToList();
+            List<User> users = [.. expMapped.Compile().Invoke(Users)];
 
             //Assert
-            Assert.True(users[0].UserId == 14);
+            Assert.Equal(14, users[0].UserId);
         }
 
         [Fact]
@@ -444,9 +444,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<IQueryable<User>, IQueryable<IGrouping<int, User>>>> expMapped = mapper.Map<Expression<Func<IQueryable<User>, IQueryable<IGrouping<int, User>>>>>(grouped);
-            List<IGrouping<int, User>> users = expMapped.Compile().Invoke(Users).ToList();
+            List<IGrouping<int, User>> users = [.. expMapped.Compile().Invoke(Users)];
 
-            Assert.True(users[0].Count() == 2);
+            Assert.Equal(2, users[0].Count());
         }
 
         [Fact]
@@ -470,9 +470,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<IQueryable<User>, IQueryable<User>>> expMapped = mapper.MapExpression<Expression<Func<IQueryable<User>, IQueryable<User>>>>(grouped);
-            List<User> users = expMapped.Compile().Invoke(Users).ToList();
+            List<User> users = [.. expMapped.Compile().Invoke(Users)];
 
-            Assert.True(users.Count == 2);
+            Assert.Equal(2, users.Count);
         }
 
         [Fact]
@@ -551,7 +551,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_to_anonymous_type_when_init_member_is_not_a_literal_with_navigation_property()
         {
             //Arrange
-            Expression<Func<IQueryable<UserModel>, IEnumerable<object>>> expression = q => q.OrderBy(s => s.Id).Select(u => new { UserId = u.Id, Branch = u.AccountModel.Branch });
+            Expression<Func<IQueryable<UserModel>, IEnumerable<object>>> expression = q => q.OrderBy(s => s.Id).Select(u => new { UserId = u.Id, u.AccountModel.Branch });
 
             //Act
             Expression<Func<IQueryable<User>, IEnumerable<object>>> expMapped = (Expression<Func<IQueryable<User>, IEnumerable<object>>>)mapper.MapExpression
@@ -578,7 +578,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             List<User> users = Enumerable.ToList(expMapped.Compile().Invoke(Users));
 
             //Assert
-            Assert.True(users[0].UserId == 11);
+            Assert.Equal(11, users[0].UserId);
         }
 
         [Fact]
@@ -623,10 +623,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_expression_where_parent_of_member_expression_is_typeAsExpression()
         {
             //Arrange
-            Parent[] parents = new Parent[]
-            {
+            Parent[] parents =
+            [
                 new Parent {  DateTimeObject = new DateTime?(new DateTime(2019, 9, 7))}
-            };
+            ];
             Expression<Func<ParentDTO, bool>> exp = p => (p.DateTimeObject as DateTime?).Value.Year.ToString() == "2019";
 
             //Act
@@ -657,10 +657,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<Account, bool>> expMapped = mapper.Map<Expression<Func<Account, bool>>>(exp);
-            List<Account> accounts = Users.Select(u => u.Account).Where(expMapped).ToList();
+            List<Account> accounts = [.. Users.Select(u => u.Account).Where(expMapped)];
 
             //Assert
-            Assert.True(accounts.Count == 2);
+            Assert.Equal(2, accounts.Count);
         }
 
         [Fact]
@@ -698,8 +698,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         [Fact]
         public void Map_ItemDto_to_ItemDto_with_local_literal_types()
         {
-            DateTime firstReleaseDate = new DateTime();
-            DateTime lastReleaseDate = new DateTime();
+            DateTime firstReleaseDate = new();
+            DateTime lastReleaseDate = new();
 
             Expression<Func<ItemDto, bool>> exp = x => (firstReleaseDate == default || x.CreateDate >= firstReleaseDate) &&
                                       (lastReleaseDate == default || x.CreateDate <= lastReleaseDate);
@@ -716,15 +716,15 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             //Arrange
             Expression<Func<AccountModel, bool>> exp = f => (f != null ? f.Id : 0) > 10
-             && (f != null && f.DateCreated != default ? f.DateCreated : default(DateTime)) > new DateTime(2007, 02, 17);
+             && (f != null && f.DateCreated != default ? f.DateCreated : default) > new DateTime(2007, 02, 17);
 
 
             //Act
             Expression<Func<Account, bool>> expMapped = mapper.MapExpression<Expression<Func<Account, bool>>>(exp);
-            List<Account> accounts = Users.Select(u => u.Account).Where(expMapped).ToList();
+            List<Account> accounts = [.. Users.Select(u => u.Account).Where(expMapped)];
 
             //Assert
-            Assert.True(accounts.Count == 1);
+            Assert.Single(accounts);
         }
 
         [Fact]
@@ -736,10 +736,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<Account, bool>> expMapped = mapper.MapExpression<Expression<Func<Account, bool>>>(exp);
-            List<Account> accounts = Users.Select(u => u.Account).Where(expMapped).ToList();
+            List<Account> accounts = [.. Users.Select(u => u.Account).Where(expMapped)];
 
             //Assert
-            Assert.True(accounts.Count == 0);
+            Assert.Empty(accounts);
         }
 
         [Fact]
@@ -764,10 +764,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<Account, bool>> expMapped = mapper.MapExpression<Expression<Func<Account, bool>>>(exp);
-            List<Account> accounts = Users.Select(u => u.Account).Where(expMapped).ToList();
+            List<Account> accounts = [.. Users.Select(u => u.Account).Where(expMapped)];
 
             //Assert
-            Assert.True(accounts.Count == 0);
+            Assert.Empty(accounts);
         }
 
 
@@ -860,29 +860,29 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Can_map_expression_when_mapped_when_members_parent_is_a_method()
         {
             //Arrange
-            List<EmployeeEntity> empEntity = new List<EmployeeEntity>
-            {
-                new EmployeeEntity { Id = 1, Name = "Jean-Louis", Age = 39, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-1) } }.ToList() },
-                new EmployeeEntity { Id = 2, Name = "Jean-Paul", Age = 32, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-2) } }.ToList() },
-                new EmployeeEntity { Id = 3, Name = "Jean-Christophe", Age = 19, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-1) } }.ToList() },
-                new EmployeeEntity { Id = 4, Name = "Jean-Marie", Age = 27, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-3) } }.ToList() },
-                new EmployeeEntity { Id = 5, Name = "Jean-Marc", Age = 22, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-5) } }.ToList() },
-                new EmployeeEntity { Id = 5, Name = "Jean-Pierre", Age = 22, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-5) } }.ToList() },
-                new EmployeeEntity { Id = 6, Name = "Christophe", Age = 55, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-1) } }.ToList() },
-                new EmployeeEntity { Id = 7, Name = "Marc", Age = 23, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-2) } }.ToList() },
-                new EmployeeEntity { Id = 8, Name = "Paul", Age = 38, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-10) }, new EventEntity { EventType = "Stop", EventDate = DateTime.Today.AddYears(-1) } }.ToList() },
-                new EmployeeEntity { Id = 9, Name = "Jean", Age = 32, Events = new EventEntity[]{ new EventEntity { EventType = "Start", EventDate = DateTime.Today.AddYears(-10) }, new EventEntity { EventType = "Stop", EventDate = DateTime.Today.AddYears(-2) } }.ToList() },
-            };
+            List<EmployeeEntity> empEntity =
+            [
+                new EmployeeEntity { Id = 1, Name = "Jean-Louis", Age = 39, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-1) }] },
+                new EmployeeEntity { Id = 2, Name = "Jean-Paul", Age = 32, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-2) }] },
+                new EmployeeEntity { Id = 3, Name = "Jean-Christophe", Age = 19, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-1) }] },
+                new EmployeeEntity { Id = 4, Name = "Jean-Marie", Age = 27, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-3) }] },
+                new EmployeeEntity { Id = 5, Name = "Jean-Marc", Age = 22, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-5) }] },
+                new EmployeeEntity { Id = 5, Name = "Jean-Pierre", Age = 22, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-5) }] },
+                new EmployeeEntity { Id = 6, Name = "Christophe", Age = 55, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-1) }] },
+                new EmployeeEntity { Id = 7, Name = "Marc", Age = 23, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-2) }] },
+                new EmployeeEntity { Id = 8, Name = "Paul", Age = 38, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-10) }, new() { EventType = "Stop", EventDate = DateTime.Today.AddYears(-1) }] },
+                new EmployeeEntity { Id = 9, Name = "Jean", Age = 32, Events = [new() { EventType = "Start", EventDate = DateTime.Today.AddYears(-10) }, new() { EventType = "Stop", EventDate = DateTime.Today.AddYears(-2) }] },
+            ];
             Expression<Func<EmployeeModel, bool>> filter = emp =>
                 emp.Events.Any(e => e.EventType.Equals("Stop")) &&
                 emp.Events.First(e => e.EventType.Equals("Stop")).EventDate < DateTime.Today.AddYears(-1);
 
             //Act
             Expression<Func<EmployeeEntity, bool>> mappedFilter = mapper.MapExpression<Expression<Func<EmployeeEntity, bool>>>(filter);
-            List<EmployeeEntity> res = empEntity.AsQueryable().Where(mappedFilter).ToList();
+            List<EmployeeEntity> res = [.. empEntity.AsQueryable().Where(mappedFilter)];
 
             //Assert
-            Assert.True(res.Count == 1);
+            Assert.Single(res);
         }
 
         [Fact]
@@ -927,8 +927,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             Users = new User[]
             {
-                new User
-                {
+                new() {
                     Account = new Account
                     {
                         Balance = 150000,
@@ -937,14 +936,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                         Id = 12,
                         Location = new Location { City = "Leeds", Latitude = 53.8008, Longitude = -1.5491 },
                         Number = "232232232",
-                        Things = new Thing[]
-                        {
+                        Things =
+                        [
                             new Thing { Bar = "Bar", Car = new Car { Color = "Black", Year = 2014 } },
                             new Thing { Bar = "Bar2", Car = new Car { Color = "White", Year = 2015 } }
-                        },
+                        ],
                         Type = "Personal",
-                        Users = new User[]
-                        {
+                        Users =
+                        [
                             new User
                             {
                                 Active = true,
@@ -954,7 +953,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                                 IsLoggedOn = true,
                                 UserId = 11
                             }
-                        }
+                        ]
                     },
                     Active = true,
                     Age = 25,
@@ -963,8 +962,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                     IsLoggedOn = true,
                     UserId = 11
                 },
-                new User
-                {
+                new() {
                     Account = new Account
                     {
                         Balance = 200000,
@@ -973,14 +971,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                         Id = 7,
                         Location = new Location { City = "Leeds", Latitude = 53.8008, Longitude = -1.5491 },
                         Number = "444555444",
-                        Things = new Thing[]
-                        {
+                        Things =
+                        [
                             new Thing { Bar = "Bar3", Car = new Car { Color = "Black", Year = 2014 } },
                             new Thing { Bar = "Bar4", Car = new Car { Color = "White", Year = 2015 } }
-                        },
+                        ],
                         Type = "Business",
-                        Users = new User[]
-                        {
+                        Users =
+                        [
                             new User
                             {
                                 Active = true,
@@ -990,7 +988,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                                 IsLoggedOn = false,
                                 UserId = 14
                             }
-                        }
+                        ]
                     },
                     Active = true,
                     Age = 25,
@@ -1007,19 +1005,19 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
     public class OptionS
     {
-        public static OptionS GetNew() => new OptionS();
+        public static OptionS GetNew() => new();
     }
 
     public class OptionT
     {
-        public static OptionT GetNew() => new OptionT();
+        public static OptionT GetNew() => new();
     }
 
     public class Account
     {
         public Account()
         {
-            Things = new List<Thing>();
+            Things = [];
         }
         public int Id { get; set; }
         public double Balance { get; set; }
@@ -1036,7 +1034,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
     {
         public AccountModel()
         {
-            ThingModels = new List<ThingModel>();
+            ThingModels = [];
         }
         public int Id { get; set; }
         public double Bal { get; set; }
@@ -1252,8 +1250,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             set
             {
                 _parent = value;
-                if (GrandChild != null)
-                    GrandChild.Parent = _parent;
+                GrandChild?.Parent = _parent;
             }
         }
 
@@ -1403,7 +1400,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
     public class Part
     {
-        public List<Check> History { get; } = new List<Check>();
+        public List<Check> History { get; } = [];
         public Guid ID { get; } = Guid.NewGuid();
     }
 
@@ -1431,7 +1428,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             CreateMap<UserModel, User>()
                 .ForMember(d => d.UserId, opt => opt.MapFrom(s => s.Id))
                 .ForMember(d => d.FirstName, opt => opt.MapFrom(s => s.FullName))
-                .ForMember(d => d.IsLoggedOn, opt => opt.MapFrom(s => s.LoggedOn.ToUpper() == "Y"))
+                .ForMember(d => d.IsLoggedOn, opt => opt.MapFrom(s => s.LoggedOn.Equals("Y", StringComparison.CurrentCultureIgnoreCase)))
                 .ForMember(d => d.Age, opt => opt.MapFrom(s => s.AgeInYears))
                 .ForMember(d => d.Active, opt => opt.MapFrom(s => s.IsActive))
                 .ForMember(d => d.Account, opt => opt.MapFrom(s => s.AccountModel));
@@ -1449,7 +1446,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             CreateMap<IUserModel, User>()
                 .ForMember(d => d.UserId, opt => opt.MapFrom(s => s.Id))
                 .ForMember(d => d.FirstName, opt => opt.MapFrom(s => s.FullName))
-                .ForMember(d => d.IsLoggedOn, opt => opt.MapFrom(s => s.LoggedOn.ToUpper() == "Y"))
+                .ForMember(d => d.IsLoggedOn, opt => opt.MapFrom(s => s.LoggedOn.Equals("Y", StringComparison.CurrentCultureIgnoreCase)))
                 .ForMember(d => d.Age, opt => opt.MapFrom(s => s.AgeInYears))
                 .ForMember(d => d.Active, opt => opt.MapFrom(s => s.IsActive));
 

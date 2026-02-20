@@ -51,8 +51,12 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         private class ClassWithMultipleConstructors
         {
             public ClassWithMultipleConstructors() { }
+#pragma warning disable IDE0060 // Remove unused parameter
             public ClassWithMultipleConstructors(int value) { }
+#pragma warning restore IDE0060 // Remove unused parameter
+#pragma warning disable IDE0060 // Remove unused parameter
             public ClassWithMultipleConstructors(string text, int value) { }
+#pragma warning restore IDE0060 // Remove unused parameter
         }
 
         [Fact]
@@ -75,7 +79,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         private class ClassWithMethods
         {
             public void TestMethod() { }
+#pragma warning disable IDE0060 // Remove unused parameter
             public void AnotherMethod(int value) { }
+#pragma warning restore IDE0060 // Remove unused parameter
         }
 
         [Fact]
@@ -116,7 +122,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var type = typeof(ClassWithMultipleConstructors);
 
             // Act
-            var constructor = type.GetDeclaredConstructor(new[] { typeof(int) });
+            var constructor = type.GetDeclaredConstructor([typeof(int)]);
 
             // Assert
             Assert.NotNull(constructor);
@@ -131,7 +137,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var type = typeof(ClassWithMultipleConstructors);
 
             // Act
-            var constructor = type.GetDeclaredConstructor(new[] { typeof(double) });
+            var constructor = type.GetDeclaredConstructor([typeof(double)]);
 
             // Assert
             Assert.Null(constructor);
@@ -144,7 +150,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var type = typeof(ClassWithMultipleConstructors);
 
             // Act
-            var constructor = type.GetDeclaredConstructor(new[] { typeof(string), typeof(int) });
+            var constructor = type.GetDeclaredConstructor([typeof(string), typeof(int)]);
 
             // Assert
             Assert.NotNull(constructor);

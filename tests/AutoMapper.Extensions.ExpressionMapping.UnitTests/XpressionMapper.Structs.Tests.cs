@@ -27,9 +27,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             var mapper = config.CreateMapper();
 
-            List<Garage> source = new List<Garage> {
+            List<Garage> source = [
                 new Garage { Truck = default }
-            };
+            ];
 
             //Act
             var output1 = source.AsQueryable().GetItems<GarageModel, Garage>(mapper, q => q.Truck.Equals(default(TruckModel)));
@@ -57,9 +57,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             var mapper = config.CreateMapper();
 
-            List<Garage> source = new List<Garage> {
+            List<Garage> source = [
                 new Garage { Truck = new Truck { Color = "blue", Year = 2000 } }
-            };
+            ];
 
             //Act
             var output1 = source.AsQueryable().GetItems<GarageModel, Garage>(mapper, q => q.Truck.Year == 2000).Select(g => g.Truck);
@@ -105,7 +105,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-            Truck truck = new Truck { Color = "Red", Year = 1999 };
+            Truck truck = new() { Color = "Red", Year = 1999 };
             Expression<Func<Garage, bool>> filter = m => m.Truck == truck;
 
             //Act
@@ -130,7 +130,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
-            Garage garage = new Garage { Truck = new Truck { Color = "Red", Year = 1999 } };
+            Garage garage = new() { Truck = new Truck { Color = "Red", Year = 1999 } };
             Expression<Func<Garage, bool>> filter = m => m.Truck == garage.Truck;
 
             //Act
@@ -156,7 +156,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
 
-            GarageModel garage = new GarageModel { Color = "Blue", Truck = new TruckModel { Color = "Red", Year = 1999 } };
+            GarageModel garage = new() { Color = "Blue", Truck = new TruckModel { Color = "Red", Year = 1999 } };
             Expression<Func<GarageModel, bool>> filter = m => m.Color == garage.Color;
 
             //Act
@@ -182,7 +182,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
 
-            GarageModel garage = new GarageModel { Color = "Blue", Truck = new TruckModel { Color = "Red", Year = 1999 } };
+            GarageModel garage = new() { Color = "Blue", Truck = new TruckModel { Color = "Red", Year = 1999 } };
             Expression<Func<GarageModel, bool>> filter = m => m.Color == garage.Color;
 
             //Act
@@ -206,8 +206,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
 
-            DateTime firstReleaseDate = new DateTime();
-            DateTime lastReleaseDate = new DateTime();
+            DateTime firstReleaseDate = new();
+            DateTime lastReleaseDate = new();
 
             Expression<Func<ItemWithDateLiteralDto, bool>> exp = x => (firstReleaseDate == default || x.CreateDate >= firstReleaseDate) &&
                                       (lastReleaseDate == default || x.CreateDate <= lastReleaseDate);
@@ -245,10 +245,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
     }
 
-    public struct Source
+    public struct Source(int i)
     {
-        public Source(int i) { val = i; }
-        public int val;
+        public int val = i;
 
         public static implicit operator int(Source i)
         {
@@ -300,25 +299,24 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             return a != b.val;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return this.val.GetHashCode();
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
-            if (obj is Source)
-                return this == (Source)obj;
-            if (obj is int)
-                return this == (Source)((int)obj);
+            if (obj is Source source)
+                return this == source;
+            if (obj is int intVal)
+                return this == (Source)intVal;
             return false;
         }
     }
 
-    public struct Dest
+    public struct Dest(int i)
     {
-        public Dest(int i) { val = i; }
-        public int val;
+        public int val = i;
 
         public static implicit operator int(Dest i)
         {
@@ -370,17 +368,17 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             return a != b.val;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return this.val.GetHashCode();
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
-            if (obj is Dest)
-                return this == (Dest)obj;
-            if (obj is int)
-                return this == (Dest)((int)obj);
+            if (obj is Dest dest)
+                return this == dest;
+            if (obj is int intVal)
+                return this == (Dest)intVal;
             return false;
         }
     }
@@ -409,7 +407,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             return !(m1 == m2);
         }
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is Truck mb)
             {
@@ -417,7 +415,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             }
             return false;
         }
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return Year.GetHashCode();
         }
@@ -436,7 +434,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             return !(m1 == m2);
         }
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is TruckModel mb)
             {
@@ -444,7 +442,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             }
             return false;
         }
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return Year.GetHashCode();
         }
@@ -474,10 +472,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 query = query.Where(f);
 
             //Call the store
-            ICollection<TData> list = queryableFunc != null ? queryableFunc(query).ToList() : query.ToList();
+            ICollection<TData> list = queryableFunc != null ? queryableFunc(query).ToList() : [.. query];
 
             //Map and return the data
-            return mapper.Map<IEnumerable<TData>, IEnumerable<TModel>>(list).ToList();
+            return [.. mapper.Map<IEnumerable<TData>, IEnumerable<TModel>>(list)];
         }
 
 

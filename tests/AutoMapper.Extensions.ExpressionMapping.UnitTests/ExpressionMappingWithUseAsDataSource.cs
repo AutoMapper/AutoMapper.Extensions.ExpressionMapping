@@ -19,10 +19,10 @@
 
             var models = new List<Model>()
             {
-                new Model { ABoolean = true },
-                new Model { ABoolean = false },
-                new Model { ABoolean = true },
-                new Model { ABoolean = false }
+                new() { ABoolean = true },
+                new() { ABoolean = false },
+                new() { ABoolean = true },
+                new() { ABoolean = false }
             };
 
             var queryable = models.AsQueryable();
@@ -50,10 +50,10 @@
 
             var models = new List<GenericModel<bool>>()
             {
-                new GenericModel<bool> {ABoolean = true},
-                new GenericModel<bool> {ABoolean = false},
-                new GenericModel<bool> {ABoolean = true},
-                new GenericModel<bool> {ABoolean = false}
+                new() {ABoolean = true},
+                new() {ABoolean = false},
+                new() {ABoolean = true},
+                new() {ABoolean = false}
             };
 
             var queryable = models.AsQueryable();

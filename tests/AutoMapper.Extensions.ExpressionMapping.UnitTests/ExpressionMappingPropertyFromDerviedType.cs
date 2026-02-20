@@ -20,7 +20,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
                 {
                     cfg.AddExpressionMapping();
-                    cfg.AddProfile(typeof(DerivedTypeProfile));
+                    cfg.AddProfile<DerivedTypeProfile>();
                 });
                 return config;
             }
@@ -29,11 +29,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         protected override void Because_of()
         {
             //Arrange
-            _source = new List<BaseEntity> {
+            _source = [
                 new Entity { Id = Guid.NewGuid(), Name = "Sofia" },
                 new Entity { Id = Guid.NewGuid(), Name = "Rafael" },
                 new BaseEntity { Id = Guid.NewGuid() }
-            };
+            ];
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             entityQuery = _source.AsQueryable().Where(entityQueryExpression);
 
             // Assert
-            entityQuery.ToList().Count().ShouldBe(1);
+            entityQuery.ToList().Count.ShouldBe(1);
         }
 
         [Fact]
@@ -57,7 +57,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             entityQuery = _source.AsQueryable().Where(entityQueryExpression);
 
             // Assert
-            entityQuery.ToList().Count().ShouldBe(1);
+            entityQuery.ToList().Count.ShouldBe(1);
         }
 
         public class DerivedTypeProfile : Profile

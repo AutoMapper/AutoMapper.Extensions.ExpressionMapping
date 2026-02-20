@@ -33,10 +33,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var mapped3 = mapper.MapExpression<Expression<Func<Source, bool>>>(expression3);
             var mapped4 = mapper.MapExpression<Expression<Func<Source, bool>>>(expression4);
 
-            Assert.Equal(1, new Source[] { new Source { } }.AsQueryable().Where(mapped1).Count());
-            Assert.Equal(0, new Source[] { new Source { } }.AsQueryable().Where(mapped2).Count());
-            Assert.Equal(1, new Source[] { new Source { Items = new List<SubSource> { new SubSource { Name = "item1" } } } }.AsQueryable().Where(mapped3).Count());
-            Assert.Equal(0, new Source[] { new Source { Items = new List<SubSource> { new SubSource { Name = "" } } } }.AsQueryable().Where(mapped4).Count());
+            Assert.Equal(1, new Source[] { new() { } }.AsQueryable().Where(mapped1).Count());
+            Assert.Equal(0, new Source[] { new() { } }.AsQueryable().Where(mapped2).Count());
+            Assert.Equal(1, new Source[] { new() { Items = [new SubSource { Name = "item1" }] } }.AsQueryable().Where(mapped3).Count());
+            Assert.Equal(0, new Source[] { new() { Items = [new SubSource { Name = "" }] } }.AsQueryable().Where(mapped4).Count());
         }
 
         public class Source { public ICollection<SubSource> Items { get; set; } }

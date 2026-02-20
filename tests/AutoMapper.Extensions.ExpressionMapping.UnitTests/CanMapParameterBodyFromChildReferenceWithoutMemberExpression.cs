@@ -25,7 +25,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var mapper = config.CreateMapper();
 
             var products = new List<TestProduct>() {
-                new TestProduct { }
+                new() { }
               }.AsQueryable();
 
             //Act

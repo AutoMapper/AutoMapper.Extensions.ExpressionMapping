@@ -12,7 +12,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Map_member_init_using_custom_expressions()
         {
             //Arrange
-            var config = GetConfiguration();
+            var config = MappingMemberInitWithCustomExpressions.GetConfiguration();
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
             Expression<Func<PlayerDto, PlayerDto>> selection = s => new PlayerDto
@@ -33,7 +33,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             //Act
             Expression<Func<Player, Player>> selectionMapped = mapper.MapExpression<Expression<Func<Player, Player>>>(selection);
-            List<Player> result = Players.Select(selectionMapped).ToList();
+            List<Player> result = [.. Players.Select(selectionMapped)];
 
             //Assert
             Assert.Equal("Jack", result[0].Name);
@@ -44,7 +44,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             Assert.Equal("Atlanta", result[0].StatsA.StatsBuilder.City);
         }
 
-        MapperConfiguration GetConfiguration()
+        static MapperConfiguration GetConfiguration()
             => ConfigurationHelper.GetMapperConfiguration
             (
                 cfg =>
@@ -69,8 +69,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         readonly IQueryable<Player> Players = new List<Player>
         {
-            new Player
-            {
+            new() {
                 Name = "Jack",
                 StatsA = new Stats
                 {
@@ -84,8 +83,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                     }
                 }
             },
-            new Player
-            {
+            new() {
                 Name = "Jane",
                 StatsA = new Stats
                 {

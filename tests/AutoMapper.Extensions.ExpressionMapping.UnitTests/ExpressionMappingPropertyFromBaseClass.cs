@@ -55,7 +55,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             //Arrange
             var guid = Guid.NewGuid();
             var entity = new Entity { Id = guid, Name = "Sofia" };
-            _source = new List<Entity> { entity };
+            _source = [entity];
 
             // Act
             Expression<Func<DTO, bool>> dtoQueryExpression = r => r.Id == guid;
@@ -68,7 +68,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void Should_support_propertypath_expressions_with_properties_from_assignable_types()
         {
             // Assert
-            entityQuery.ToList().Count().ShouldBe(1);
+            entityQuery.ToList().Count.ShouldBe(1);
         }
     }
 }

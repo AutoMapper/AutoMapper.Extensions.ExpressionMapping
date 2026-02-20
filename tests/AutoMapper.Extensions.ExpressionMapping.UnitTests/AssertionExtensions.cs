@@ -31,7 +31,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             throws.ShouldBeTrue();
         }
 
-        public static void ShouldNotBeThrownBy(this Type exceptionType, Action action) 
+#pragma warning disable IDE0060 // Remove unused parameter
+        public static void ShouldNotBeThrownBy(this Type exceptionType, Action action)
+#pragma warning restore IDE0060 // Remove unused parameter
             => action.ShouldNotThrow();
     }
 }

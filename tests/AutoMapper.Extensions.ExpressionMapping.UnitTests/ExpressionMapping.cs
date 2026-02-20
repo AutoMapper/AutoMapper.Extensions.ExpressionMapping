@@ -212,14 +212,14 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         public void When_Use_Multiple_Parameter_Lambda_Statement()
         {
             _predicateExpression = p => p.Children.Any((c, i) => c.ID_ > 4);
-            _valid = new Parent { Children = new[] { new Child { ID = 5 } } };
+            _valid = new Parent { Children = [new Child { ID = 5 }] };
         }
 
         [Fact]
         public void When_Use_Lambda_Statement_With_TypeMapped_Property_Being_Other_Than_First()
         {
             _predicateExpression = p => p.Children.AnyParamReverse((c, c2) => c.ID_ > 4);
-            _valid = new Parent {Children = new[] {new Child {ID = 5}}};
+            _valid = new Parent {Children = [new Child {ID = 5}]};
         }
 
         [Fact]
@@ -228,10 +228,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             _predicateExpression = p => p.Children.Any(c => c.GrandChild.GrandChild.ID_ == 4);
             _valid = new Parent
             {
-                Children = new[]
-                {
+                Children =
+                [
                     new Child {GrandChild = new Child {GrandChild = new Child {ID = 4}}}
-                }
+                ]
             };
         }
 
@@ -242,7 +242,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             _valid = new Parent
             {
                 Child = new Child {ID = 4},
-                Children = new[] {new Child {GrandChild = new Child  {ID = 4}}}
+                Children = [new Child {GrandChild = new Child  {ID = 4}}]
             };
         }
 
@@ -295,7 +295,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             var year = DateTime.Now.Year;
             _predicateExpression = p => p.DateTime.Year == year && p.Child.Parent.Child.GrandChild.Parent.Child.GrandChild.GrandChild.ID_ == 4 && p.Children.Any(c => c.GrandChild.GrandChild.ID_ == 4);
-            _valid = new Parent { DateTime = DateTime.Now, Child = new Child { GrandChild = new Child { GrandChild = new Child { ID = 4 } } }, Children = new[] { new Child { GrandChild = new Child { GrandChild = new Child { ID = 4 } } } } };
+            _valid = new Parent { DateTime = DateTime.Now, Child = new Child { GrandChild = new Child { GrandChild = new Child { ID = 4 } } }, Children = [new Child { GrandChild = new Child { GrandChild = new Child { ID = 4 } } }] };
         }
 
         [Fact]
@@ -324,9 +324,8 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         {
             var req = new TestData { Code = "DD" };
             Expression<Func<TestData, bool>> f = s => s.Code == req.Code;
-#pragma warning disable CA2263 // Prefer generic overload when type is known
+
             var result = (Expression<Func<TestModel, bool>>) Mapper.Map(f, typeof(Expression<Func<TestData, bool>>), typeof(Expression<Func<TestModel, bool>>));
-#pragma warning restore CA2263 // Prefer generic overload when type is known
 
             var func = result.Compile();
 
