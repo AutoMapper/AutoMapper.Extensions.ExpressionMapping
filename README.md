@@ -1,6 +1,8 @@
 ## OData
 AutoMapper extentions for mapping expressions (OData)
 
+[![CI](https://github.com/AutoMapper/AutoMapper.Extensions.ExpressionMapping/actions/workflows/ci.yml/badge.svg)](https://github.com/AutoMapper/AutoMapper.Extensions.ExpressionMapping/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/AutoMapper/AutoMapper.Extensions.ExpressionMapping/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/AutoMapper/AutoMapper.Extensions.ExpressionMapping/actions/workflows/github-code-scanning/codeql)
 [![NuGet](http://img.shields.io/nuget/v/AutoMapper.Extensions.ExpressionMapping.svg)](https://www.nuget.org/packages/AutoMapper.Extensions.ExpressionMapping/)
 
 To use, configure using the configuration helper method:
