@@ -81,7 +81,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             ParameterExpression productParam = Expression.Parameter(typeof(Product), "x");
             MemberExpression property = Expression.MakeMemberAccess(productParam, AutoMapper.Internal.TypeExtensions.GetFieldOrProperty(typeof(Product), memberName));
 
-            var ex = Assert.Throws<InvalidOperationException>
+            Assert.Throws<InvalidOperationException>
             (
                 () => Expression.Lambda<Func<Product, bool>>
                 (

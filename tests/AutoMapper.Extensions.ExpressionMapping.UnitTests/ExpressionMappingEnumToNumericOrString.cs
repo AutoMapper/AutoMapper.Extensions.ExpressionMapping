@@ -284,7 +284,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             }
 
             Expression<Func<ComplexEntityDto, bool>> translatedExpression =
-                translatedExpression = x =>
+                x =>
                 x.intToEnum == SimpleEnumInt.Value2
                 && x.intToInt == (int)SimpleEnumInt.Value1
                 && x.enumToEnum == SimpleEnumInt.Value3

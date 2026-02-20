@@ -21,10 +21,6 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             config.AssertConfigurationIsValid();
             var mapper = config.CreateMapper();
 
-            var products = new List<TestProduct>() {
-                new() { }
-              }.AsQueryable();
-
             //Act
             Expression<Func<TestProductDTO, bool>> expr = x => x.Brand == 2;
             var mappedExpression = mapper.MapExpression<Expression<Func<TestProduct, bool>>>(expr);
