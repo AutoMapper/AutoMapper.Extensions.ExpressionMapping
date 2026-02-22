@@ -87,7 +87,7 @@ The methods below map the DTO query expresions to the equivalent data query expr
             Expression<Func<TModel, object>>[] GetExpansions() => expansions?.ToArray() ?? [];
         }
 
-        //This version update IQueryable<TData>.Expression with the mapped queryable expression parameter.
+        //This version updates IQueryable<TData>.Expression with the mapped queryable expression parameter.
         internal static IQueryable<TModel> GetQuery2<TModel, TData>(this IQueryable<TData> query,
             IMapper mapper,
             Expression<Func<TModel, bool>> filter = null,
