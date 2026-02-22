@@ -51,11 +51,11 @@ Expression Mapping also supports writing queries against the mapped objects. Tak
 
 We can write LINQ expressions against the DTO collections.
 ```csharp
-ICollection<RequestDTO> requests = await context.Request.GetItemsAsync(mapper, r => r.Id > 0 && r.Id < 3, null, new List<Expression<Func<IQueryable<RequestDTO>, IIncludableQueryable<RequestDTO, object>>>>() { item => item.Include(s => s.Assignee) });
-ICollection<UserDTO> users = await context.User.GetItemsAsync<UserDTO, User>(mapper, u => u.Id > 0 && u.Id < 4, q => q.OrderBy(u => u.Name));
+ICollection<RequestDTO> requests = [.. context.Request.GetQuery1<RequestDTO, Request>(mapper, r => r.Id > 0 && r.Id < 3, null, [r => r.Assignee])];
+ICollection <UserDTO> users = [.. context.User.GetQuery1<UserDTO, User>(mapper, u => u.Id > 0 && u.Id < 4, q => q.OrderBy(u => u.Name))];
 int count = await context.Request.Query<RequestDTO, Request, int, int>(mapper, q => q.Count(r => r.Id > 1));
 ```
-The methods below map the DTO query expresions to the equivalent data query expressions. The call to IMapper.Map converts the data query results back to the DTO (or model) object types.
+The methods below map the DTO query expresions to the equivalent data query expressions. The call to IMapper.Map converts the data query results back to the DTO (or model) object types. The call to IMapper.ProjectTo converts the data query to a DTO (or model) query.
 ```csharp
     static class Extensions
     {
@@ -69,27 +69,62 @@ The methods below map the DTO query expresions to the equivalent data query expr
             return mapper.Map<TDataResult, TModelResult>(mappedQueryFunc(query));
         }
 
-        internal static async Task<ICollection<TModel>> GetItemsAsync<TModel, TData>(this IQueryable<TData> query, IMapper mapper,
+        //This version compiles the queryable expression.
+        internal static IQueryable<TModel> GetQuery1<TModel, TData>(this IQueryable<TData> query,
+            IMapper mapper,
             Expression<Func<TModel, bool>> filter = null,
-            Expression<Func<IQueryable<TModel>, IQueryable<TModel>>> queryFunc = null,
-            ICollection<Expression<Func<IQueryable<TModel>, IIncludableQueryable<TModel, object>>>> includeProperties = null)
+            Expression<Func<IQueryable<TModel>, IQueryable<TModel>>> queryableExpression = null,
+            IEnumerable<Expression<Func<TModel, object>>> expansions = null)
         {
-            //Map the expressions
-            Expression<Func<TData, bool>> f = mapper.MapExpression<Expression<Func<TData, bool>>>(filter);
-            Func<IQueryable<TData>, IQueryable<TData>> mappedQueryFunc = mapper.MapExpression<Expression<Func<IQueryable<TData>, IQueryable<TData>>>>(queryFunc)?.Compile();
-            ICollection<Expression<Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>> includes = mapper.MapIncludesList<Expression<Func<IQueryable<TData>, IIncludableQueryable<TData, object>>>>(includeProperties);
+            Func<IQueryable<TData>, IQueryable<TData>> mappedQueryDelegate = mapper.MapExpression<Expression<Func<IQueryable<TData>, IQueryable<TData>>>>(queryableExpression)?.Compile();
+            if (filter != null)
+                query = query.Where(mapper.MapExpression<Expression<Func<TData, bool>>>(filter));
 
-            if (f != null)
-                query = query.Where(f);
+            return mappedQueryDelegate != null
+                    ? mapper.ProjectTo(mappedQueryDelegate(query), null, GetExpansions())
+                    : mapper.ProjectTo(query, null, GetExpansions());
 
-            if (includes != null)
-                query = includes.Select(i => i.Compile()).Aggregate(query, (list, next) => query = next(query));
+            Expression<Func<TModel, object>>[] GetExpansions() => expansions?.ToArray() ?? [];
+        }
 
-            //Call the store
-            ICollection<TData> result = mappedQueryFunc != null ? await mappedQueryFunc(query).ToListAsync() : await query.ToListAsync();
+        //This version updates IQueryable<TData>.Expression with the mapped queryable expression parameter.
+        internal static IQueryable<TModel> GetQuery2<TModel, TData>(this IQueryable<TData> query,
+            IMapper mapper,
+            Expression<Func<TModel, bool>> filter = null,
+            Expression<Func<IQueryable<TModel>, IQueryable<TModel>>> queryableExpression = null,
+            IEnumerable<Expression<Func<TModel, object>>> expansions = null)
+        {
+            Expression<Func<IQueryable<TData>, IQueryable<TData>>> mappedQueryExpression = mapper.MapExpression<Expression<Func<IQueryable<TData>, IQueryable<TData>>>>(queryableExpression);
+            if (filter != null)
+                query = query.Where(mapper.MapExpression<Expression<Func<TData, bool>>>(filter));
 
-            //Map and return the data
-            return mapper.Map<IEnumerable<TData>, IEnumerable<TModel>>(result).ToList();
+            if (mappedQueryExpression != null)
+            {
+                var queryableExpressionBody = GetUnconvertedExpression(mappedQueryExpression.Body);
+                queryableExpressionBody = ReplaceParameter(queryableExpressionBody, mappedQueryExpression.Parameters[0], query.Expression);
+                query = query.Provider.CreateQuery<TData>(queryableExpressionBody);
+            }
+
+            return mapper.ProjectTo(query, null, GetExpansions());
+
+            Expression<Func<TModel, object>>[] GetExpansions() => expansions?.ToArray() ?? [];
+            static Expression GetUnconvertedExpression(Expression expression) => expression.NodeType switch
+            {
+                ExpressionType.Convert or ExpressionType.ConvertChecked or ExpressionType.TypeAs => GetUnconvertedExpression(((UnaryExpression)expression).Operand),
+                _ => expression,
+            };
+            Expression ReplaceParameter(Expression expression, ParameterExpression source, Expression target) => new ParameterReplacer(source, target).Visit(expression);
+        }
+
+        class ParameterReplacer(ParameterExpression source, Expression target) : ExpressionVisitor
+        {
+            private readonly ParameterExpression _source = source;
+            private readonly Expression _target = target;
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                return node == _source ? _target : base.VisitParameter(node);
+            }
         }
     }
 ```
