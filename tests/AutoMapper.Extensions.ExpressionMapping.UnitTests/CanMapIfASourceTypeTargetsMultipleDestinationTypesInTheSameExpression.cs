@@ -13,6 +13,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Can_map_if_source_type_targets_multiple_destination_types_in_the_same_expression()
         {
+            // Arrange
             var mapper = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.CreateMap<SourceType, TargetType>().ReverseMap();
@@ -23,9 +24,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 cfg.CreateMap<SourceListItemType, TargetChildListItemType>().ReverseMap();
 
             }).CreateMapper();
-
             Expression<Func<SourceType, bool>> sourcesWithListItemsExpr = src => src.Id != 0 && src.ItemList.Any() && src.Child.ItemList.Any(); // Sources with non-empty ItemList
+
+            // Act
             Expression<Func<TargetType, bool>> target1sWithListItemsExpr = mapper.MapExpression<Expression<Func<TargetType, bool>>>(sourcesWithListItemsExpr);
+
+            // Assert
+            Assert.NotNull(target1sWithListItemsExpr);
         }
 
 #pragma warning disable xUnit1004 // Test methods should not be skipped
@@ -33,6 +38,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 #pragma warning restore xUnit1004 // Test methods should not be skipped
         public void Can_map_if_source_type_targets_multiple_destination_types_in_the_same_expression_including_nested_parameters()
         {
+            // Arrange
             var mapper = ConfigurationHelper.GetMapperConfiguration(cfg =>
             {
                 cfg.CreateMap<SourceType, TargetType>().ReverseMap();
@@ -43,9 +49,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                 cfg.CreateMap<SourceListItemType, TargetChildListItemType>().ReverseMap();
 
             }).CreateMapper();
-
             Expression<Func<SourceType, bool>> sourcesWithListItemsExpr = src => src.Id != 0 && src.ItemList.FirstOrDefault(i => i.Id == 1) == null && src.Child.ItemList.FirstOrDefault(i => i.Id == 1) == null; // Sources with non-empty ItemList
+
+            // Act
             Expression<Func<TargetType, bool>> target1sWithListItemsExpr = mapper.MapExpression<Expression<Func<TargetType, bool>>>(sourcesWithListItemsExpr);
+
+            //Assert
+            Assert.NotNull(target1sWithListItemsExpr);
         }
 
         private class SourceChildType
