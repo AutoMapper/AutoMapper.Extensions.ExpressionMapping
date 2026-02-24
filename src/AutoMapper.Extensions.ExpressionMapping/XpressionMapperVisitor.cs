@@ -1,6 +1,4 @@
-﻿using AutoMapper.Extensions.ExpressionMapping;
-using AutoMapper.Extensions.ExpressionMapping.Extensions;
-using AutoMapper.Extensions.ExpressionMapping.Structures;
+﻿using AutoMapper.Extensions.ExpressionMapping.Structures;
 using AutoMapper.Internal;
 using System;
 using System.Collections.Generic;
@@ -31,7 +29,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             InfoDictionary.Add(node, TypeMappings);
             var pair = InfoDictionary.SingleOrDefault(a => a.Key.Equals(node));
-            return !pair.Equals(default(KeyValuePair<Type, MapperInfo>)) ? pair.Value.NewParameter : base.VisitParameter(node);
+            return !pair.Equals(default(KeyValuePair<ParameterExpression, MapperInfo>)) ? pair.Value.NewParameter : base.VisitParameter(node);
         }
 
         private static object GetConstantValue(object constantObject, string fullName, Type parentType)
@@ -557,8 +555,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 ? node.Method.GetGenericArguments().Select(type => this.TypeMappingsManager.ReplaceType(type)).ToList()//not converting the type it is not in the typeMappings dictionary
                 : null;
 
-            ConvertTypesIfNecessary(node.Method.GetParameters(), listOfArgumentsForNewMethod, node.Method);
-
             return node.Method.IsStatic
                     ? GetStaticExpression()
                     : GetInstanceExpression(this.Visit(node.Object));
@@ -582,19 +578,6 @@ namespace AutoMapper.Extensions.ExpressionMapping
                 => node.Method.IsGenericMethod
                     ? Expression.Call(node.Method.DeclaringType, node.Method.Name, [.. typeArgsForNewMethod], [.. listOfArgumentsForNewMethod])
                     : Expression.Call(node.Method, [.. listOfArgumentsForNewMethod]);
-        }
-
-        static void ConvertTypesIfNecessary(ParameterInfo[] parameters, List<Expression> listOfArgumentsForNewMethod, MethodInfo mInfo)
-        {
-            if (mInfo.IsGenericMethod)
-                return;
-
-            for (int i = 0; i < listOfArgumentsForNewMethod.Count; i++)
-            {
-                if (listOfArgumentsForNewMethod[i].Type != parameters[i].ParameterType
-                    && parameters[i].ParameterType.IsAssignableFrom(listOfArgumentsForNewMethod[i].Type))
-                    listOfArgumentsForNewMethod[i] = Expression.Convert(listOfArgumentsForNewMethod[i], parameters[i].ParameterType);
-            }
         }
 
         protected static string BuildFullName(List<PropertyMapInfo> propertyMapInfoList)

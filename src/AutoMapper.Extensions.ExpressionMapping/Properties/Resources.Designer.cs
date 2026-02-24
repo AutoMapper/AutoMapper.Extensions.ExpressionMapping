@@ -61,7 +61,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Argument {0} must be a deledate type..
+        ///   Looks up a localized string similar to Argument {0} must be a delegate type..
         /// </summary>
         internal static string argumentMustBeDelegateFormat {
             get {
@@ -79,11 +79,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can&apos;t rempa expression.
+        ///   Looks up a localized string similar to Can&apos;t map expression.
         /// </summary>
-        internal static string cantRemapExpression {
+        internal static string cantMapExpression {
             get {
-                return ResourceManager.GetString("cantRemapExpression", resourceCulture);
+                return ResourceManager.GetString("cantMapExpression", resourceCulture);
             }
         }
         
@@ -129,6 +129,15 @@ namespace AutoMapper.Extensions.ExpressionMapping.Properties {
         internal static string invalidExpErr {
             get {
                 return ResourceManager.GetString("invalidExpErr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalis type mappings. Source Type: {0}, Destination Type: {1}..
+        /// </summary>
+        internal static string invalidTypeMappingsFormat {
+            get {
+                return ResourceManager.GetString("invalidTypeMappingsFormat", resourceCulture);
             }
         }
         

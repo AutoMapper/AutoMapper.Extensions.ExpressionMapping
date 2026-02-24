@@ -81,7 +81,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var exception = Assert.Throws<ArgumentException>(() =>
                 new TypeMappingsManager(config, typeof(int), typeof(Func<DestModel, bool>)));
 
-            Assert.Contains("must be a deledate type", exception.Message);
+            Assert.Contains("must be a delegate type", exception.Message);
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var exception = Assert.Throws<ArgumentException>(() =>
                 new TypeMappingsManager(config, typeof(Func<SourceModel, bool>), typeof(string)));
 
-            Assert.Contains("must be a deledate type", exception.Message);
+            Assert.Contains("must be a delegate type", exception.Message);
         }
 
         [Fact]

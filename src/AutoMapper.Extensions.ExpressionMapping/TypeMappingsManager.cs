@@ -33,6 +33,9 @@ namespace AutoMapper.Extensions.ExpressionMapping
         {
             if (sourceType.GetTypeInfo().IsGenericType && sourceType.GetGenericTypeDefinition() == typeof(Expression<>))
             {
+                if (!destType.GetTypeInfo().IsGenericType || destType.GetGenericTypeDefinition() != typeof(Expression<>))
+                    throw new ArgumentException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Properties.Resources.invalidTypeMappingsFormat, sourceType, destType));
+
                 sourceType = sourceType.GetGenericArguments()[0];
                 destType = destType.GetGenericArguments()[0];
             }
@@ -150,8 +153,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             for (int i = 0; i < sourceArguments.Count; i++)
             {
-                if (!TypeMappings.ContainsKey(sourceArguments[i]) && sourceArguments[i] != destArguments[i])
-                    AddTypeMapping(sourceArguments[i], destArguments[i]);
+                AddTypeMapping(sourceArguments[i], destArguments[i]);
             }
         }
 
@@ -162,8 +164,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             for (int i = 0; i < sourceArguments.Count; i++)
             {
-                if (!TypeMappings.ContainsKey(sourceArguments[i]) && sourceArguments[i] != destArguments[i])
-                    AddTypeMapping(sourceArguments[i], destArguments[i]);
+                AddTypeMapping(sourceArguments[i], destArguments[i]);
             }
         }
 
