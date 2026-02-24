@@ -132,7 +132,6 @@ The methods below map the DTO query expresions to the equivalent data query expr
 ## Known Issues
 Mapping a single type in the source expression to multiple types in the destination expression is not supported e.g.
 ```c#
-```
         [Fact]
         public void Can_map_if_source_type_targets_multiple_destination_types_in_the_same_expression()
         {
@@ -193,3 +192,5 @@ Mapping a single type in the source expression to multiple types in the destinat
         {
             public virtual int Id { get; set; }
         }
+
+```
