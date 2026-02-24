@@ -129,7 +129,7 @@ The methods below map the DTO query expresions to the equivalent data query expr
     }
 ```
 
-## Know Issues
+## Known Issues
 Mapping a single type in the source expression to multiple types in the destination expression is not supported e.g.
 ```c#
 ```
