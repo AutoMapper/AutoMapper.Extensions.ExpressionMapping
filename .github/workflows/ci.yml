@@ -22,7 +22,7 @@ jobs:
       run: dotnet nuget add source https://www.myget.org/F/automapperdev/api/v3/index.json -n automappermyget
 
     - name: Test
-      run: dotnet test --configuration Release --verbosity normal
+      run: dotnet test --configuration Release --verbosity normal /p:CollectCoverage=true /p:Threshold=94 /p:ThresholdType=line /p:ThresholdStat=Average /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/ /p:ExcludeByAttribute="GeneratedCodeAttribute"
 
     - name: Pack and push
       env:

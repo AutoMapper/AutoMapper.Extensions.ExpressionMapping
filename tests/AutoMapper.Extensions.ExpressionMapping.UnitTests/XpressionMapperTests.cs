@@ -20,6 +20,36 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         #region Tests
 
         [Fact]
+        public void Map_expression_list()
+        {
+            //Arrange
+            ICollection<Expression<Func<UserModel, object>>> selections = [s => s.AccountModel.Bal, s => s.AccountName];
+
+            //Act
+            List<Expression<Func<User, object>>> selectionsMapped = [.. mapper.MapExpressionList<Expression<Func<User, object>>>(selections)];
+            List<object> accounts = [.. Users.Select(selectionsMapped[0])];
+            List<object> branches = [.. Users.Select(selectionsMapped[1])];
+
+            //Assert
+            Assert.True(accounts.Count == 2 && branches.Count == 2);
+        }
+
+        [Fact]
+        public void Map_expression_list_using_two_generic_arguments_override()
+        {
+            //Arrange
+            ICollection<Expression<Func<UserModel, object>>> selections = [s => s.AccountModel.Bal, s => s.AccountName];
+
+            //Act
+            List<Expression<Func<User, object>>> selectionsMapped = [.. mapper.MapExpressionList<Expression < Func<UserModel, object>>, Expression <Func<User, object>>>(selections)];
+            List<object> accounts = [.. Users.Select(selectionsMapped[0])];
+            List<object> branches = [.. Users.Select(selectionsMapped[1])];
+
+            //Assert
+            Assert.True(accounts.Count == 2 && branches.Count == 2);
+        }
+
+        [Fact]
         public void Map_object_type_change()
         {
             //Arrange
@@ -893,6 +923,16 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var mappedExpression = mapper.MapExpression<Expression<Func<TestEntity, bool>>>(expr);
 
             Assert.NotNull(mappedExpression);
+        }
+
+        [Fact]
+        public void Returns_null_when_soure_is_null()
+        {
+            Expression<Func<TestDTO, bool>> expr = null;
+
+            var mappedExpression = mapper.MapExpression<Expression<Func<TestEntity, bool>>>(expr);
+
+            Assert.Null(mappedExpression);
         }
 
         [Fact]

@@ -183,7 +183,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitNew(NewExpression node)
         {
-            if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
+            Type newType = this.TypeMappingsManager.ReplaceType(node.Type);
+            if (newType != node.Type && !IsAnonymousType(node.Type))
             {
                 return Expression.New(newType);
             }
@@ -217,7 +218,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitMemberInit(MemberInitExpression node)
         {
-            if (this.TypeMappings.TryGetValue(node.Type, out Type newType))
+            Type newType = this.TypeMappingsManager.ReplaceType(node.Type);
+            if (newType != node.Type && !IsAnonymousType(node.Type))
             {
                 var typeMap = ConfigurationProvider.CheckIfTypeMapExists(sourceType: newType, destinationType: node.Type);
                 //The destination becomes the source because to map a source expression to a destination expression,
@@ -474,7 +476,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
         protected override Expression VisitTypeBinary(TypeBinaryExpression node)
         {
-            if (this.TypeMappings.TryGetValue(node.TypeOperand, out Type mappedType))
+            Type mappedType = this.TypeMappingsManager.ReplaceType(node.TypeOperand);
+            if (mappedType != node.TypeOperand)
                 return MapTypeBinary(this.Visit(node.Expression));
 
             return base.VisitTypeBinary(node);
@@ -498,7 +501,8 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             Expression DoVisitUnary(Expression updated)
             {
-                if (this.TypeMappings.TryGetValue(node.Type, out Type mappedType))
+                Type mappedType = this.TypeMappingsManager.ReplaceType(node.Type);
+                if (mappedType != node.Type)
                     return Expression.MakeUnary
                     (
                         node.NodeType,
