@@ -133,7 +133,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalis type mappings. Source Type: {0}, Destination Type: {1}..
+        ///   Looks up a localized string similar to Invalid type mappings. Source Type: {0}, Destination Type: {1}..
         /// </summary>
         internal static string invalidTypeMappingsFormat {
             get {

@@ -149,6 +149,6 @@
   </data>
 	<data name="invalidTypeMappingsFormat" xml:space="preserve">
     <value>Invalid type mappings. Source Type: {0}, Destination Type: {1}.</value>
-    <comment>0=sourceType; 1=destinationTyp;</comment>
+    <comment>0=sourceType; 1=destinationType</comment>
   </data>
 </root>
