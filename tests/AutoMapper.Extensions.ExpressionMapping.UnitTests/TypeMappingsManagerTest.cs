@@ -227,7 +227,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
                     typeof(Expression<Func<SourceChild, bool>>),
                     typeof(Func<DestChild, bool>)));
 
-            Assert.Contains("Invalis type mappings", exception.Message);
+            Assert.Contains("Invalid type mappings", exception.Message);
         }
 
         [Fact]
