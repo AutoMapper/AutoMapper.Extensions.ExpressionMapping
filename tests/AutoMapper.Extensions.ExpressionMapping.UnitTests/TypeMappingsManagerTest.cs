@@ -81,7 +81,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var exception = Assert.Throws<ArgumentException>(() =>
                 new TypeMappingsManager(config, typeof(int), typeof(Func<DestModel, bool>)));
 
-            Assert.Contains("must be a deledate type", exception.Message);
+            Assert.Contains("must be a delegate type", exception.Message);
         }
 
         [Fact]
@@ -97,7 +97,7 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             var exception = Assert.Throws<ArgumentException>(() =>
                 new TypeMappingsManager(config, typeof(Func<SourceModel, bool>), typeof(string)));
 
-            Assert.Contains("must be a deledate type", exception.Message);
+            Assert.Contains("must be a delegate type", exception.Message);
         }
 
         [Fact]
@@ -206,6 +206,28 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
             // Assert
             Assert.Equal(countAfterFirst, manager.TypeMappings.Count);
+        }
+
+        [Fact]
+        public void AddTypeMapping_ExpressionSourceNonExpressionDest_ThrowsArgumentException()
+        {
+            // Arrange
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<SourceModel, DestModel>();
+            });
+            var manager = new TypeMappingsManager(
+                config,
+                typeof(Func<SourceModel, bool>),
+                typeof(Func<DestModel, bool>));
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentException>(() =>
+                manager.AddTypeMapping(
+                    typeof(Expression<Func<SourceChild, bool>>),
+                    typeof(Func<DestChild, bool>)));
+
+            Assert.Contains("Invalid type mappings", exception.Message);
         }
 
         [Fact]

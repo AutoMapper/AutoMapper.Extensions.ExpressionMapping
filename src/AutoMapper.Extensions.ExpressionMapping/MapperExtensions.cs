@@ -27,7 +27,7 @@ namespace AutoMapper.Extensions.ExpressionMapping
 
             LambdaExpression GetLambdaExpression(ITypeMappingsManager typeMappingsManager)
             {
-                Expression mappedBody = new XpressionMapperVisitor(mapper, typeMappingsManager).Visit(expression.Body) ?? throw new InvalidOperationException(Properties.Resources.cantRemapExpression);
+                Expression mappedBody = new XpressionMapperVisitor(mapper, typeMappingsManager).Visit(expression.Body) ?? throw new InvalidOperationException(Properties.Resources.cantMapExpression);
 
                 return Lambda
                 (
