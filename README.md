@@ -69,7 +69,7 @@ The methods below map the DTO query expresions to the equivalent data query expr
             return mapper.Map<TDataResult, TModelResult>(mappedQueryFunc(query));
         }
 
-        //This version compiles the queryable expression.
+        //This example compiles the queryable expression.
         internal static IQueryable<TModel> GetQuery1<TModel, TData>(this IQueryable<TData> query,
             IMapper mapper,
             Expression<Func<TModel, bool>> filter = null,
@@ -87,7 +87,7 @@ The methods below map the DTO query expresions to the equivalent data query expr
             Expression<Func<TModel, object>>[] GetExpansions() => expansions?.ToArray() ?? [];
         }
 
-        //This version updates IQueryable<TData>.Expression with the mapped queryable expression parameter.
+        //This example updates IQueryable<TData>.Expression with the mapped queryable expression argument.
         internal static IQueryable<TModel> GetQuery2<TModel, TData>(this IQueryable<TData> query,
             IMapper mapper,
             Expression<Func<TModel, bool>> filter = null,
@@ -128,3 +128,68 @@ The methods below map the DTO query expresions to the equivalent data query expr
         }
     }
 ```
+
+## Known Issues
+Mapping a single type in the source expression to multiple types in the destination expression is not supported e.g.
+```c#
+```
+        [Fact]
+        public void Can_map_if_source_type_targets_multiple_destination_types_in_the_same_expression()
+        {
+            var mapper = ConfigurationHelper.GetMapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<SourceType, TargetType>().ReverseMap();
+                cfg.CreateMap<SourceChildType, TargetChildType>().ReverseMap();
+
+                // Same source type can map to different target types. This seems unsupported currently.
+                cfg.CreateMap<SourceListItemType, TargetListItemType>().ReverseMap();
+                cfg.CreateMap<SourceListItemType, TargetChildListItemType>().ReverseMap();
+
+            }).CreateMapper();
+
+            Expression<Func<SourceType, bool>> sourcesWithListItemsExpr = src => src.Id != 0 && src.ItemList.Any() && src.Child.ItemList.Any(); // Sources with non-empty ItemList
+            Expression<Func<TargetType, bool>> target1sWithListItemsExpr = mapper.MapExpression<Expression<Func<TargetType, bool>>>(sourcesWithListItemsExpr);
+        }
+
+        private class SourceChildType
+        {
+            public int Id { get; set; }
+            public IEnumerable<SourceListItemType> ItemList { get; set; } // Uses same type (SourceListItemType) for its itemlist as SourceType
+        }
+
+        private class SourceType
+        {
+            public int Id { get; set; }
+            public SourceChildType Child { set; get; }
+            public IEnumerable<SourceListItemType> ItemList { get; set; }
+        }
+
+        private class SourceListItemType
+        {
+            public int Id { get; set; }
+        }
+
+        private class TargetChildType
+        {
+            public virtual int Id { get; set; }
+            public virtual ICollection<TargetChildListItemType> ItemList { get; set; } = [];
+        }
+
+        private class TargetChildListItemType
+        {
+            public virtual int Id { get; set; }
+        }
+
+        private class TargetType
+        {
+            public virtual int Id { get; set; }
+
+            public virtual TargetChildType Child { get; set; }
+
+            public virtual ICollection<TargetListItemType> ItemList { get; set; } = [];
+        }
+
+        private class TargetListItemType
+        {
+            public virtual int Id { get; set; }
+        }
