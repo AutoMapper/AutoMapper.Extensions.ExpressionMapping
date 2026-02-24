@@ -209,6 +209,28 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         }
 
         [Fact]
+        public void AddTypeMapping_ExpressionSourceNonExpressionDest_ThrowsArgumentException()
+        {
+            // Arrange
+            var config = ConfigurationHelper.GetMapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<SourceModel, DestModel>();
+            });
+            var manager = new TypeMappingsManager(
+                config,
+                typeof(Func<SourceModel, bool>),
+                typeof(Func<DestModel, bool>));
+
+            // Act & Assert
+            var exception = Assert.Throws<ArgumentException>(() =>
+                manager.AddTypeMapping(
+                    typeof(Expression<Func<SourceChild, bool>>),
+                    typeof(Func<DestChild, bool>)));
+
+            Assert.Contains("Invalis type mappings", exception.Message);
+        }
+
+        [Fact]
         public void AddTypeMapping_ListTypes_AddsUnderlyingTypeMappings()
         {
             // Arrange
