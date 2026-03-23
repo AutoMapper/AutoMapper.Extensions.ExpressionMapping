@@ -4,19 +4,15 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
-#pragma warning disable IDE0079
-#pragma warning disable S2094
-#pragma warning disable S2544
-#pragma warning disable S1186
-#pragma warning disable S1144
-#pragma warning disable S4144
-
 namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 {
     public class TypeExtensionsTest
     {
         #region Has<TAttribute> Tests
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression - SonarQube rules (S*) are not recognized by the IDE
+#pragma warning disable S1144 // Unused private types - test helper types referenced via typeof() and reflection
+#pragma warning disable S2094 // Classes should not be empty - test helper types intentionally have no members
         [AttributeUsage(AttributeTargets.Class)]
         private class TestAttribute : Attribute { }
 
@@ -24,6 +20,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         private class ClassWithAttribute { }
 
         private class ClassWithoutAttribute { }
+#pragma warning restore S2094
+#pragma warning restore S1144
+#pragma warning restore IDE0079
 
         [Fact]
         public void Has_TypeWithAttribute_ReturnsTrue()
@@ -55,6 +54,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         #region GetDeclaredConstructors Tests
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression - SonarQube rules (S*) are not recognized by the IDE
+#pragma warning disable S1144 // Unused private type - referenced via typeof() in tests
+#pragma warning disable S1186 // Methods should not be empty - constructors intentionally have no body
+#pragma warning disable S4144 // Methods should not have identical implementations - empty constructors with different signatures serve distinct test scenarios
         private class ClassWithMultipleConstructors
         {
             public ClassWithMultipleConstructors() { }
@@ -65,6 +68,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             public ClassWithMultipleConstructors(string text, int value) { }
 #pragma warning restore IDE0060 // Remove unused parameter
         }
+#pragma warning restore S4144
+#pragma warning restore S1186
+#pragma warning restore S1144
+#pragma warning restore IDE0079
 
         [Fact]
         public void GetDeclaredConstructors_ReturnsAllConstructors()
@@ -83,6 +90,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         #region GetDeclaredMethod Tests
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression - SonarQube rules (S*) are not recognized by the IDE
+#pragma warning disable S1144 // Unused private type - referenced via typeof() and reflection in tests
+#pragma warning disable S1186 // Methods should not be empty - test helper methods intentionally have no body
         private class ClassWithMethods
         {
             public void TestMethod() { }
@@ -90,6 +100,9 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             public void AnotherMethod(int value) { }
 #pragma warning restore IDE0060 // Remove unused parameter
         }
+#pragma warning restore S1186
+#pragma warning restore S1144
+#pragma warning restore IDE0079
 
         [Fact]
         public void GetDeclaredMethod_ExistingMethod_ReturnsMethod()
@@ -187,11 +200,15 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         #region GetDeclaredProperties Tests
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression - SonarQube rules (S*) are not recognized by the IDE
+#pragma warning disable S1144 // Unused private type - referenced via typeof() in tests
         private class ClassWithProperties
         {
             public int Property1 { get; set; }
             public string Property2 { get; set; }
         }
+#pragma warning restore S1144
+#pragma warning restore IDE0079
 
         [Fact]
         public void GetDeclaredProperties_ReturnsAllDeclaredProperties()
@@ -212,6 +229,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         #region IsStatic Tests
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression - SonarQube rules (S*) are not recognized by the IDE
+#pragma warning disable S1144 // Unused private type and members - accessed via GetField/GetProperty/GetMethod reflection in tests
+#pragma warning disable S1186 // Methods should not be empty - test helper methods intentionally have no body
+#pragma warning disable S4144 // Methods should not have identical implementations - StaticMethod and InstanceMethod intentionally mirror each other for static/instance comparison tests
         private class ClassWithStaticMembers
         {
             public static readonly int StaticField = 0;
@@ -221,6 +242,10 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
             public static void StaticMethod() { }
             public void InstanceMethod() { }
         }
+#pragma warning restore S4144
+#pragma warning restore S1186
+#pragma warning restore S1144
+#pragma warning restore IDE0079
 
         [Fact]
         public void IsStatic_StaticField_ReturnsTrue()
@@ -356,7 +381,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         #region IsEnum Tests
 
+#pragma warning disable IDE0079 // Remove unnecessary suppression - SonarQube rules (S*) are not recognized by the IDE
+#pragma warning disable S1144 // Unused private type - referenced via typeof() in tests
         private enum Values { Value1, Value2 }
+#pragma warning restore S1144
+#pragma warning restore IDE0079
 
         [Fact]
         public void IsEnum_EnumType_ReturnsTrue()
@@ -744,11 +773,3 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         #endregion
     }
 }
-
-
-#pragma warning restore S2094
-#pragma warning restore S2544
-#pragma warning restore S1186
-#pragma warning restore S1144
-#pragma warning restore S4144
-#pragma warning restore IDE0079
