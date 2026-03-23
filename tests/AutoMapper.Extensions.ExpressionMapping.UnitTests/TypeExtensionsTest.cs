@@ -4,6 +4,13 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
+#pragma warning disable IDE0079
+#pragma warning disable S2094
+#pragma warning disable S2544
+#pragma warning disable S1186
+#pragma warning disable S1144
+#pragma warning disable S4144
+
 namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 {
     public class TypeExtensionsTest
@@ -349,13 +356,13 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
 
         #region IsEnum Tests
 
-        private enum TestEnum { Value1, Value2 }
+        private enum Values { Value1, Value2 }
 
         [Fact]
         public void IsEnum_EnumType_ReturnsTrue()
         {
             // Arrange
-            var type = typeof(TestEnum);
+            var type = typeof(Values);
 
             // Act
             var result = type.IsEnum();
@@ -737,3 +744,11 @@ namespace AutoMapper.Extensions.ExpressionMapping.UnitTests
         #endregion
     }
 }
+
+
+#pragma warning restore S2094
+#pragma warning restore S2544
+#pragma warning restore S1186
+#pragma warning restore S1144
+#pragma warning restore S4144
+#pragma warning restore IDE0079
