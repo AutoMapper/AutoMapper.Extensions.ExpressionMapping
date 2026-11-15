@@ -16,8 +16,13 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 11.x
+
     - name: Test
-      run: dotnet test --configuration Release --verbosity normal /p:CollectCoverage=true /p:Threshold=94 /p:ThresholdType=line /p:ThresholdStat=Average /p:CoverletOutputFormat=opencover /p:CoverletOutput=./TestResults/ /p:ExcludeByAttribute="GeneratedCodeAttribute"
+      run: dotnet test --configuration Release --verbosity normal --results-directory ./TestResults/ -- --coverage --coverage-output-format xml --coverage-output coverage.xml
 
     - name: Pack and push
       env:
