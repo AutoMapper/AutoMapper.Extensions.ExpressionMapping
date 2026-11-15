@@ -18,6 +18,11 @@ jobs:
       with:
         fetch-depth: 0
 
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 11.x
+
     - name: Add AutoMapper Myget Source
       run: dotnet nuget add source https://www.myget.org/F/automapperdev/api/v3/index.json -n automappermyget
 
